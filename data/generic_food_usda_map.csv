@@ -1,0 +1,80 @@
+generic_food_id,usda_food_key,usda_food_name,weight,is_primary,sort_order,mapping_note
+rice,non_whole_grain_rice_and_pasta,Non-whole-grain rice and pasta,0.8,true,1,Approximate generic rice to non-whole-grain rice and pasta
+rice,whole_grain_rice_and_pasta,Whole-grain rice and pasta,0.2,false,2,Blend in whole-grain rice coverage for generic rice
+pasta,non_whole_grain_rice_and_pasta,Non-whole-grain rice and pasta,0.9,true,1,Approximate generic pasta to non-whole-grain rice and pasta
+pasta,whole_grain_rice_and_pasta,Whole-grain rice and pasta,0.1,false,2,Small whole-grain pasta blend
+barley,whole_grain_rice_and_pasta,Whole-grain rice and pasta,1.0,true,1,Approximate barley to whole-grain rice and pasta
+quinoa,whole_grain_rice_and_pasta,Whole-grain rice and pasta,1.0,true,1,Approximate quinoa to whole-grain rice and pasta
+couscous,non_whole_grain_rice_and_pasta,Non-whole-grain rice and pasta,1.0,true,1,Approximate couscous to non-whole-grain rice and pasta
+oats,whole_grain_breakfast_grains,Whole-grain breakfast grains,1.0,true,1,Approximate oats to whole-grain breakfast grains
+corn_flakes,all_other_breakfast_cereal,All other breakfast cereal,1.0,true,1,Approximate corn flakes to non-whole-grain breakfast cereal
+wholemeal_bread,whole_grain_breads,Whole-grain breads,1.0,true,1,Approximate wholemeal bread to whole-grain breads
+bagel,non_whole_grain_breads,Non-whole-grain breads,1.0,true,1,Approximate bagel to non-whole-grain breads
+pita,non_whole_grain_breads,Non-whole-grain breads,1.0,true,1,Approximate pita to non-whole-grain breads
+tortilla,non_whole_grain_breads,Non-whole-grain breads,1.0,true,1,Approximate tortilla to non-whole-grain breads
+corn_tortilla,non_whole_grain_breads,Non-whole-grain breads,1.0,true,1,Approximate corn tortilla to non-whole-grain breads
+potatoes,potatoes_fresh,Potatoes fresh,1.0,true,1,Approximate potatoes to fresh potatoes
+sweet_potatoes,other_starchy_vegetables_fresh,Other starchy vegetables fresh,1.0,true,1,Approximate sweet potatoes to other starchy vegetables fresh
+corn,other_starchy_vegetables_fresh,Other starchy vegetables fresh,1.0,true,1,Approximate corn to other starchy vegetables fresh
+bananas,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate bananas to whole fruit fresh
+apples,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate apples to whole fruit fresh
+oranges,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate oranges to whole fruit fresh
+berries,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate berries to whole fruit fresh
+grapes,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate grapes to whole fruit fresh
+pears,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate pears to whole fruit fresh
+kiwi,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate kiwi to whole fruit fresh
+pineapple,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate pineapple to whole fruit fresh
+mango,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate mango to whole fruit fresh
+avocado,whole_fruit_fresh,Whole fruit fresh,1.0,true,1,Approximate avocado to whole fruit fresh
+broccoli,dark_green_vegetables_fresh,Dark green vegetables fresh,1.0,true,1,Approximate broccoli to dark green vegetables fresh
+spinach,dark_green_vegetables_fresh,Dark green vegetables fresh,1.0,true,1,Approximate spinach to dark green vegetables fresh
+kale,dark_green_vegetables_fresh,Dark green vegetables fresh,1.0,true,1,Approximate kale to dark green vegetables fresh
+lettuce,dark_green_vegetables_fresh,Dark green vegetables fresh,1.0,true,1,Approximate lettuce to dark green vegetables fresh
+carrots,other_red_and_orange_vegetables_fresh,Other red and orange vegetables fresh,1.0,true,1,Approximate carrots to other red and orange vegetables fresh
+bell_peppers,other_red_and_orange_vegetables_fresh,Other red and orange vegetables fresh,1.0,true,1,Approximate bell peppers to other red and orange vegetables fresh
+beetroot,other_red_and_orange_vegetables_fresh,Other red and orange vegetables fresh,1.0,true,1,Approximate beetroot to other red and orange vegetables fresh
+tomatoes,tomatoes_fresh,Tomatoes fresh,1.0,true,1,Approximate tomatoes to fresh tomatoes
+cabbage,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate cabbage to other mixed vegetables fresh
+cauliflower,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate cauliflower to other mixed vegetables fresh
+celery,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate celery to other mixed vegetables fresh
+cucumber,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate cucumber to other mixed vegetables fresh
+green_beans,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate green beans to other mixed vegetables fresh
+brussels_sprouts,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate Brussels sprouts to other mixed vegetables fresh
+zucchini,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate zucchini to other mixed vegetables fresh
+asparagus,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate asparagus to other mixed vegetables fresh
+mushrooms,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate mushrooms to other mixed vegetables fresh
+onions,other_mixed_vegetables_fresh,Other mixed vegetables fresh,1.0,true,1,Approximate onions to other mixed vegetables fresh
+frozen_vegetables,other_mixed_vegetables_frozen,Other mixed vegetables frozen,1.0,true,1,Approximate frozen vegetables to frozen mixed vegetables
+beans,beans_lentils_and_peas_fresh_dried,Beans lentils and peas fresh dried,1.0,true,1,Approximate beans to dried legumes
+black_beans,beans_lentils_and_peas_fresh_dried,Beans lentils and peas fresh dried,1.0,true,1,Approximate black beans to dried legumes
+chickpeas,beans_lentils_and_peas_fresh_dried,Beans lentils and peas fresh dried,1.0,true,1,Approximate chickpeas to dried legumes
+lentils,beans_lentils_and_peas_fresh_dried,Beans lentils and peas fresh dried,1.0,true,1,Approximate lentils to dried legumes
+peas,beans_lentils_and_peas_frozen,Beans lentils and peas frozen,1.0,true,1,Approximate peas to frozen legumes
+edamame,beans_lentils_and_peas_frozen,Beans lentils and peas frozen,1.0,true,1,Approximate edamame to frozen legumes
+hummus,beans_lentils_and_peas_fresh_dried,Beans lentils and peas fresh dried,1.0,true,1,Approximate hummus to chickpea/legume group
+eggs,egg_and_egg_substitutes,Egg and egg substitutes,1.0,true,1,Approximate eggs to egg and egg substitutes
+milk,reduced_fat_low_fat_and_skim_milk,Reduced-fat low-fat and skim milk,0.7,true,1,Generic milk leans toward reduced-fat/skim market mix
+milk,whole_milk,Whole milk,0.3,false,2,Blend in whole milk coverage
+greek_yogurt,reduced_fat_low_fat_and_skim_yogurt,Reduced-fat low-fat and skim yogurt,0.8,true,1,Generic Greek yogurt leans toward lower-fat yogurt market mix
+greek_yogurt,whole_yogurt,Whole yogurt,0.2,false,2,Blend in whole yogurt coverage
+protein_yogurt,reduced_fat_low_fat_and_skim_yogurt,Reduced-fat low-fat and skim yogurt,1.0,true,1,Approximate protein yogurt to reduced-fat yogurt
+cottage_cheese,cheese_and_cream_cheese,Cheese and cream cheese,1.0,true,1,Approximate cottage cheese to soft cheese group
+ricotta,cheese_and_cream_cheese,Cheese and cream cheese,1.0,true,1,Approximate ricotta to soft cheese group
+cheese,cheese_and_cream_cheese,Cheese and cream cheese,1.0,true,1,Approximate cheese to cheese and cream cheese
+chicken_breast,chicken_turkey_and_game_birds_fresh,Chicken turkey and game birds fresh,1.0,true,1,Approximate chicken breast to fresh chicken group
+rotisserie_chicken,chicken_turkey_and_game_birds_fresh,Chicken turkey and game birds fresh,1.0,true,1,Approximate rotisserie chicken to fresh chicken group
+turkey,chicken_turkey_and_game_birds_fresh,Chicken turkey and game birds fresh,1.0,true,1,Approximate turkey to fresh poultry group
+ground_beef,beef_pork_lamb_veal_and_game_fresh,Beef pork lamb veal and game fresh,1.0,true,1,Approximate ground beef to fresh red meat group
+salmon,fish_and_seafood_fresh,Fish and seafood fresh,1.0,true,1,Approximate salmon to fresh fish and seafood
+shrimp,fish_and_seafood_fresh,Fish and seafood fresh,1.0,true,1,Approximate shrimp to fresh fish and seafood
+tuna,fish_and_seafood_canned,Fish and seafood canned,1.0,true,1,Approximate tuna to canned fish and seafood
+sardines,fish_and_seafood_canned,Fish and seafood canned,1.0,true,1,Approximate sardines to canned fish and seafood
+tofu,tofu_and_meat_substitutes,Tofu and meat substitutes,1.0,true,1,Approximate tofu to tofu and meat substitutes
+veggie_burger,tofu_and_meat_substitutes,Tofu and meat substitutes,1.0,true,1,Approximate veggie burger to tofu and meat substitutes
+almonds,nuts_and_seeds,Nuts and seeds,1.0,true,1,Approximate almonds to nuts and seeds
+cashews,nuts_and_seeds,Nuts and seeds,1.0,true,1,Approximate cashews to nuts and seeds
+nuts,nuts_and_seeds,Nuts and seeds,1.0,true,1,Approximate mixed nuts to nuts and seeds
+walnuts,nuts_and_seeds,Nuts and seeds,1.0,true,1,Approximate walnuts to nuts and seeds
+peanut_butter,nut_and_seed_butters_and_spreads,Nut and seed butters and spreads,1.0,true,1,Approximate peanut butter to nut and seed butters
+almond_butter,nut_and_seed_butters_and_spreads,Nut and seed butters and spreads,1.0,true,1,Approximate almond butter to nut and seed butters
+olive_oil,fats_and_oils,Fats and oils,1.0,true,1,Approximate olive oil to fats and oils

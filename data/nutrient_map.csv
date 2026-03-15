@@ -1,0 +1,72 @@
+id,name,ciqual_const_code,ciqual_const_name_eng,ciqual_const_name_fr,ciqual_unit,calnut_const_code,calnut_const_name,calnut_unit,off_id,count,template,nnr2023_id,nutrient_type,disabled,comments
+energy_kj,Energy,327,"Energy, Regulation EU No 1169/2011 (kJ/100g)","Energie, Règlement UE N° 1169/2011 (kJ/100 g)",kj,,,,,,,,energy,true,
+energy_kcal,Energy,328,"Energy, Regulation EU No 1169/2011 (kcal/100g)","Energie, Règlement UE N° 1169/2011 (kcal/100 g)",kcal,,,,,,,,energy,true,
+energy_fibre_kj,Energy,332,"Energy, N x Jones' factor, with fibres (kJ/100g)","Energie, N x facteur Jones, avec fibres  (kJ/100 g)",kj,332,nrj,kj,energy-kj,387477,true,,energy,true,
+energy_fibre_kcal,Energy,333,"Energy, N x Jones' factor, with fibres (kcal/100g)","Energie, N x facteur Jones, avec fibres  (kcal/100 g)",kcal,333,nrj,kcal,energy-kcal,2813169,true,,energy,,
+water,Water,400,Water (g/100g),Eau (g/100 g),g,400,eau,g,,,,,other,,
+protein,Protein,25000,Protein (g/100g),"Protéines, N x facteur de Jones (g/100 g)",g,25000,proteines,g,proteins,2833630,true,,macro,,
+protein_crude,"Protein, crude, N x 6.25",25003,"Protein, crude, N x 6.25 (g/100g)","Protéines, N x 6.25 (g/100 g)",g,,,,,,,,macro,true,
+carbohydrate,Carbohydrate,31000,Carbohydrate (g/100g),Glucides (g/100 g),g,31000,glucides,g,carbohydrates,2833340,true,,macro,,
+fat,Fat,40000,Fat (g/100g),Lipides (g/100 g),g,40000,lipides,g,fat,2828992,true,,macro,,
+sugars,Sugars,32000,Sugars (g/100g),Sucres (g/100 g),g,32000,sucres,g,sugars,2711002,true,,macro,,
+fructose,Fructose,32210,fructose (g/100g),Fructose (g/100 g),g,32210,fructose,g,fructose,10753,,,sugar,,
+galactose,Galactose,32220,galactose (g/100g),Galactose (g/100 g),g,32220,galactose,g,galactose,16,,,sugar,,
+glucose,Glucose,32250,glucose (g/100g),Glucose (g/100 g),g,32250,glucose,g,glucose,10797,,,sugar,,
+lactose,Lactose,32410,lactose (g/100g),Lactose (g/100 g),g,32410,lactose,g,lactose,12303,true,,sugar,,
+maltose,Maltose,32430,maltose (g/100g),Maltose (g/100 g),g,32430,maltose,g,maltose,212,,,sugar,,
+sucrose,Sucrose,32480,sucrose (g/100g),Saccharose (g/100 g),g,32480,saccharose,g,sucrose,387,,,sugar,,Saccharose name in calnut seems outdated
+starch,Starch,33110,Starch (g/100g),Amidon (g/100 g),g,33110,amidon,g,starch,885,true,,macro,,
+fiber,Fibres,34100,Fibres (g/100g),Fibres alimentaires (g/100 g),g,34100,fibres,g,fiber,1378076,true,,macro,,
+polyols,Polyols,34000,Polyols (g/100g),Polyols totaux (g/100 g),g,34000,polyols,g,polyols,6745,true,,sugar,,
+ash,Ash,10000,Ash (g/100g),Cendres (g/100 g),g,,,,,,,,other,true,
+alcohol,Alcohol,60000,Alcohol (g/100g),Alcool (g/100 g),g,60000,alcool,g,alcohol,47265,true,,other,,
+organic_acids,Organic acids,65000,Organic acids (g/100g),Acides organiques (g/100 g),g,65000,acides_organiques,g,,,,,other,true,
+saturated_fat,Saturated fat,40302,FA saturated (g/100g),AG saturés (g/100 g),g,40302,ags,g,saturated-fat,2667123,true,,macro,,
+monounsaturated_fat,Monounsaturated fat,40303,FA mono (g/100g),AG monoinsaturés (g/100 g),g,40303,agmi,g,monounsaturated-fat,68469,true,,macro,,
+polyunsaturated_fat,Polyunsaturated fat,40304,FA poly (g/100g),AG polyinsaturés (g/100 g),g,40304,agpi,g,polyunsaturated-fat,68123,true,,macro,,
+fa_04_0,FA 4:0,40400,FA 4:0 (g/100g),"AG 4:0, butyrique (g/100 g)",g,40400,ag_04_0,g,,,,,fatty_acid,true,
+fa_06_0,FA 6:0,40600,FA 6:0 (g/100g),"AG 6:0, caproïque (g/100 g)",g,40600,ag_06_0,g,,,,,fatty_acid,true,
+fa_08_0,FA 8:0,40800,FA 8:0 (g/100g),"AG 8:0, caprylique (g/100 g)",g,40800,ag_08_0,g,,,,,fatty_acid,true,
+fa_10_0,FA 10:0,41000,FA 10:0 (g/100g),"AG 10:0, caprique (g/100 g)",g,41000,ag_10_0,g,,,,,fatty_acid,true,
+fa_12_0,FA 12:0,41200,FA 12:0 (g/100g),"AG 12:0, laurique (g/100 g)",g,41200,ag_12_0,g,,,,,fatty_acid,true,
+fa_14_0,FA 14:0,41400,FA 14:0 (g/100g),"AG 14:0, myristique (g/100 g)",g,41400,ag_14_0,g,,,,,fatty_acid,true,
+fa_16_0,FA 16:0,41600,FA 16:0 (g/100g),"AG 16:0, palmitique (g/100 g)",g,41600,ag_16_0,g,,,,,fatty_acid,true,
+fa_18_0,FA 18:0,41800,FA 18:0 (g/100g),"AG 18:0, stéarique (g/100 g)",g,41800,ag_18_0,g,,,,,fatty_acid,true,
+fa_18_1_ole,FA 18:1 n-9 cis,41819,FA 18:1 n-9 cis (g/100g),"AG 18:1 9c (n-9), oléique (g/100 g)",g,41819,ag_18_1_ole,g,,,,,fatty_acid,true,
+fa_18_2_lino,"FA 18:2 9c,12c (n-6)",41826,"FA 18:2 9c,12c (n-6) (g/100g)","AG 18:2 9c,12c (n-6), linoléique (g/100 g)",g,41826,ag_18_2_lino,g,,,,,fatty_acid,true,
+fa_18_3_a_lino,"FA 18:3 c9,c12,c15 (n-3)",41833,"FA 18:3 c9,c12,c15 (n-3) (g/100g)","AG 18:3 c9,c12,c15 (n-3), alpha-linolénique (g/100 g)",g,41833,ag_18_3_a_lino,g,,,,,fatty_acid,true,
+fa_20_4_ara,"FA 20:4 5c,8c,11c,14c (n-6)",42046,"FA 20:4 5c,8c,11c,14c (n-6) (g/100g)","AG 20:4 5c,8c,11c,14c (n-6), arachidonique (g/100 g)",g,42046,ag_20_4_ara,g,,,,,fatty_acid,true,
+fa_20_5_epa,"FA 20:5 5c,8c,11c,14c,17c (n-3) EPA",42053,"FA 20:5 5c,8c,11c,14c,17c (n-3) EPA (g/100g)","AG 20:5 5c,8c,11c,14c,17c (n-3) EPA (g/100 g)",g,42053,ag_20_5_epa,g,,,,,fatty_acid,true,
+fa_20_6_dha,"FA 22:6 4c,7c,10c,13c,16c,19c (n-3) DHA",42263,"FA 22:6 4c,7c,10c,13c,16c,19c (n-3) DHA (g/100g)","AG 22:6 4c,7c,10c,13c,16c,19c (n-3) DHA (g/100 g)",g,42263,ag_20_6_dha,g,,,,,fatty_acid,true,
+cholesterol,Cholesterol,75100,Cholesterol (mg/100g),Cholestérol (mg/100 g),mg,75100,cholesterol,mg,cholesterol,387112,true,,macro,,
+salt,Salt,10004,Salt (g/100g),Sel chlorure de sodium (g/100 g),g,10004,sel,g,salt,2463141,true,,macro,,
+calcium,Calcium,10200,Calcium (mg/100g),Calcium (mg/100 g),mg,10200,calcium,mg,calcium,381925,true,Calcium,mineral,,
+chloride,Chloride,10170,Chloride (mg/100g),Chlorure (mg/100 g),mg,,,,chloride,1990,,Choline,mineral,true,
+copper,Copper,10290,Copper (mg/100g),Cuivre (mg/100 g),mg,10290,cuivre,mg,copper,16885,true,Copper,mineral,,
+iron,Iron,10260,Iron (mg/100g),Fer (mg/100 g),mg,10260,fer,mg,iron,363008,true,Iron,mineral,,
+iodine,Iodine,10530,Iodine (µg/100g),Iode (µg/100 g),µg,10530,iode,mcg,iodine,14250,true,Iodine,mineral,,
+magnesium,Magnesium,10120,Magnesium (mg/100g),Magnésium (mg/100 g),mg,10120,magnesium,mg,magnesium,34047,true,Magnesium,mineral,,
+manganese,Manganese,10251,Manganese (mg/100g),Manganèse (mg/100 g),mg,10251,manganese,mg,manganese,16994,true,Manganese,mineral,,
+phosphorus,Phosphorus,10150,Phosphorus (mg/100g),Phosphore (mg/100 g),mg,10150,phosphore,mg,phosphorus,29176,true,Phosphorus,mineral,,TODO: fix units
+potassium,Potassium,10190,Potassium (mg/100g),Potassium (mg/100 g),mg,10190,potassium,mg,potassium,201996,true,Potassium,mineral,,
+selenium,Selenium,10340,Selenium (µg/100g),Sélénium (µg/100 g),µg,10340,selenium,mcg,selenium,15212,true,Selenium,mineral,,
+sodium,Sodium,10110,Sodium (mg/100g),Sodium (mg/100 g),mg,10110,sodium,mg,sodium,2463141,true,Sodium,mineral,true,"TODO: fix units, breaks the optimization"
+zinc,Zinc,10300,Zinc (mg/100g),Zinc (mg/100 g),mg,10300,zinc,mg,zinc,26711,true,Zinc,mineral,,
+retinol,Retinol,51200,Retinol (µg/100g),Rétinol (µg/100 g),µg,51200,retinol,mcg,retinol,2,,,vitamin,true,Questionable match with NNR2023 (Vitamin A != Retinol)
+beta_carotene,Beta-carotene,51330,Beta-carotene (µg/100g),Beta-Carotène (µg/100 g),µg,51330,beta_carotene,mcg,beta-carotene,125,,,vitamin,true,
+vitamin_d,Vitamin D,52100,Vitamin D (µg/100g),Vitamine D (µg/100 g),µg,52100,vitamine_d,mcg,vitamin-d,82272,true,Vitamin D,vitamin,,
+vitamin_e,Vitamin E,53100,Vitamin E (mg/100g),Vitamine E (mg/100 g),mg,53100,vitamine_e,mg,vitamin-e,21573,true,Vitamin E,vitamin,,
+vitamin_k1,Vitamin K1,54101,Vitamin K1 (µg/100g),Vitamine K1 (µg/100 g),µg,54101,vitamine_k1,mcg,,,,,vitamin,true,How to sum to get similar to Vitamin K
+vitamin_k2,Vitamin K2,54104,Vitamin K2 (µg/100g),Vitamine K2 (µg/100 g),µg,54104,vitamine_k2,mcg,,,,,vitamin,true,
+vitamin_c,Vitamin C,55100,Vitamin C (mg/100g),Vitamine C (mg/100 g),mg,55100,vitamine_c,mg,vitamin-c,229044,true,Vitamin C,vitamin,,
+vitamin_b1,Vitamin B1,56100,Vitamin B1 or Thiamin (mg/100g),Vitamine B1 ou Thiamine (mg/100 g),mg,56100,vitamine_b1,mg,vitamin-b1,42459,true,Thiamin,vitamin,true,"TODO: fix units, breaks the optimization"
+vitamin_b2,Vitamin B2,56200,Vitamin B2 or Riboflavin (mg/100g),Vitamine B2 ou Riboflavine (mg/100 g),mg,56200,vitamine_b2,mg,vitamin-b2,42633,true,Riboflavin,vitamin,,TODO: fix units
+vitamin_pp,Vitamin B3,56310,Vitamin B3 or Niacin (mg/100g),Vitamine B3 ou PP ou Niacine (mg/100 g),mg,56310,vitamine_b3,mg,vitamin-pp,37064,true,Niacin,vitamin,,A component of B3? TODO: fix units
+pantothenic_acid,Vitamin B5,56400,Vitamin B5 or Pantothenic acid (mg/100g),Vitamine B5 ou Acide pantothénique (mg/100 g),mg,56400,vitamine_b5,mg,pantothenic-acid,21375,true,Pantothenic acid,vitamin,,
+vitamin_b6,Vitamin B6,56500,Vitamin B6 (mg/100g),Vitamine B6 (mg/100 g),mg,56500,vitamine_b6,mg,vitamin-b6,35127,true,Vitamin B6,vitamin,,
+vitamin_b9,Vitamin B9,56700,Vitamin B9 or Folate (µg/100g),Vitamine B9 ou Folates totaux (µg/100 g),µg,56700,vitamine_b9,mcg,vitamin-b9,26607,true,Folate,vitamin,,TODO: fix units
+folates,Folates,,,,,,,,folates,8906,true,,vitamin,true,
+vitamin_b12,Vitamin B12,56600,Vitamin B12 (µg/100g),Vitamine B12 (µg/100 g),µg,56600,vitamine_b12,mcg,vitamin-b12,33248,true,Vitamin B12,vitamin,,
+vitamin_a,Vitamin A,,,,,,,,vitamin-a,224232,true,Vitamin A,vitamin,true,Need a formula to combine retinol and beta-carotene (and vitamin A)
+trans_fat,Trans fat,,,,,,,,trans-fat,369043,true,,macro,true,Unclear which CIQUAL FA should be used or if it is a sum of a number
+cocoa,Cocoa,,,,,,,,cocoa,8230,true,,other,true,?

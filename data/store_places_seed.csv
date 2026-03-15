@@ -1,0 +1,9 @@
+source,source_place_id,name,brand,chain_name,category_primary,lat,lon,address_line,city,region,postcode,country_code,website
+foursquare_seed,mv_safeway_570,Safeway,Safeway,Safeway,supermarket,37.4031206,-122.0793060,"570 N Shoreline Blvd",Mountain View,CA,94043,US,https://local.safeway.com/safeway/ca/mountain-view/570-n-shoreline-blvd.html
+foursquare_seed,mv_safeway_645,Safeway,Safeway,Safeway,supermarket,37.4017803,-122.1118102,"645 San Antonio Rd",Mountain View,CA,94040,US,https://local.safeway.com/safeway/ca/mountain-view/645-san-antonio-rd.html
+foursquare_seed,sv_wholefoods_150,Whole Foods Market,Whole Foods Market,Whole Foods Market,supermarket,37.3739192,-122.0312241,"150 E McKinley Ave",Sunnyvale,CA,94086,US,https://www.wholefoodsmarket.com/stores/sunnyvale
+foursquare_seed,la_wholefoods_4800,Whole Foods Market,Whole Foods Market,Whole Foods Market,supermarket,37.3988983,-122.1107585,"4800 El Camino Real",Los Altos,CA,94022,US,https://www.wholefoodsmarket.com/stores/losaltos
+foursquare_seed,mv_traderjoes_590,Trader Joe's,Trader Joe's,Trader Joe's,grocery_store,37.4022780,-122.1109850,"590 Showers Dr",Mountain View,CA,94040,US,https://locations.traderjoes.com/ca/mountain-view/170/
+foursquare_seed,mv_nobhill_1250,Nob Hill Foods,Nob Hill Foods,Nob Hill Foods,supermarket,37.3783433,-122.0763504,"1250 Grant Rd",Mountain View,CA,94040,US,https://www.raleys.com/store/nob-hill-foods-grant-road/
+foursquare_seed,mv_target_555,Target Grocery,Target,Target,grocery_store,37.4016360,-122.1082970,"555 Showers Dr",Mountain View,CA,94040,US,https://www.target.com/sl/mountain-view/950
+foursquare_seed,sv_sprouts_111,Sprouts Farmers Market,Sprouts Farmers Market,Sprouts Farmers Market,grocery_store,37.3777670,-122.0322820,"111 E El Camino Real",Sunnyvale,CA,94087,US,https://www.sprouts.com/store/ca/sunnyvale/sunnyvale/

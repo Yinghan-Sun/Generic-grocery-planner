@@ -1,0 +1,88 @@
+# Vscode settings
+.vscode/
+
+# Dotenv file
+.env
+
+# python virtual environment
+.venv/
+
+# Temporary folder and files
+tmp/
+tmp*
+
+# All python cache files
+*.pyc
+*.egg-info/
+
+# Mac hidden files
+.DS_Store
+
+# Claude generated files
+CLAUDE.md
+
+# Javascript modules
+**/node_modules/
+
+# Ruff cache
+.ruff_cache/
+
+# ---- Data ----
+
+# Open food facts exports
+**/food*.parquet
+**/products.parquet
+**/products/*.parquet
+**/prices.parquet
+**/prices/*.parquet
+
+# Open food facts database dump
+**/openfoodfacts-product*.jsonl.gz
+
+# DuckDB databases stay out of source control by default.
+# For demo deployment, treat them as explicit build or release artifacts.
+**/*.db
+!data/data.db
+!data/store_discovery.db
+# DuckDB tmp files
+**/*.db.tmp
+
+# Fetched NNR2023 html
+**/recommendations_nnr2023.html
+
+# Ciqual 2020 table
+**/ciqual2020.csv
+**/XML_2020_07_07.zip
+**/ciqual2020
+
+# Calnut tables
+**/calnut.0.csv
+**/calnut.1.csv
+
+# Agribalyse tables
+**/agribalyse_*.csv
+
+# EUR exchange rates
+**/euro_exchange_rates
+
+# Livsmedelsdatabasen table
+**/LivsmedelsDB_*.xlsx
+**/LivsmedelsDB_*.csv
+
+# Generated USDA staged tables
+data/usda/usda_food_area_prices_*_staged.csv
+
+# Fetched nutrient_map
+**/nutrient_map_recipe_estimator.csv
+
+# Benchmarking files
+**/input.json
+**/benchmark_results.json
+**/benchmark.npz
+
+# Other files
+**/exported_images
+**/user_data
+
+# DuckDB databases stay out of source control by default.
+**/*.db

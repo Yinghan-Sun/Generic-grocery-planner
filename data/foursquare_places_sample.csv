@@ -1,0 +1,6 @@
+fsq_place_id,name,brand,latitude,longitude,address,locality,region,postcode,country,category_labels
+fsq_mv_hmart,H Mart,H Mart,37.4011,-122.1095,"1060 E El Camino Real",Mountain View,CA,94040,US,"Supermarket | Grocery Store"
+fsq_sf_gus,Gus's Community Market,Gus's Community Market,37.7752,-122.4374,"2111 Harrison St",San Francisco,CA,94110,US,"Market | Grocery Store"
+fsq_berkeley_bowl,Berkeley Bowl,Berkeley Bowl,37.8554,-122.2876,"2020 Oregon St",Berkeley,CA,94703,US,"Supermarket | Food Market"
+fsq_oakland_outlet,Grocery Outlet,Grocery Outlet,37.8115,-122.2661,"2900 Broadway",Oakland,CA,94611,US,"Grocery Store | Market"
+fsq_ssf_costco,Costco Wholesale,Costco Wholesale,37.6442,-122.4030,"451 S Airport Blvd",South San Francisco,CA,94080,US,"Wholesale Club | Supermarket"

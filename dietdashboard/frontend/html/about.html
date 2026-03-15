@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block head %}
+<title>About The Generic Grocery Planner Demo</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f8f7f2;
+  }
+  article {
+    max-width: 860px;
+  }
+  ul {
+    padding-left: 1.25rem;
+  }
+</style>
+{% endblock %} {% block content %}
+<article>
+  <h1>About The Generic Grocery Planner Demo</h1>
+
+  <p>
+    This app is a generic grocery-planning demo. It combines local nutrition data, local representative price tables, and a local
+    nearby-store index to turn nutrition targets into a practical shopping list.
+  </p>
+
+  <h2>What The Demo Does</h2>
+  <ul>
+    <li>Builds a generic shopping list from nutrition targets and simple preferences</li>
+    <li>Shows nearby grocery options from a local store index</li>
+    <li>Uses representative regional USDA and BLS price data for basket-cost guidance</li>
+    <li>Adds lightweight store-fit notes, pantry adjustments, and meal suggestions</li>
+  </ul>
+
+  <h2>Data Sources Used In The Current Demo</h2>
+  <ul>
+    <li>CIQUAL and CALNUT-derived nutrition tables for generic-food nutrient coverage</li>
+    <li>USDA Food-at-Home Monthly Area Prices for representative regional grocery prices</li>
+    <li>BLS food price and CPI files for fallback pricing and inflation adjustment</li>
+    <li>Local store seed, persisted store index, and optional offline Foursquare ingest for nearby-store lookup</li>
+  </ul>
+
+  <h2>Project Origin / Attribution</h2>
+  <p>
+    This demo evolved from earlier diet-optimization work. In this local workspace, the clearest preserved upstream source reference
+    is the historical GitHub link:
+    <a href="https://github.com/albertaillet/diet-optimization" target="_blank" rel="noopener noreferrer"
+      >github.com/albertaillet/diet-optimization</a
+    >.
+  </p>
+  <p>
+    There is no top-level <code>LICENSE</code> file or git history in this local copy, so upstream license details could not be fully
+    verified from the files on disk alone.
+  </p>
+
+  <h2>Demo Scope Notes</h2>
+  <p>
+    Store and price logic run from local DuckDB data at runtime. Browser-side address geocoding is still optional for convenience;
+    entering coordinates directly avoids that lookup.
+  </p>
+</article>
+{% endblock %}

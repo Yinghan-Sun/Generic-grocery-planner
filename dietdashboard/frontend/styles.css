@@ -1,0 +1,276 @@
+:root {
+  --primary-green: #2c6e31; /* Green for primary elements */
+  --light-green: #5b8c51; /* Lighter green for secondary elements */
+  --dark-green: #3d5c37; /* Darker green for highlights */
+  --background-light-color: #f8f7f2;
+  --text-color: #2e3d2d;
+  --white: #fff;
+  --grey: #ccc;
+  --light-grey: #f0f0f0;
+  --highlight-yellow: #ffc107; /* Dark yellow for highlights */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--background-light-color);
+  color: var(--text-color);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem;
+  background-color: var(--primary-green);
+  box-shadow: none;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+h1 {
+  font-size: 1.3rem;
+  color: white;
+}
+
+h2 {
+  font-size: 1.1rem;
+  color: var(--primary-green);
+}
+
+h3 {
+  font-size: 1rem;
+  color: var(--dark-green);
+}
+
+.nutrient-selector-form {
+  position: absolute;
+  right: 0;
+  background-color: var(--background-light-color);
+  padding: 0.5rem;
+  border-radius: 3px;
+  border: 1px solid var(--grey);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Dashboard layout */
+.dashboard-content {
+  display: flex;
+  overflow: hidden; /* Be able to scroll the content */
+  height: 100%;
+}
+
+.dashboard-column {
+  width: 50%;
+  padding: 1rem;
+  overflow-y: auto;
+  border: 1px solid var(--grey);
+}
+
+/* Content and column adjustments for smaller screens */
+@media (max-width: 768px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .dashboard-column {
+    width: 100%;
+    height: auto;
+    min-height: 50vh;
+  }
+}
+
+/* D3 chart styling */
+/* Brush styling */
+.brush .selection {
+  fill: var(--primary-green);
+  fill-opacity: 0.8;
+  stroke: none;
+}
+.brush .brush-handle circle {
+  fill: var(--primary-green);
+  fill-opacity: 1;
+  stroke: var(--text-color);
+  stroke-width: 1px;
+  cursor: ew-resize;
+}
+
+/* Tooltip styling */
+text.segment-label {
+  font-size: 11px;
+  text-anchor: middle;
+  fill: var(--text-color);
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+}
+rect.segment:hover {
+  opacity: 0.8;
+}
+g.segment-group:hover text.segment-label,
+text.segment-label:hover {
+  opacity: 1;
+}
+/* Map styling */
+g.markers circle {
+  cursor: pointer;
+  stroke-width: 0.5px;
+}
+g.markers circle {
+  fill: rgb(253, 73, 73);
+}
+g.markers circle.selected {
+  fill: var(--light-green);
+}
+
+/* Pie chart */
+.slice:hover {
+  opacity: 0.8;
+}
+.pie-label {
+  font-size: 11px;
+  font-weight: 500;
+  fill: white;
+  pointer-events: none; /* let mouse events pass through */
+  text-transform: capitalize; /* make the text capitalized */
+}
+
+/* Button Styles - shared by all <button> elements */
+button {
+  background-color: var(--white);
+  border: 1px solid var(--grey);
+  border-radius: 3px;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 3px 8px;
+}
+button:hover,
+button:focus {
+  background-color: var(--light-grey);
+}
+
+/* Input Elements - shared by all <input> elements */
+input {
+  background-color: var(--white);
+  border: 1px solid var(--grey);
+  border-radius: 3px;
+  color: var(--text-color);
+  padding: 8px 8px;
+}
+
+/* Modal/Dialog - shared by all <dialog> elements */
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+}
+dialog {
+  background-color: var(--background-light-color);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid var(--grey);
+  border-radius: 5px;
+  width: 300px;
+  max-width: 80%;
+}
+
+/* Details summary - shared by all <details> elements */
+details summary {
+  background-color: var(--background-light-color);
+  border: 1px solid var(--grey);
+  border-radius: 3px;
+  color: var(--primary-green);
+  cursor: pointer;
+  padding: 3px 8px;
+}
+details summary:hover,
+details summary:focus {
+  background-color: var(--light-grey);
+}
+
+/* Select - shared by all <select> elements */
+select {
+  border-radius: 3px;
+  color: var(--primary-green);
+  cursor: pointer;
+}
+select:hover,
+select:focus {
+  background-color: var(--light-grey);
+}
+
+/* Table - shared by all <table> elements */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+table th {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--grey);
+  color: var(--primary-green);
+}
+table td {
+  padding: 0.3rem;
+  text-align: left;
+  border-bottom: 1px solid var(--grey);
+}
+table tr:hover {
+  background-color: var(--light-grey);
+}
+
+/* A - shared by all <a> elements */
+a {
+  color: var(--dark-green) !important;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--light-green) !important;
+  text-decoration: underline;
+}
+
+/* Tabs */
+button.tab-button {
+  position: relative;
+}
+button.tab-button.active {
+  font-weight: bold;
+}
+
+g.map-brush .selection {
+  /* Style for the brush selection rectangle */
+  fill: rgba(100, 100, 100, 0.3);
+}
+
+/* Active variable highlighting */
+tr.active-variable {
+  background-color: rgba(255, 200, 58, 0.2) !important; /* Light yellow background */
+  border-left: 3px solid var(--highlight-yellow) !important; /* Yellow left border */
+  border-right: 3px solid var(--highlight-yellow) !important; /* Yellow left border */
+  font-weight: 500;
+}
+
+tr.active-variable:hover {
+  background-color: rgba(255, 200, 7, 0.3) !important; /* Slightly darker yellow on hover */
+}

@@ -1,0 +1,70 @@
+[project]
+name = "diet-optimization"
+version = "0.0.0"
+readme = "README.md"
+requires-python = "==3.13.*"
+dependencies = [
+    "certifi>=2025.8.3",
+    "duckdb>=1.3.2",
+    "flask>=3.1.2",
+    "flask-compress>=1.18",
+    "pytz>=2025.2",
+    "scipy>=1.15.2",
+    "sqlglot>=28.6.0",
+]
+
+[project.optional-dependencies]
+plotting = ["matplotlib", "matplotlib_set_diagrams", "ipykernel"]
+benchmark = [
+    "cvxopt>=1.3.2",
+    "cvxpy>=1.6.3",
+    "highspy>=1.9.0",
+    "mosek>=11.0.11",
+    "pyscipopt>=5.4.1",
+]
+# "highspy>=1.9.0",
+# "pulp>=3.0.2",
+# "pyomo>=6.9.1",
+
+[dependency-groups]
+dev = ["files-to-prompt", "pre-commit", "pyright"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dietdashboard"]
+
+[tool.ruff]
+line-length = 130
+preview = true
+
+[tool.ruff.lint]
+select = [
+    "F",    # flake8 (pyflakes)
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "BLE",  # flake8-blind-except
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
+    "PIE",  # flake8-pie
+    "Q",    # flake8-quotes
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SIM",  # flake8-simplify
+    "TID",  # flask8-tidy-imports
+    "TCH",  # flake8-type-checking
+    "PTH",  # flake8-use-pathlib
+    "NPY",  # numpy-specific rules
+    "PERF", # perflint
+    "FURB", # refurb
+    "RUF",  # ruff-specific rules
+]
+
+[tool.pyright]
+reportIncompatibleMethodOverride = true
+include = ["*"]

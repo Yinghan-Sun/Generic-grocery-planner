@@ -1,0 +1,50 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-json
+        exclude: tests/data/invalid.json
+      - id: check-toml
+      - id: check-yaml
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        exclude: \.html$
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.0
+    hooks:
+      - id: ruff # linter
+        types_or: [python, pyi, jupyter]
+        args: [--fix]
+      - id: ruff-format # formatter
+        types_or: [python, pyi, jupyter]
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: pnpx prettier --write
+        language: system
+        files: \.(js|jsx|ts|tsx|css|json|md|html)$
+  - repo: local
+    hooks:
+      - id: validate-staged-csv-data
+        name: validate-staged-csv-data
+        entry: ./scripts/validate_staged_csv_data.py
+        language: system
+        types: [csv]
+  - repo: local
+    hooks:
+      - id: illustrate-queries
+        name: illustrate-queries
+        language: system
+        entry: ./scripts/illustrate_queries.py
+        types_or: [sql]
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        language: system
+        entry: uv run pyright
+        types_or: [python, pyi]

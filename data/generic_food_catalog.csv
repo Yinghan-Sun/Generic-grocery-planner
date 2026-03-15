@@ -1,0 +1,76 @@
+generic_food_id,display_name,food_family,default_serving_g,purchase_unit,purchase_unit_size_g,vegetarian,vegan,dairy_free,gluten_free,high_protein,breakfast_friendly,prep_level,shelf_stability,commonality_rank,notes,meal_type,budget_score,shelf_stable,cold_only,microwave_friendly
+eggs,Eggs,protein,100,dozen eggs,600,true,false,true,true,true,true,low,chilled,1,Whole raw egg used as the nutrition reference.,lunch|dinner|breakfast,4,false,true,false
+milk,Milk,dairy,244,gallon,3785,true,false,false,true,false,true,none,chilled,2,Semi skimmed milk as a broadly available baseline.,breakfast|snack,4,false,true,false
+greek_yogurt,Greek yogurt,dairy,170,tub,450,true,false,false,true,true,true,none,chilled,3,Plain Greek style yogurt.,breakfast|snack,3,false,true,false
+oats,Oats,grain,40,bag,1000,true,true,true,false,false,true,low,stable,4,Oatmeal flakes are used as the representative pantry staple.,lunch|dinner|breakfast,5,true,false,false
+rice,Rice,grain,45,bag,1000,true,true,true,true,false,false,medium,stable,5,Raw white rice for dry goods shopping estimates.,lunch|dinner,5,true,false,true
+beans,Beans,legume,50,bag,454,true,true,true,true,false,false,medium,stable,6,Red kidney beans in dried form as a generic beans proxy.,lunch|dinner,5,true,false,true
+lentils,Lentils,legume,50,bag,500,true,true,true,true,true,false,medium,stable,7,Dried lentils as a shelf stable protein source.,lunch|dinner,5,true,false,true
+tofu,Tofu,protein,150,block,350,true,true,true,true,true,false,low,chilled,8,Plain tofu block.,lunch|dinner,4,false,true,false
+chicken_breast,Chicken breast,protein,150,pack,680,false,false,true,true,true,false,medium,chilled,9,Raw skinless chicken breast.,lunch|dinner,3,false,true,false
+tuna,Tuna,protein,120,can pack,340,false,false,true,true,true,false,none,stable,10,Canned tuna drained.,lunch|dinner,3,true,false,false
+peanut_butter,Peanut butter,protein,32,jar,454,true,true,true,true,false,true,none,stable,11,Unsweetened peanut butter baseline.,lunch|dinner|breakfast|snack,2,true,false,false
+wholemeal_bread,Wholemeal bread,grain,56,loaf,680,true,true,true,false,false,true,none,stable,12,Wholemeal bread for easy calorie support.,lunch|dinner|breakfast,4,true,false,true
+bananas,Bananas,produce,118,bunch,700,true,true,true,true,false,true,none,ambient,13,Raw banana pulp.,side|snack|breakfast,4,false,false,false
+spinach,Spinach,produce,85,bag,312,true,true,true,true,false,false,low,chilled,14,Raw spinach leaves.,side|snack,4,false,true,true
+broccoli,Broccoli,produce,91,crown,450,true,true,true,true,false,false,medium,chilled,15,Raw broccoli.,side|snack,4,false,true,true
+potatoes,Potatoes,produce,173,bag,2268,true,true,true,true,false,false,medium,stable,16,Raw potatoes for a basic starch anchor.,side|snack,5,true,false,true
+olive_oil,Olive oil,fat,14,bottle,500,true,true,true,true,false,false,none,stable,17,Extra virgin olive oil for calorie support.,snack,3,true,false,false
+salmon,Salmon,protein,120,fillet,170,false,false,true,true,true,false,medium,chilled,18,Cooked salmon as a fatty fish protein option.,lunch|dinner,1,false,true,false
+ground_beef,Ground beef,protein,113,pack,454,false,false,true,true,true,false,medium,chilled,19,Minced beef around ten percent fat.,lunch|dinner,2,false,true,false
+turkey,Turkey,protein,120,pack,454,false,false,true,true,true,false,medium,chilled,20,Turkey escalope as a lean poultry baseline.,lunch|dinner,3,false,true,false
+rotisserie_chicken,Rotisserie chicken,protein,140,pack,900,false,false,true,true,true,false,none,chilled,21,Roasted chicken meat as a low prep protein option.,lunch|dinner,2,false,true,true
+chickpeas,Chickpeas,legume,82,can,400,true,true,true,true,false,false,low,stable,22,Canned chickpeas as a quick legume staple.,lunch|dinner,5,true,false,true
+black_beans,Black beans,legume,86,can,425,true,true,true,true,false,false,low,stable,23,Black beans approximated with canned kidney beans.,lunch|dinner,5,true,false,true
+edamame,Edamame,legume,90,bag,340,true,true,true,true,true,false,low,chilled,24,Edamame approximated with soy sprouts.,lunch|dinner,5,false,true,true
+shrimp,Shrimp,protein,100,bag,340,false,false,true,true,true,false,low,chilled,25,Cooked shrimp as a quick seafood protein.,lunch|dinner,1,false,true,false
+sardines,Sardines,protein,92,can,120,false,false,true,true,true,false,none,stable,26,Canned sardines in oil drained.,lunch|dinner,3,true,false,false
+cottage_cheese,Cottage cheese,dairy,113,tub,454,true,false,false,true,true,true,none,chilled,27,Cottage cheese approximated with drained soft fresh cheese.,breakfast|snack,3,false,true,false
+protein_yogurt,Protein yogurt,dairy,160,tub,400,true,false,false,true,true,true,none,chilled,28,High protein yogurt.,breakfast|snack,2,false,true,false
+ricotta,Ricotta,dairy,124,tub,475,true,false,false,true,false,false,low,chilled,29,Ricotta cheese.,breakfast|snack,3,false,true,false
+cheese,Cheese,dairy,30,pack,200,true,false,false,true,false,false,none,chilled,30,General cheese baseline using a common cow milk cheese.,breakfast|snack,2,false,true,false
+hummus,Hummus,legume,56,tub,280,true,true,true,true,false,false,none,chilled,31,Hummus as a low prep chickpea spread.,lunch|dinner|snack,5,false,true,false
+veggie_burger,Veggie burger,protein,113,pack,340,true,true,true,false,true,false,low,chilled,32,Plant based burger with wheat and soybean.,lunch|dinner,2,false,true,true
+almond_butter,Almond butter,fat,32,jar,340,true,true,true,true,false,true,none,stable,33,Almond butter approximated with almonds.,snack|breakfast,2,true,false,false
+nuts,Nuts,fat,30,bag,400,true,true,true,true,false,true,none,stable,34,Mixed nuts average of almonds walnuts and cashews.,snack|breakfast,2,true,false,false
+almonds,Almonds,fat,28,bag,227,true,true,true,true,false,true,none,stable,35,Raw almonds.,snack|breakfast,2,true,false,false
+walnuts,Walnuts,fat,28,bag,227,true,true,true,true,false,true,none,stable,36,Dry walnuts.,snack|breakfast,2,true,false,false
+cashews,Cashews,fat,28,bag,227,true,true,true,true,false,true,none,stable,37,Unsalted cashews.,snack|breakfast,2,true,false,false
+pasta,Pasta,grain,56,box,454,true,true,true,false,false,false,medium,stable,38,Dried pasta.,lunch|dinner,5,true,false,true
+quinoa,Quinoa,grain,45,bag,500,true,true,true,true,true,false,medium,stable,39,Raw quinoa.,lunch|dinner,2,true,false,true
+tortilla,Tortilla,grain,50,pack,320,true,true,false,false,false,false,none,stable,40,Wheat tortilla wrap.,lunch|dinner,3,true,false,true
+sweet_potatoes,Sweet potatoes,produce,130,bag,1360,true,true,true,true,false,false,medium,stable,41,Raw sweet potatoes.,side|snack,4,true,false,true
+couscous,Couscous,grain,60,box,500,true,true,true,false,false,false,low,stable,42,Precooked couscous.,lunch|dinner,4,true,false,true
+barley,Barley,grain,45,bag,500,true,true,true,false,false,false,medium,stable,43,Pearled barley.,lunch|dinner,5,true,false,true
+bagel,Bagel,grain,95,pack,510,true,true,true,false,false,true,none,stable,44,Plain bagel.,lunch|dinner|breakfast,3,true,false,true
+pita,Pita bread,grain,60,pack,360,true,true,true,false,false,true,none,stable,45,Pita bread.,lunch|dinner|breakfast,3,true,false,true
+corn,Corn,grain,90,bag,500,true,true,true,true,false,false,medium,stable,46,Dry corn or maize grain.,lunch|dinner,4,true,false,true
+corn_tortilla,Corn tortilla,grain,48,pack,288,true,true,true,true,false,false,none,stable,47,Corn tortilla wrap.,lunch|dinner,3,true,false,true
+corn_flakes,Corn flakes,grain,30,box,375,true,true,true,true,false,true,none,stable,48,Plain corn flakes cereal.,lunch|dinner|breakfast,3,true,false,false
+apples,Apples,produce,182,bag,1360,true,true,true,true,false,true,none,ambient,49,Raw apples.,side|snack|breakfast,3,false,false,false
+oranges,Oranges,produce,140,bag,1360,true,true,true,true,false,true,none,ambient,50,Raw oranges.,side|snack|breakfast,3,false,false,false
+berries,Berries,produce,140,clamshell,340,true,true,true,true,false,true,none,chilled,51,Mixed berries average of strawberry blueberry and blackberry.,side|snack|breakfast,2,false,true,false
+carrots,Carrots,produce,61,bag,907,true,true,true,true,false,false,low,stable,52,Raw carrots.,side|snack,5,true,false,false
+tomatoes,Tomatoes,produce,123,pack,450,true,true,true,true,false,false,low,ambient,53,Raw tomatoes.,side|snack,3,false,false,false
+cucumber,Cucumber,produce,100,pack,300,true,true,true,true,false,false,none,chilled,54,Raw cucumber.,side|snack,3,false,true,false
+bell_peppers,Bell peppers,produce,120,bag,450,true,true,true,true,false,false,medium,chilled,55,Sweet bell peppers approximated with red and green peppers.,side|snack,3,false,true,false
+avocado,Avocado,produce,75,bag,340,true,true,true,true,false,false,none,ambient,56,Raw avocado.,side|snack,2,false,false,false
+cauliflower,Cauliflower,produce,100,crown,600,true,true,true,true,false,false,medium,chilled,57,Raw cauliflower.,side|snack,3,false,true,true
+lettuce,Lettuce,produce,85,head,500,true,true,true,true,false,false,none,chilled,58,Raw lettuce.,side|snack,3,false,true,false
+grapes,Grapes,produce,151,bag,900,true,true,true,true,false,true,none,ambient,59,Raw table grapes.,side|snack|breakfast,3,false,false,false
+mushrooms,Mushrooms,produce,70,pack,227,true,true,true,true,false,false,low,chilled,60,Raw button mushrooms.,side|snack,3,false,true,false
+zucchini,Zucchini,produce,124,bag,600,true,true,true,true,false,false,medium,chilled,61,Raw zucchini.,side|snack,3,false,true,false
+kale,Kale,produce,67,bag,227,true,true,true,true,false,false,medium,chilled,62,Raw curly kale.,side|snack,3,false,true,false
+onions,Onions,produce,110,bag,907,true,true,true,true,false,false,medium,stable,63,Raw onions.,side|snack,5,true,false,false
+peas,Peas,produce,80,bag,340,true,true,true,true,true,false,low,stable,64,Raw green peas.,side|snack,3,true,false,true
+celery,Celery,produce,110,bunch,500,true,true,true,true,false,false,none,chilled,65,Raw celery stalk.,side|snack,3,false,true,false
+brussels_sprouts,Brussels sprouts,produce,88,bag,340,true,true,true,true,false,false,medium,chilled,66,Raw Brussels sprouts.,side|snack,3,false,true,false
+green_beans,Green beans,produce,90,bag,340,true,true,true,true,false,false,medium,chilled,67,Raw French beans.,side|snack,3,false,true,true
+asparagus,Asparagus,produce,90,bunch,340,true,true,true,true,false,false,medium,chilled,68,Raw green asparagus.,side|snack,3,false,true,false
+cabbage,Cabbage,produce,89,head,900,true,true,true,true,false,false,medium,chilled,69,Raw green cabbage.,side|snack,5,false,true,false
+beetroot,Beetroot,produce,82,bag,450,true,true,true,true,false,false,medium,stable,70,Raw beetroot.,side|snack,3,true,false,false
+pears,Pears,produce,178,bag,900,true,true,true,true,false,true,none,ambient,71,Raw pears.,side|snack|breakfast,3,false,false,false
+kiwi,Kiwi,produce,76,pack,454,true,true,true,true,false,true,none,chilled,72,Raw kiwi fruit.,side|snack|breakfast,3,false,true,false
+pineapple,Pineapple,produce,140,whole,900,true,true,true,true,false,false,medium,ambient,73,Raw pineapple.,side|snack,3,false,false,false
+mango,Mango,produce,140,pack,700,true,true,true,true,false,false,medium,ambient,74,Raw mango.,side|snack,3,false,false,false
+frozen_vegetables,Frozen vegetables,produce,85,bag,454,true,true,true,true,false,false,none,stable,75,Mixed frozen vegetables for quick meals.,side|snack|dinner,4,true,false,true

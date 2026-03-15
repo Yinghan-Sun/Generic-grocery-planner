@@ -1,0 +1,303 @@
+{% extends "base.html" %} {% block head %}
+<title>Generic Food Recommendations</title>
+<script type="module" src="/static/generic_bundle.js"></script>
+<link rel="stylesheet" href="/static/bundle.css" />
+<style>
+  :root {
+    --generic-error: #9f2a1c;
+    --generic-error-bg: #fff0ee;
+    --generic-info: #234f32;
+    --generic-info-bg: #eef8f0;
+    --generic-border-strong: #cdd8cf;
+  }
+
+  html,
+  body {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .generic-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    height: auto;
+    min-height: 0;
+    flex: 1 0 auto;
+  }
+
+  .generic-card {
+    background: white;
+    border: 1px solid var(--grey);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+
+  .generic-form-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 1rem;
+  }
+
+  .generic-form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 500;
+  }
+
+  .generic-span-full {
+    grid-column: 1 / -1;
+  }
+
+  .generic-form-grid input {
+    border: 1px solid var(--grey);
+    border-radius: 4px;
+    padding: 0.55rem 0.65rem;
+    font: inherit;
+  }
+
+  .generic-form-grid input[aria-invalid="true"] {
+    border-color: var(--generic-error);
+    background: var(--generic-error-bg);
+  }
+
+  .generic-field-error {
+    color: var(--generic-error);
+    font-size: 0.9rem;
+    min-height: 1.1rem;
+  }
+
+  .generic-help {
+    color: #556b57;
+    font-size: 0.9rem;
+  }
+
+  .generic-advanced {
+    margin-top: 1rem;
+  }
+
+  .generic-advanced[open] {
+    padding-bottom: 0.5rem;
+  }
+
+  .generic-checkboxes {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .generic-checkboxes label {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    font-weight: 500;
+  }
+
+  .generic-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .generic-actions button {
+    border: 1px solid #29543b;
+    border-radius: 4px;
+    padding: 0.65rem 0.95rem;
+    font: inherit;
+    cursor: pointer;
+    background: #29543b;
+    color: white;
+  }
+
+  .generic-actions button[type="button"] {
+    background: white;
+    color: #29543b;
+  }
+
+  .generic-actions button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .generic-presets {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .generic-preset-button {
+    border: 1px solid var(--generic-border-strong);
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    background: white;
+    color: #29543b;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .generic-preset-button:hover {
+    background: #f3f7f4;
+  }
+
+  .generic-status {
+    min-height: 1.2rem;
+    margin-top: 0.75rem;
+  }
+
+  .generic-notice {
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+    border: 1px solid var(--generic-border-strong);
+    background: white;
+  }
+
+  .generic-notice.error {
+    border-color: #efc8c1;
+    background: var(--generic-error-bg);
+    color: var(--generic-error);
+  }
+
+  .generic-notice.info,
+  .generic-notice.success {
+    background: var(--generic-info-bg);
+    color: var(--generic-info);
+  }
+
+  .generic-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .generic-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+  }
+
+  .generic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .generic-list-item {
+    border: 1px solid var(--grey);
+    border-radius: 4px;
+    padding: 0.75rem;
+    background: var(--background-light-color);
+  }
+
+  .generic-list-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .generic-badge {
+    border-radius: 999px;
+    border: 1px solid var(--generic-border-strong);
+    padding: 0.2rem 0.55rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    background: white;
+  }
+
+  .generic-list-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .generic-summary-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-top: 0.75rem;
+  }
+
+  .generic-summary-metric {
+    border: 1px solid var(--generic-border-strong);
+    border-radius: 4px;
+    padding: 0.75rem;
+    background: white;
+  }
+
+  .generic-summary-metric strong {
+    display: block;
+    font-size: 1.1rem;
+  }
+
+  .generic-muted {
+    color: #556b57;
+  }
+
+  .generic-assumptions {
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+  }
+
+  .generic-empty {
+    border: 1px dashed var(--generic-border-strong);
+    border-radius: 4px;
+    padding: 1rem;
+    color: #556b57;
+    background: #fafcfb;
+  }
+
+  .generic-inline-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+
+</style>
+{% endblock %} {% block content %}
+<header>
+  <h1>Generic Food Recommendations</h1>
+  <nav style="display: flex; gap: 1rem">
+    <a href="/about"><div style="color: white">About</div></a>
+  </nav>
+</header>
+<main class="generic-shell">
+  <section class="generic-card">
+    <h2>Plan a Generic Grocery Trip</h2>
+    <p class="generic-muted">
+      Pick a location, set a simple nutrition goal, and get a rough shopping list plus nearby supermarkets.
+    </p>
+    <div id="generic-form"></div>
+  </section>
+  <section class="generic-columns">
+    <div class="generic-column">
+      <div class="generic-card">
+        <h2>Nearby Supermarkets</h2>
+        <div id="generic-stores"></div>
+      </div>
+    </div>
+    <div class="generic-column">
+      <div class="generic-card">
+        <h2>Suggested Shopping List</h2>
+        <div id="generic-results"></div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
