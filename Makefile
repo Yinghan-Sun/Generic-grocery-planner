@@ -7,7 +7,7 @@ SHELL := /bin/sh
 	fetch-food-cpi create-table-food-cpi-index create-table-usda-food-area-prices create-table-store-places \
 	open-db \
 	smoke-generic test-generic test-generic-behavior check-generic-catalog check-generic-price-coverage qa-generic \
-	store-discovery-summary store-discovery-prune-cache store-discovery-dedupe-live backfill-generic-stores ingest-foursquare-stores \
+	store-discovery-summary store-discovery-prune-cache store-discovery-dedupe-live backfill-generic-stores ingest-foursquare-stores ingest-foursquare-os-places \
 	run-app run-dev \
 	frontend-bundle frontend-watch frontend-copy \
 	build-container run-container
@@ -104,9 +104,13 @@ backfill-generic-stores:
 	uv run python ./scripts/backfill_generic_stores.py
 
 FOURSQUARE_INPUT ?= ./data/foursquare_places_sample.csv
+FOURSQUARE_OS_INPUT ?= ./data/foursquare_os/foursquare_os_places_grocery_metros.parquet
 
 ingest-foursquare-stores:
 	uv run python ./scripts/ingest_foursquare_stores.py --input $(FOURSQUARE_INPUT)
+
+ingest-foursquare-os-places:
+	uv run python ./scripts/ingest_foursquare_stores.py --input $(FOURSQUARE_OS_INPUT) --source foursquare_os_places
 
 run-app:
 	uv run python -m dietdashboard.app

@@ -1,0 +1,14 @@
+Foursquare OS Places Attribution Notice
+
+This repository can ingest locally staged data derived from Foursquare OS Places
+to enrich grocery-store metadata for the generic planner's offline store index.
+
+Source:
+- Foursquare OS Places
+- Official documentation: https://docs.foursquare.com/data-products/docs/places-os-data-schema
+
+Attribution / notice handling:
+- Foursquare OS Places is distributed separately from this application.
+- If you stage or redistribute local extracts derived from Foursquare OS Places,
+  keep the upstream Apache 2.0 license and NOTICE information with those data artifacts.
+- This notice is informational and does not replace the upstream dataset terms.

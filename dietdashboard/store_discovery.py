@@ -6,6 +6,7 @@ import json
 import math
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Sequence
@@ -29,6 +30,8 @@ STORE_DISCOVERY_PERSIST_LIVE = os.getenv("STORE_DISCOVERY_PERSIST_LIVE", "true")
 STORE_DISCOVERY_LIVE_INDEX_MAX_AGE_S = int(os.getenv("STORE_DISCOVERY_LIVE_INDEX_MAX_AGE_S", "2592000"))
 STORE_DISCOVERY_LIVE_INDEX_MIN_RESULTS = int(os.getenv("STORE_DISCOVERY_LIVE_INDEX_MIN_RESULTS", "3"))
 STORE_DISCOVERY_UNIFIED_REFRESH_TTL_S = int(os.getenv("STORE_DISCOVERY_UNIFIED_REFRESH_TTL_S", "300"))
+STORE_DISCOVERY_READ_RETRY_COUNT = int(os.getenv("STORE_DISCOVERY_READ_RETRY_COUNT", "6"))
+STORE_DISCOVERY_READ_RETRY_DELAY_MS = int(os.getenv("STORE_DISCOVERY_READ_RETRY_DELAY_MS", "150"))
 STORE_DISCOVERY_DB_PATH = Path(
     os.getenv("STORE_DISCOVERY_DB_PATH", str(Path(__file__).resolve().parent.parent / "data" / "store_discovery.db"))
 )
@@ -40,6 +43,7 @@ _LAST_UNIFIED_REFRESH_SUMMARY: dict[str, int] | None = None
 SOURCE_PRIORITY = {
     "overpass": 100,
     "store_places_live": 95,
+    "foursquare_os_places": 90,
     "foursquare_offline": 85,
     "foursquare_seed": 70,
     "seed": 65,
@@ -49,15 +53,67 @@ SOURCE_PRIORITY = {
 SOURCE_CONFIDENCE = {
     "overpass": 0.95,
     "store_places_live": 0.9,
+    "foursquare_os_places": 0.9,
     "foursquare_offline": 0.88,
     "foursquare_seed": 0.8,
     "seed": 0.75,
     "store_places": 0.7,
 }
 
+FOURSQUARE_DISPLAY_CATEGORY_KEYWORDS = (
+    "grocery store",
+    "supermarket",
+    "food market",
+    "fruit and vegetable store",
+    "produce market",
+    "meat market",
+    "meat and seafood store",
+    "seafood market",
+    "fish market",
+    "warehouse club",
+    "wholesale club",
+)
+
+FOURSQUARE_DISPLAY_CATEGORY_EXCLUSIONS = (
+    "liquor store",
+    "wine store",
+    "beer store",
+    "candy store",
+    "dessert shop",
+    "pharmacy",
+    "market research",
+    "night market",
+    "street fair",
+    "street food gathering",
+    "convenience store",
+)
+
 
 def _normalized_store_text(value: object | None) -> str:
     return re.sub(r"[^a-z0-9]+", " ", str(value or "").strip().lower().replace("’", "'")).strip()
+
+
+def _foursquare_category_labels_text(raw_record_json: object | None) -> str:
+    if _is_blank_text(raw_record_json):
+        return ""
+    try:
+        raw_record = json.loads(str(raw_record_json))
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return ""
+
+    labels = raw_record.get("fsq_category_labels") or raw_record.get("category_labels") or raw_record.get("categories")
+    parts: list[str] = []
+    if isinstance(labels, str):
+        parts.append(labels)
+    elif isinstance(labels, list):
+        for item in labels:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                parts.append(str(item.get("name") or item.get("label") or ""))
+    elif isinstance(labels, dict):
+        parts.append(str(labels.get("name") or labels.get("label") or ""))
+    return " | ".join(part for part in parts if part).strip().lower()
 
 
 def _normalized_address_value(value: object | None) -> str:
@@ -86,6 +142,10 @@ def _normalized_address_value(value: object | None) -> str:
 def _address_tokens(value: object | None) -> tuple[str, ...]:
     ignored_tokens = {"ca", "us", "usa"}
     return tuple(token for token in _normalized_address_value(value).split() if token and token not in ignored_tokens)
+
+
+def _is_blank_text(value: object | None) -> bool:
+    return value is None or str(value).strip() == ""
 
 
 def _addresses_match(first: object | None, second: object | None) -> bool:
@@ -256,6 +316,128 @@ def _store_record_rank(record: dict[str, object]) -> tuple[int, int, int, float,
     )
 
 
+def _metadata_score(record: dict[str, object]) -> int:
+    score = 0
+    if not _is_blank_text(record.get("city")):
+        score += 4
+    if not _is_blank_text(record.get("region")):
+        score += 4
+    if not _is_blank_text(record.get("postcode")):
+        score += 2
+    if not _is_blank_text(record.get("address")):
+        score += min(_address_detail_score(record.get("address")), 8)
+    return score
+
+
+def _address_looks_like_store_name(record: dict[str, object]) -> bool:
+    address = _normalized_address_value(record.get("address"))
+    if not address:
+        return False
+    name = _normalized_store_text(record.get("brand") or record.get("name"))
+    return bool(name) and (address == name or address in name or name in address)
+
+
+def _latest_timestamp(first: object | None, second: object | None) -> object | None:
+    if first is None:
+        return second
+    if second is None:
+        return first
+    return max(first, second)
+
+
+def _preferred_address(primary: object | None, alternate: object | None) -> object | None:
+    if _is_blank_text(primary):
+        return alternate
+    if _is_blank_text(alternate):
+        return primary
+    primary_score = _address_detail_score(primary)
+    alternate_score = _address_detail_score(alternate)
+    if alternate_score > primary_score + 1:
+        return alternate
+    return primary
+
+
+def _preferred_record_address(primary: dict[str, object], alternate: dict[str, object]) -> object | None:
+    if _address_looks_like_store_name(primary) and not _address_looks_like_store_name(alternate):
+        return alternate.get("address") or primary.get("address")
+    if _address_looks_like_store_name(alternate) and not _address_looks_like_store_name(primary):
+        return primary.get("address") or alternate.get("address")
+    return _preferred_address(primary.get("address"), alternate.get("address"))
+
+
+def _merge_store_records(first: dict[str, object], second: dict[str, object]) -> dict[str, object]:
+    preferred = first
+    alternate = second
+    if _store_record_rank(second) > _store_record_rank(first):
+        preferred = second
+        alternate = first
+
+    metadata_owner = preferred
+    metadata_fallback = alternate
+    if _metadata_score(alternate) > _metadata_score(preferred):
+        metadata_owner = alternate
+        metadata_fallback = preferred
+
+    merged = dict(preferred)
+    merged["brand"] = preferred.get("brand") or alternate.get("brand")
+    merged["address"] = _preferred_record_address(metadata_owner, metadata_fallback)
+    for field in ("city", "region", "postcode"):
+        merged[field] = (
+            metadata_owner.get(field)
+            or preferred.get(field)
+            or metadata_fallback.get(field)
+            or alternate.get(field)
+        )
+    merged["confidence"] = max(
+        float(preferred.get("confidence") or 0.0),
+        float(alternate.get("confidence") or 0.0),
+    )
+    merged["last_seen_at"] = _latest_timestamp(preferred.get("last_seen_at"), alternate.get("last_seen_at"))
+    merged["metadata_source"] = str(metadata_owner.get("source") or preferred.get("source") or "")
+    merged["metadata_confidence"] = float(metadata_owner.get("confidence") or preferred.get("confidence") or 0.0)
+    return merged
+
+
+def _merge_store_metadata(
+    primary: dict[str, object],
+    enrichment: dict[str, object],
+) -> dict[str, object]:
+    merged = dict(primary)
+    merged["brand"] = primary.get("brand") or enrichment.get("brand")
+    merged["address"] = _preferred_record_address(primary, enrichment)
+    for field in ("city", "region", "postcode"):
+        merged[field] = primary.get(field) or enrichment.get(field)
+    merged["confidence"] = max(
+        float(primary.get("confidence") or 0.0),
+        float(enrichment.get("confidence") or 0.0),
+    )
+    merged["last_seen_at"] = _latest_timestamp(primary.get("last_seen_at"), enrichment.get("last_seen_at"))
+    if _metadata_score(enrichment) > _metadata_score(primary):
+        merged["metadata_source"] = str(enrichment.get("source") or primary.get("metadata_source") or primary.get("source") or "")
+        merged["metadata_confidence"] = float(enrichment.get("confidence") or primary.get("metadata_confidence") or primary.get("confidence") or 0.0)
+    else:
+        merged["metadata_source"] = str(primary.get("metadata_source") or primary.get("source") or "")
+        merged["metadata_confidence"] = float(primary.get("metadata_confidence") or primary.get("confidence") or 0.0)
+    return merged
+
+
+def _dedupe_bucket_ids(
+    record: dict[str, object],
+    *,
+    grid_size: float = 0.002,
+) -> tuple[tuple[str, int, int], list[tuple[str, int, int]]]:
+    name = _normalized_store_text(record.get("brand") or record.get("name"))
+    lat_bucket = int(round(float(record["lat"]) / grid_size))
+    lon_bucket = int(round(float(record["lon"]) / grid_size))
+    primary_bucket = (name, lat_bucket, lon_bucket)
+    nearby = [
+        (name, lat_bucket + lat_delta, lon_bucket + lon_delta)
+        for lat_delta in (-1, 0, 1)
+        for lon_delta in (-1, 0, 1)
+    ]
+    return primary_bucket, nearby
+
+
 def _records_match_for_dedupe(first: dict[str, object], second: dict[str, object]) -> bool:
     first_name = _normalized_store_text(first.get("brand") or first.get("name"))
     second_name = _normalized_store_text(second.get("brand") or second.get("name"))
@@ -273,27 +455,93 @@ def _records_match_for_dedupe(first: dict[str, object], second: dict[str, object
 
     if first_address and second_address:
         addresses_match = _addresses_match(first_address, second_address)
-        return addresses_match and distance_m <= 120.0
+        if addresses_match and distance_m <= 120.0:
+            return True
 
-    return distance_m <= 45.0
+        if distance_m <= 25.0:
+            first_postcode = str(first.get("postcode") or "").strip()
+            second_postcode = str(second.get("postcode") or "").strip()
+            if first_postcode and second_postcode and first_postcode == second_postcode:
+                return True
+
+        if distance_m <= 20.0 and (_address_looks_like_store_name(first) or _address_looks_like_store_name(second)):
+            return True
+
+        return False
+
+    return distance_m <= 60.0
 
 
 def _dedupe_store_records(records: list[dict[str, object]]) -> tuple[list[dict[str, object]], int]:
     deduped: list[dict[str, object]] = []
     merged_duplicates = 0
+    bucket_index: dict[tuple[str, int, int], list[int]] = {}
+
     for record in records:
+        primary_bucket, nearby_buckets = _dedupe_bucket_ids(record)
+        candidate_indices: list[int] = []
+        seen_indices: set[int] = set()
+        for bucket in nearby_buckets:
+            for candidate_index in bucket_index.get(bucket, []):
+                if candidate_index in seen_indices:
+                    continue
+                candidate_indices.append(candidate_index)
+                seen_indices.add(candidate_index)
+
         matched_index = next(
-            (index for index, existing in enumerate(deduped) if _records_match_for_dedupe(existing, record)),
+            (index for index in candidate_indices if _records_match_for_dedupe(deduped[index], record)),
             None,
         )
         if matched_index is None:
             deduped.append(record)
+            bucket_index.setdefault(primary_bucket, []).append(len(deduped) - 1)
             continue
 
         merged_duplicates += 1
-        if _store_record_rank(record) > _store_record_rank(deduped[matched_index]):
-            deduped[matched_index] = record
+        deduped[matched_index] = _merge_store_records(deduped[matched_index], record)
     return deduped, merged_duplicates
+
+
+def _enrich_store_records(
+    records: list[dict[str, object]],
+    enrichment_records: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], int]:
+    if not records or not enrichment_records:
+        return records, 0
+
+    enriched = [dict(record) for record in records]
+    bucket_index: dict[tuple[str, int, int], list[int]] = {}
+    for index, record in enumerate(enriched):
+        primary_bucket, _ = _dedupe_bucket_ids(record)
+        bucket_index.setdefault(primary_bucket, []).append(index)
+
+    actual_enrichments = 0
+    tracked_fields = ("address", "city", "region", "postcode", "metadata_source")
+    for record in enrichment_records:
+        _, nearby_buckets = _dedupe_bucket_ids(record)
+        candidate_indices: list[int] = []
+        seen_indices: set[int] = set()
+        for bucket in nearby_buckets:
+            for candidate_index in bucket_index.get(bucket, []):
+                if candidate_index in seen_indices:
+                    continue
+                candidate_indices.append(candidate_index)
+                seen_indices.add(candidate_index)
+
+        matched_index = next(
+            (index for index in candidate_indices if _records_match_for_dedupe(enriched[index], record)),
+            None,
+        )
+        if matched_index is None:
+            continue
+
+        before = {field: enriched[matched_index].get(field) for field in tracked_fields}
+        enriched[matched_index] = _merge_store_metadata(enriched[matched_index], record)
+        after = {field: enriched[matched_index].get(field) for field in tracked_fields}
+        if after != before:
+            actual_enrichments += 1
+
+    return enriched, actual_enrichments
 
 
 def _finalize_store_results(stores: list[dict[str, object]], limit: int) -> list[dict[str, object]]:
@@ -355,6 +603,8 @@ def _runtime_con() -> duckdb.DuckDBPyConnection:
           source VARCHAR,
           source_priority INTEGER,
           confidence DOUBLE,
+          metadata_source VARCHAR,
+          metadata_confidence DOUBLE,
           last_seen_at TIMESTAMP
         )
         """
@@ -384,16 +634,26 @@ def _runtime_con() -> duckdb.DuckDBPyConnection:
     con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS city VARCHAR""")
     con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS region VARCHAR""")
     con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS postcode VARCHAR""")
+    con.execute("""ALTER TABLE store_places_unified ADD COLUMN IF NOT EXISTS metadata_source VARCHAR""")
+    con.execute("""ALTER TABLE store_places_unified ADD COLUMN IF NOT EXISTS metadata_confidence DOUBLE""")
     return con
 
 
 def _readonly_runtime_con() -> duckdb.DuckDBPyConnection | None:
-    try:
-        if not STORE_DISCOVERY_DB_PATH.exists():
-            return None
-        return duckdb.connect(STORE_DISCOVERY_DB_PATH, read_only=True)
-    except duckdb.Error:
+    if not STORE_DISCOVERY_DB_PATH.exists():
         return None
+
+    attempts = max(1, STORE_DISCOVERY_READ_RETRY_COUNT)
+    delay_s = max(0.0, STORE_DISCOVERY_READ_RETRY_DELAY_MS / 1000.0)
+    for attempt in range(attempts):
+        try:
+            return duckdb.connect(STORE_DISCOVERY_DB_PATH, read_only=True)
+        except duckdb.Error:
+            if attempt + 1 >= attempts:
+                break
+            if delay_s > 0:
+                time.sleep(delay_s)
+    return None
 
 
 def _unified_index_row_count() -> int:
@@ -563,36 +823,35 @@ def persist_foursquare_stores(records: list[dict[str, object]], source: str = "f
                     {"store_ids": [str(record["store_id"]) for record in records]},
                 ).fetchall()
             }
-            for record in records:
-                con.execute(
-                    """
-                    INSERT OR REPLACE INTO store_places_foursquare (
-                      store_id, name, brand, lat, lon, address, city, region, postcode, category,
-                      source, source_priority, confidence, last_seen_at, raw_record_json
-                    )
-                    VALUES (
-                      $store_id, $name, $brand, $lat, $lon, $address, $city, $region, $postcode, $category,
-                      $source, $source_priority, $confidence, $last_seen_at, $raw_record_json
-                    )
-                    """,
-                    {
-                        "store_id": str(record["store_id"]),
-                        "name": str(record["name"]),
-                        "brand": normalize_brand(str(record["name"]), str(record.get("brand") or "")),
-                        "lat": float(record["lat"]),
-                        "lon": float(record["lon"]),
-                        "address": str(record.get("address") or ""),
-                        "city": record.get("city"),
-                        "region": record.get("region"),
-                        "postcode": record.get("postcode"),
-                        "category": str(record["category"]),
-                        "source": str(record.get("source") or source),
-                        "source_priority": int(record.get("source_priority") or _source_priority(source)),
-                        "confidence": float(record.get("confidence") or _source_confidence(source)),
-                        "last_seen_at": record.get("last_seen_at") or _utcnow_naive(),
-                        "raw_record_json": json.dumps(record.get("raw_record") or {}, separators=(",", ":")),
-                    },
+            con.executemany(
+                """
+                INSERT OR REPLACE INTO store_places_foursquare (
+                  store_id, name, brand, lat, lon, address, city, region, postcode, category,
+                  source, source_priority, confidence, last_seen_at, raw_record_json
                 )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        str(record["store_id"]),
+                        str(record["name"]),
+                        normalize_brand(str(record["name"]), str(record.get("brand") or "")),
+                        float(record["lat"]),
+                        float(record["lon"]),
+                        str(record.get("address") or ""),
+                        record.get("city"),
+                        record.get("region"),
+                        record.get("postcode"),
+                        str(record["category"]),
+                        str(record.get("source") or source),
+                        int(record.get("source_priority") or _source_priority(source)),
+                        float(record.get("confidence") or _source_confidence(source)),
+                        record.get("last_seen_at") or _utcnow_naive(),
+                        json.dumps(record.get("raw_record") or {}, separators=(",", ":")),
+                    )
+                    for record in records
+                ],
+            )
             merged_rows = len(existing_ids)
             return {
                 "input_rows": len(records),
@@ -643,6 +902,8 @@ def _local_index_records(con: duckdb.DuckDBPyConnection) -> list[dict[str, objec
                 "source": source,
                 "source_priority": _source_priority(source),
                 "confidence": _source_confidence(source),
+                "metadata_source": source,
+                "metadata_confidence": _source_confidence(source),
                 "last_seen_at": None,
             }
         )
@@ -687,6 +948,8 @@ def _live_index_records(runtime_con: duckdb.DuckDBPyConnection) -> list[dict[str
                 "source": source,
                 "source_priority": _source_priority(source),
                 "confidence": _source_confidence(source),
+                "metadata_source": source,
+                "metadata_confidence": _source_confidence(source),
                 "last_seen_at": row[11],
             }
         )
@@ -710,7 +973,8 @@ def _foursquare_index_records(runtime_con: duckdb.DuckDBPyConnection) -> list[di
           source,
           source_priority,
           confidence,
-          last_seen_at
+          last_seen_at,
+          raw_record_json
         FROM store_places_foursquare
         ORDER BY last_seen_at DESC, name
         """
@@ -730,10 +994,48 @@ def _foursquare_index_records(runtime_con: duckdb.DuckDBPyConnection) -> list[di
             "source": str(row[10] or "foursquare_offline"),
             "source_priority": int(row[11] or _source_priority("foursquare_offline")),
             "confidence": float(row[12] or _source_confidence("foursquare_offline")),
+            "metadata_source": str(row[10] or "foursquare_offline"),
+            "metadata_confidence": float(row[12] or _source_confidence("foursquare_offline")),
             "last_seen_at": row[13],
+            "category_labels_text": _foursquare_category_labels_text(row[14]),
         }
         for row in rows
     ]
+
+
+def _is_high_quality_foursquare_record(record: dict[str, object]) -> bool:
+    if _is_blank_text(record.get("name")):
+        return False
+    if _is_blank_text(record.get("city")) or _is_blank_text(record.get("region")):
+        return False
+    if _is_blank_text(record.get("address")):
+        return False
+    if _address_looks_like_store_name(record) and _is_blank_text(record.get("postcode")):
+        return False
+    labels_text = str(record.get("category_labels_text") or "").lower()
+    if labels_text:
+        if any(keyword in labels_text for keyword in FOURSQUARE_DISPLAY_CATEGORY_EXCLUSIONS):
+            return False
+        if not any(keyword in labels_text for keyword in FOURSQUARE_DISPLAY_CATEGORY_KEYWORDS):
+            return False
+    return True
+
+
+def _split_foursquare_records_for_unified(
+    records: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    display_records: list[dict[str, object]] = []
+    enrichment_records: list[dict[str, object]] = []
+    for record in records:
+        source = str(record.get("source") or "")
+        if source.startswith("foursquare_os_places"):
+            if _is_high_quality_foursquare_record(record):
+                display_records.append(record)
+            else:
+                enrichment_records.append(record)
+            continue
+        display_records.append(record)
+    return display_records, enrichment_records
 
 
 def refresh_unified_store_index(
@@ -761,7 +1063,10 @@ def refresh_unified_store_index(
         with _runtime_con() as runtime_con:
             live_records = _live_index_records(runtime_con)
             foursquare_records = _foursquare_index_records(runtime_con)
-            combined = live_records + foursquare_records + local_records
+            foursquare_display_records, foursquare_enrichment_records = _split_foursquare_records_for_unified(
+                foursquare_records
+            )
+            combined = live_records + foursquare_display_records + local_records
             combined.sort(
                 key=lambda record: (
                     -int(record["source_priority"]),
@@ -772,28 +1077,47 @@ def refresh_unified_store_index(
             )
 
             deduped, merged_duplicates = _dedupe_store_records(combined)
+            deduped, enriched_matches = _enrich_store_records(deduped, foursquare_enrichment_records)
 
             runtime_con.execute("DELETE FROM store_places_unified")
-            for record in deduped:
-                runtime_con.execute(
-                    """
-                    INSERT INTO store_places_unified (
-                      store_id, name, brand, lat, lon, address, city, region, postcode, category,
-                      source, source_priority, confidence, last_seen_at
-                    )
-                    VALUES (
-                      $store_id, $name, $brand, $lat, $lon, $address, $city, $region, $postcode, $category,
-                      $source, $source_priority, $confidence, $last_seen_at
-                    )
-                    """,
-                    record,
+            runtime_con.executemany(
+                """
+                INSERT INTO store_places_unified (
+                  store_id, name, brand, lat, lon, address, city, region, postcode, category,
+                  source, source_priority, confidence, metadata_source, metadata_confidence, last_seen_at
                 )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        record["store_id"],
+                        record["name"],
+                        record.get("brand"),
+                        record["lat"],
+                        record["lon"],
+                        record.get("address"),
+                        record.get("city"),
+                        record.get("region"),
+                        record.get("postcode"),
+                        record["category"],
+                        record["source"],
+                        record["source_priority"],
+                        record["confidence"],
+                        record.get("metadata_source"),
+                        record.get("metadata_confidence"),
+                        record.get("last_seen_at"),
+                    )
+                    for record in deduped
+                ],
+            )
             summary = {
                 "local_rows": len(local_records),
                 "live_rows": len(live_records),
-                "foursquare_rows": len(foursquare_records),
+                "foursquare_rows": len(foursquare_display_records),
+                "foursquare_enrichment_rows": len(foursquare_enrichment_records),
                 "unified_rows": len(deduped),
                 "duplicates_merged": merged_duplicates,
+                "metadata_enriched": enriched_matches,
             }
             _LAST_UNIFIED_REFRESH_AT = _utcnow_naive()
             _LAST_UNIFIED_REFRESH_SUMMARY = dict(summary)
@@ -803,8 +1127,10 @@ def refresh_unified_store_index(
             "local_rows": len(local_records),
             "live_rows": 0,
             "foursquare_rows": 0,
+            "foursquare_enrichment_rows": 0,
             "unified_rows": 0,
             "duplicates_merged": 0,
+            "metadata_enriched": 0,
         }
         if force:
             _LAST_UNIFIED_REFRESH_AT = None
@@ -869,11 +1195,11 @@ def _unified_nearby_stores(
     lon: float,
     radius_m: float,
     limit: int,
-) -> list[dict[str, object]]:
+) -> list[dict[str, object]] | None:
     lat_min, lat_max, lon_min, lon_max = _bounding_box(lat, lon, radius_m)
     runtime_con = _readonly_runtime_con()
     if runtime_con is None:
-        return []
+        return None
 
     try:
         rows = runtime_con.execute(
@@ -899,8 +1225,7 @@ def _unified_nearby_stores(
             },
         ).fetchall()
     except duckdb.Error:
-        runtime_con.close()
-        return []
+        return None
     finally:
         runtime_con.close()
 
@@ -922,6 +1247,25 @@ def _unified_nearby_stores(
         )
 
     return _finalize_store_results(stores, limit)
+
+
+def _unified_nearby_stores_with_retry(
+    lat: float,
+    lon: float,
+    radius_m: float,
+    limit: int,
+) -> list[dict[str, object]] | None:
+    attempts = max(1, STORE_DISCOVERY_READ_RETRY_COUNT)
+    delay_s = max(0.0, STORE_DISCOVERY_READ_RETRY_DELAY_MS / 1000.0)
+    for attempt in range(attempts):
+        stores = _unified_nearby_stores(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+        if stores is not None:
+            return stores
+        if attempt + 1 >= attempts:
+            break
+        if delay_s > 0:
+            time.sleep(delay_s)
+    return None
 
 
 def _local_nearby_stores(
@@ -1194,13 +1538,13 @@ def nearby_stores(
         _ensure_unified_index_available(main_con=con)
 
     if mode == "local":
-        unified_stores = _unified_nearby_stores(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+        unified_stores = _unified_nearby_stores_with_retry(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
         if unified_stores:
             return unified_stores
         return _local_nearby_stores(con=con, lat=lat, lon=lon, radius_m=radius_m, limit=limit)
 
     if mode == "auto":
-        unified_stores = _unified_nearby_stores(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+        unified_stores = _unified_nearby_stores_with_retry(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
         if unified_stores:
             return unified_stores
 
@@ -1224,7 +1568,7 @@ def nearby_stores(
                 return []
 
     if mode == "auto":
-        unified_stores = _unified_nearby_stores(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+        unified_stores = _unified_nearby_stores_with_retry(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
         if unified_stores:
             return unified_stores
 

@@ -9,13 +9,22 @@ import json
 from pathlib import Path
 from typing import Any
 
+import duckdb
+
 import dietdashboard.store_discovery as store_discovery
 
 RELEVANT_CATEGORY_KEYWORDS = (
+    "food and beverage retail",
+    "grocery store",
     "supermarket",
     "grocery",
     "food market",
-    "market",
+    "farmers market",
+    "fruit and vegetable store",
+    "health food store",
+    "meat and seafood store",
+    "meat market",
+    "seafood market",
     "wholesale club",
     "warehouse club",
 )
@@ -23,7 +32,7 @@ RELEVANT_CATEGORY_KEYWORDS = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", required=True, type=Path, help="Local Foursquare dataset file (CSV or JSONL).")
+    parser.add_argument("--input", required=True, type=Path, help="Local Foursquare dataset file (Parquet, CSV, or JSONL).")
     parser.add_argument(
         "--db-path",
         type=Path,
@@ -89,9 +98,11 @@ def _is_relevant_category(category_text: str) -> bool:
     normalized = category_text.strip().lower()
     if not normalized:
         return False
-    if "convenience" in normalized and not any(keyword in normalized for keyword in ("grocery", "market", "supermarket")):
+    if "convenience" in normalized and not any(keyword in normalized for keyword in ("grocery", "supermarket")):
         return False
-    return any(keyword in normalized for keyword in RELEVANT_CATEGORY_KEYWORDS)
+    if any(keyword in normalized for keyword in RELEVANT_CATEGORY_KEYWORDS):
+        return True
+    return "market" in normalized and ("food and beverage retail" in normalized or "grocery" in normalized)
 
 
 def _normalize_category(category_text: str) -> str | None:
@@ -102,7 +113,16 @@ def _normalize_category(category_text: str) -> str | None:
         return "wholesale_club"
     if "supermarket" in normalized:
         return "supermarket"
-    if "market" in normalized or "grocery" in normalized:
+    if (
+        "grocery" in normalized
+        or "food and beverage retail" in normalized
+        or "farmers market" in normalized
+        or "fruit and vegetable store" in normalized
+        or "meat market" in normalized
+        or "seafood market" in normalized
+        or "food market" in normalized
+        or "market" in normalized
+    ):
         return "grocery"
     return "grocery"
 
@@ -121,6 +141,14 @@ def _load_rows(path: Path) -> list[dict[str, Any]]:
     if suffix == ".csv":
         with path.open(newline="", encoding="utf-8") as fh:
             return [dict(row) for row in csv.DictReader(fh)]
+    if suffix in {".parquet", ".pq"}:
+        con = duckdb.connect()
+        try:
+            result = con.execute("SELECT * FROM read_parquet($path)", {"path": str(path)})
+            columns = [description[0] for description in result.description or []]
+            return [dict(zip(columns, row, strict=True)) for row in result.fetchall()]
+        finally:
+            con.close()
     if suffix in {".jsonl", ".ndjson"}:
         rows: list[dict[str, Any]] = []
         with path.open(encoding="utf-8") as fh:
@@ -186,6 +214,7 @@ def _normalize_row(row: dict[str, Any], source: str) -> dict[str, Any] | None:
     region = _first_non_empty(row.get("region"), row.get("state"), location.get("region"), location.get("state"))
     postcode = _first_non_empty(row.get("postcode"), row.get("postal_code"), location.get("postcode"), location.get("postal_code"))
     brand = store_discovery.normalize_brand(str(name), _first_non_empty(row.get("brand"), row.get("chain_name")))
+    last_seen_at = _first_non_empty(row.get("date_refreshed"), row.get("date_created"))
 
     return {
         "store_id": f"{source}:{source_place_id}",
@@ -201,8 +230,28 @@ def _normalize_row(row: dict[str, Any], source: str) -> dict[str, Any] | None:
         "source": source,
         "source_priority": store_discovery.SOURCE_PRIORITY.get(source, 85),
         "confidence": store_discovery.SOURCE_CONFIDENCE.get(source, 0.88),
+        "last_seen_at": last_seen_at,
         "raw_record": row,
     }
+
+
+def _missing_counts(db_path: Path) -> tuple[int, int, int]:
+    if not db_path.exists():
+        return (0, 0, 0)
+    con = duckdb.connect(db_path, read_only=True)
+    try:
+        row = con.execute(
+            """
+            SELECT
+              SUM(CASE WHEN city IS NULL OR TRIM(city) = '' THEN 1 ELSE 0 END),
+              SUM(CASE WHEN region IS NULL OR TRIM(region) = '' THEN 1 ELSE 0 END),
+              SUM(CASE WHEN (city IS NULL OR TRIM(city) = '') AND (region IS NULL OR TRIM(region) = '') THEN 1 ELSE 0 END)
+            FROM store_places_unified
+            """
+        ).fetchone()
+        return (int(row[0] or 0), int(row[1] or 0), int(row[2] or 0))
+    finally:
+        con.close()
 
 
 def main() -> int:
@@ -226,8 +275,10 @@ def main() -> int:
         normalized.append(normalized_row)
 
     store_discovery.STORE_DISCOVERY_DB_PATH = args.db_path
+    before_missing = _missing_counts(args.db_path)
     persistence = store_discovery.persist_foursquare_stores(normalized, source=args.source)
     unified_summary = store_discovery.refresh_unified_store_index(main_db_path=args.main_db_path)
+    after_missing = _missing_counts(args.db_path)
 
     print(f"input={args.input}")
     print(f"db_path={args.db_path}")
@@ -244,6 +295,12 @@ def main() -> int:
     print(
         "unified local_rows={local_rows} live_rows={live_rows} foursquare_rows={foursquare_rows} "
         "unified_rows={unified_rows} duplicates_merged={duplicates_merged}".format(**unified_summary)
+    )
+    print(
+        "unified_missing_before city={0} region={1} both={2}".format(*before_missing)
+    )
+    print(
+        "unified_missing_after city={0} region={1} both={2}".format(*after_missing)
     )
     return 0
 

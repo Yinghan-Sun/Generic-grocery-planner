@@ -55,6 +55,9 @@ def connect(db_path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
         """
     )
     con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS brand VARCHAR""")
+    con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS city VARCHAR""")
+    con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS region VARCHAR""")
+    con.execute("""ALTER TABLE store_places_live ADD COLUMN IF NOT EXISTS postcode VARCHAR""")
     con.execute(
         """
         CREATE TABLE IF NOT EXISTS store_places_unified (
@@ -71,10 +74,14 @@ def connect(db_path: Path, *, read_only: bool) -> duckdb.DuckDBPyConnection:
           source VARCHAR,
           source_priority INTEGER,
           confidence DOUBLE,
+          metadata_source VARCHAR,
+          metadata_confidence DOUBLE,
           last_seen_at TIMESTAMP
         )
         """
     )
+    con.execute("""ALTER TABLE store_places_unified ADD COLUMN IF NOT EXISTS metadata_source VARCHAR""")
+    con.execute("""ALTER TABLE store_places_unified ADD COLUMN IF NOT EXISTS metadata_confidence DOUBLE""")
     con.execute(
         """
         CREATE TABLE IF NOT EXISTS store_places_foursquare (
@@ -109,6 +116,49 @@ def summary(db_path: Path) -> int:
     live_rows = con.execute("SELECT COUNT(*) FROM store_places_live").fetchone()[0]
     foursquare_rows = con.execute("SELECT COUNT(*) FROM store_places_foursquare").fetchone()[0]
     unified_rows = con.execute("SELECT COUNT(*) FROM store_places_unified").fetchone()[0]
+    foursquare_distinct_city_regions = con.execute(
+        """
+        SELECT COUNT(DISTINCT city || '|' || region)
+        FROM store_places_foursquare
+        WHERE city IS NOT NULL AND TRIM(city) != ''
+          AND region IS NOT NULL AND TRIM(region) != ''
+        """
+    ).fetchone()[0]
+    unified_distinct_city_regions = con.execute(
+        """
+        SELECT COUNT(DISTINCT city || '|' || region)
+        FROM store_places_unified
+        WHERE city IS NOT NULL AND TRIM(city) != ''
+          AND region IS NOT NULL AND TRIM(region) != ''
+        """
+    ).fetchone()[0]
+    live_missing = con.execute(
+        """
+        SELECT
+          SUM(CASE WHEN city IS NULL OR TRIM(city) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN region IS NULL OR TRIM(region) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN (city IS NULL OR TRIM(city) = '') AND (region IS NULL OR TRIM(region) = '') THEN 1 ELSE 0 END)
+        FROM store_places_live
+        """
+    ).fetchone()
+    foursquare_missing = con.execute(
+        """
+        SELECT
+          SUM(CASE WHEN city IS NULL OR TRIM(city) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN region IS NULL OR TRIM(region) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN (city IS NULL OR TRIM(city) = '') AND (region IS NULL OR TRIM(region) = '') THEN 1 ELSE 0 END)
+        FROM store_places_foursquare
+        """
+    ).fetchone()
+    unified_missing = con.execute(
+        """
+        SELECT
+          SUM(CASE WHEN city IS NULL OR TRIM(city) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN region IS NULL OR TRIM(region) = '' THEN 1 ELSE 0 END),
+          SUM(CASE WHEN (city IS NULL OR TRIM(city) = '') AND (region IS NULL OR TRIM(region) = '') THEN 1 ELSE 0 END)
+        FROM store_places_unified
+        """
+    ).fetchone()
     oldest_newest = con.execute(
         """
         SELECT MIN(fetched_at), MAX(fetched_at)
@@ -139,6 +189,17 @@ def summary(db_path: Path) -> int:
     print(f"live_rows={live_rows}")
     print(f"foursquare_rows={foursquare_rows}")
     print(f"unified_rows={unified_rows}")
+    print(f"foursquare_distinct_city_regions={foursquare_distinct_city_regions}")
+    print(f"unified_distinct_city_regions={unified_distinct_city_regions}")
+    print(f"live_missing_city={live_missing[0] or 0}")
+    print(f"live_missing_region={live_missing[1] or 0}")
+    print(f"live_missing_both={live_missing[2] or 0}")
+    print(f"foursquare_missing_city={foursquare_missing[0] or 0}")
+    print(f"foursquare_missing_region={foursquare_missing[1] or 0}")
+    print(f"foursquare_missing_both={foursquare_missing[2] or 0}")
+    print(f"unified_missing_city={unified_missing[0] or 0}")
+    print(f"unified_missing_region={unified_missing[1] or 0}")
+    print(f"unified_missing_both={unified_missing[2] or 0}")
     print(f"cache_oldest={oldest_newest[0]}")
     print(f"cache_newest={oldest_newest[1]}")
     print(f"live_oldest_seen={live_oldest_newest[0]}")
@@ -212,6 +273,17 @@ def summary(db_path: Path) -> int:
         FROM store_places_unified
         GROUP BY source
         ORDER BY count DESC, source
+        """
+    ).fetchall():
+        print(f"  {row[0]}: {row[1]}")
+
+    print("\nunified_by_metadata_source")
+    for row in con.execute(
+        """
+        SELECT COALESCE(metadata_source, '(unknown)') AS metadata_source, COUNT(*) AS count
+        FROM store_places_unified
+        GROUP BY metadata_source
+        ORDER BY count DESC, metadata_source
         """
     ).fetchall():
         print(f"  {row[0]}: {row[1]}")

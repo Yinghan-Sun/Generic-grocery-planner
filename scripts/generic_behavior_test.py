@@ -1593,6 +1593,167 @@ def run_store_discovery_scenarios() -> list[str]:
             assert_equal(prefilled[0]["name"], "Nob Hill Foods", "prefilled unified index store name")
             labels.append("prefilled_unified_reuse")
 
+        flaky_unified_calls = {"count": 0}
+        real_unified_nearby = store_discovery._unified_nearby_stores  # noqa: SLF001
+
+        def flaky_unified_nearby(*, lat: float, lon: float, radius_m: float, limit: int) -> list[dict[str, object]] | None:
+            flaky_unified_calls["count"] += 1
+            if flaky_unified_calls["count"] == 1:
+                return None
+            return real_unified_nearby(lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+
+        with patched_attrs(
+            store_discovery,
+            STORE_DISCOVERY_DB_PATH=sidecar_path,
+            STORE_DISCOVERY_MODE="local",
+            STORE_DISCOVERY_READ_RETRY_COUNT=2,
+            STORE_DISCOVERY_READ_RETRY_DELAY_MS=0,
+            _unified_nearby_stores=flaky_unified_nearby,
+        ):
+            with duckdb.connect("data/data.db", read_only=True) as con:
+                retried = store_discovery.nearby_stores(con, lat=37.3789, lon=-122.0796, radius_m=500, limit=3)
+            assert_equal(len(retried), 1, "transient unified-sidecar failure still returns unified store")
+            assert_equal(retried[0]["name"], "Nob Hill Foods", "transient unified-sidecar failure keeps unified coverage")
+            assert_equal(flaky_unified_calls["count"], 2, "transient unified-sidecar failure retries once before fallback")
+            labels.append("transient_unified_retry")
+
+        with patched_attrs(store_discovery, STORE_DISCOVERY_DB_PATH=sidecar_path):
+            with store_discovery._runtime_con() as runtime_con:  # noqa: SLF001
+                runtime_con.execute("DELETE FROM store_places_unified")
+                runtime_con.execute("DELETE FROM store_places_live")
+                runtime_con.execute("DELETE FROM store_places_foursquare")
+                runtime_con.execute(
+                    """
+                    INSERT INTO store_places_live (
+                      store_id, source, source_place_id, name, brand, address, city, region, postcode, category,
+                      lat, lon, last_seen_at, raw_record_json
+                    )
+                    VALUES (
+                      'osm:node:99ranch', 'overpass', 'node:99ranch', '99 Ranch Market', '99 Ranch Market',
+                      '99 Ranch Market', NULL, NULL, NULL, 'supermarket',
+                      37.8951, -122.3042, CURRENT_TIMESTAMP, '{}'
+                    )
+                    """
+                )
+                runtime_con.execute(
+                    """
+                    INSERT INTO store_places_foursquare (
+                      store_id, name, brand, lat, lon, address, city, region, postcode, category,
+                      source, source_priority, confidence, last_seen_at, raw_record_json
+                    )
+                    VALUES (
+                      'foursquare_os_places:99ranch', '99 Ranch Market', '99 Ranch Market', 37.89511, -122.30418,
+                      '3288 Pierce St', 'Richmond', 'CA', '94804', 'supermarket',
+                      'foursquare_os_places', 90, 0.90, CURRENT_TIMESTAMP, '{}'
+                    )
+                    """
+                )
+
+            with duckdb.connect("data/data.db", read_only=True) as con:
+                summary = store_discovery.refresh_unified_store_index(main_con=con, force=True)
+            assert_true(summary["unified_rows"] >= 1, "foursquare metadata enrichment refresh returns unified rows")
+
+            with duckdb.connect(sidecar_path, read_only=True) as sidecar_con:
+                row = sidecar_con.execute(
+                    """
+                    SELECT address, city, region, postcode, source, metadata_source
+                    FROM store_places_unified
+                    WHERE name = '99 Ranch Market'
+                    """
+                ).fetchone()
+                match_count = sidecar_con.execute(
+                    "SELECT COUNT(*) FROM store_places_unified WHERE name = '99 Ranch Market'"
+                ).fetchone()[0]
+            assert_equal(match_count, 1, "foursquare metadata enrichment collapses matching rows")
+            assert_true(row is not None, "foursquare metadata enrichment creates unified row")
+            assert_equal(row[0], "3288 Pierce St", "foursquare metadata enrichment prefers richer address")
+            assert_equal(row[1], "Richmond", "foursquare metadata enrichment fills city")
+            assert_equal(row[2], "CA", "foursquare metadata enrichment fills region")
+            assert_equal(row[3], "94804", "foursquare metadata enrichment fills postcode")
+            assert_equal(row[4], "overpass", "foursquare metadata enrichment keeps primary overpass source")
+            assert_equal(
+                row[5],
+                "foursquare_os_places",
+                "foursquare metadata enrichment records metadata source",
+            )
+            labels.append("foursquare_metadata_enrichment")
+
+        with patched_attrs(store_discovery, STORE_DISCOVERY_DB_PATH=sidecar_path):
+            with store_discovery._runtime_con() as runtime_con:  # noqa: SLF001
+                runtime_con.execute("DELETE FROM store_places_unified")
+                runtime_con.execute("DELETE FROM store_places_live")
+                runtime_con.execute("DELETE FROM store_places_foursquare")
+                runtime_con.execute(
+                    """
+                    INSERT INTO store_places_foursquare (
+                      store_id, name, brand, lat, lon, address, city, region, postcode, category,
+                      source, source_priority, confidence, last_seen_at, raw_record_json
+                    )
+                    VALUES
+                    (
+                      'foursquare_os_places:display_quality',
+                      'Green Valley Market',
+                      'Green Valley Market',
+                      40.7342,
+                      -73.9911,
+                      '101 1st Ave',
+                      'New York',
+                      'NY',
+                      '10003',
+                      'grocery',
+                      'foursquare_os_places',
+                      90,
+                      0.90,
+                      CURRENT_TIMESTAMP,
+                      '{}'
+                    ),
+                    (
+                      'foursquare_os_places:enrichment_only',
+                      'Example Market',
+                      'Example Market',
+                      40.7343,
+                      -73.9912,
+                      'Example Market',
+                      'New York',
+                      'NY',
+                      NULL,
+                      'grocery',
+                      'foursquare_os_places',
+                      90,
+                      0.90,
+                      CURRENT_TIMESTAMP,
+                      '{}'
+                    )
+                    """
+                )
+
+            with duckdb.connect("data/data.db", read_only=True) as con:
+                summary = store_discovery.refresh_unified_store_index(main_con=con, force=True)
+            assert_true(summary["unified_rows"] >= 1, "foursquare coverage expansion refresh returns unified rows")
+
+            with duckdb.connect(sidecar_path, read_only=True) as sidecar_con:
+                display_row = sidecar_con.execute(
+                    """
+                    SELECT source, city, region, postcode
+                    FROM store_places_unified
+                    WHERE store_id = 'foursquare_os_places:display_quality'
+                    """
+                ).fetchone()
+                enrichment_only_row = sidecar_con.execute(
+                    """
+                    SELECT store_id
+                    FROM store_places_unified
+                    WHERE store_id = 'foursquare_os_places:enrichment_only'
+                    """
+                ).fetchone()
+            assert_true(display_row is not None, "foursquare coverage expansion keeps high-quality standalone rows")
+            assert_equal(display_row[0], "foursquare_os_places", "foursquare coverage expansion preserves Foursquare source")
+            assert_equal(display_row[1], "New York", "foursquare coverage expansion keeps city")
+            assert_equal(display_row[2], "NY", "foursquare coverage expansion keeps region")
+            assert_equal(display_row[3], "10003", "foursquare coverage expansion keeps postcode")
+            assert_true(enrichment_only_row is None, "foursquare coverage expansion filters low-quality standalone rows")
+            labels.append("foursquare_coverage_expansion")
+
         live_call_count = {"count": 0}
 
         def fake_live(*, lat: float, lon: float, radius_m: float, limit: int) -> list[tuple[dict[str, object], dict[str, object]]]:

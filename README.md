@@ -62,6 +62,32 @@ The demo runtime expects prebuilt local artifacts:
 
 The two DuckDB files are the main demo deployment artifacts.
 
+### Offline store metadata enrichment
+
+The nearby-store runtime stays local-first. It does not call Foursquare at request time.
+
+If you want to enrich the local store index with better address metadata, the repo supports
+offline Foursquare OS Places inputs in:
+- Parquet
+- CSV
+- JSONL
+
+Recommended local command:
+
+```bash
+make ingest-foursquare-os-places
+```
+
+The default local input path for that target is:
+
+```text
+data/foursquare_os/foursquare_os_places_grocery_metros.parquet
+```
+
+That path ingests a local Foursquare OS Places extract into `data/store_discovery.db` and
+refreshes the unified local store index so missing `city`, `region`, `postcode`, and `address`
+fields can be filled from the offline data during dedupe/merge.
+
 ### Rebuild-only inputs
 
 These inputs are only needed if you want to rebuild the data locally:
@@ -137,6 +163,7 @@ Useful checks:
 make test-generic
 make qa-generic
 make store-discovery-summary
+make ingest-foursquare-os-places
 ```
 
 ## Deployment Notes
@@ -174,3 +201,10 @@ API routes:
 
 - [Generic Flow](docs/generic-flow.md)
 - [Generic QA Checklist](docs/generic-qa-checklist.md)
+
+## Data Attribution Notes
+
+- Local store metadata enrichment can use Foursquare OS Places as an offline data source.
+- If you stage or redistribute Foursquare-derived local extracts, preserve the upstream
+  attribution and NOTICE information with those data artifacts.
+- See [NOTICE](NOTICE) for the repo-level attribution note kept with this project.
