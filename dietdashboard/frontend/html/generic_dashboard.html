@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block head %}
 <title>Generic Food Recommendations</title>
-<script type="module" src="/static/generic_bundle.js"></script>
-<link rel="stylesheet" href="/static/bundle.css" />
+<script type="module" src="{{ static_asset_url('generic_bundle.js') }}"></script>
+<link rel="stylesheet" href="{{ static_asset_url('bundle.css') }}" />
 <style>
   :root {
     --generic-error: #9f2a1c;

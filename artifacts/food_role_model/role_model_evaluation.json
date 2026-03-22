@@ -1,0 +1,66 @@
+{
+  "dataset_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/generic_food_role_training_dataset.csv",
+  "dataset_size": 75,
+  "label_distribution": {
+    "calorie_booster": 10,
+    "carb_base": 17,
+    "produce": 30,
+    "protein_anchor": 18
+  },
+  "label_source_distribution": {
+    "heuristic_vote": 74,
+    "manual_override": 1
+  },
+  "overall_metrics": {
+    "accuracy": 0.9467,
+    "macro_f1": 0.9356,
+    "weighted_f1": 0.9456
+  },
+  "per_class_metrics": {
+    "calorie_booster": {
+      "f1_score": 0.8889,
+      "precision": 1.0,
+      "recall": 0.8,
+      "support": 10
+    },
+    "carb_base": {
+      "f1_score": 0.9412,
+      "precision": 0.9412,
+      "recall": 0.9412,
+      "support": 17
+    },
+    "produce": {
+      "f1_score": 0.9677,
+      "precision": 0.9375,
+      "recall": 1.0,
+      "support": 30
+    },
+    "protein_anchor": {
+      "f1_score": 0.9444,
+      "precision": 0.9444,
+      "recall": 0.9444,
+      "support": 18
+    }
+  },
+  "selected_model": {
+    "accuracy": 0.9467,
+    "best_params": {
+      "classifier__C": 1.0,
+      "classifier__class_weight": "balanced"
+    },
+    "confusion_matrix_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/role_model_confusion_matrix.csv",
+    "feature_summary_kind": "logistic_coefficients",
+    "feature_summary_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/role_model_feature_summary.csv",
+    "macro_f1": 0.9356,
+    "model_artifact_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/generic_food_role_classifier.joblib",
+    "model_name": "logistic_regression",
+    "predictions_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/role_model_oof_predictions.csv",
+    "weighted_f1": 0.9456
+  },
+  "validation_method": {
+    "n_splits": 5,
+    "random_state": 42,
+    "shuffle": true,
+    "type": "stratified_k_fold"
+  }
+}

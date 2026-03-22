@@ -1,0 +1,77 @@
+#!/usr/bin/env -S uv run --extra ml python
+"""Build a local candidate-plan dataset, train a scorer, and save artifacts."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+from dietdashboard import plan_scorer
+from dietdashboard import plan_scorer_training
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--db-path",
+        type=Path,
+        default=plan_scorer_training.default_db_path(),
+        help="Path to the local DuckDB database.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=plan_scorer.default_model_dir(),
+        help="Directory for the dataset, model artifact, and metrics.",
+    )
+    parser.add_argument(
+        "--candidate-count",
+        type=int,
+        default=8,
+        help="Number of heuristic candidate plans to generate per training request.",
+    )
+    parser.add_argument(
+        "--backend",
+        default="auto",
+        help="Model backend to train: auto, xgboost, lightgbm, sklearn_gradient_boosting, sklearn_random_forest, or sklearn_ridge.",
+    )
+    parser.add_argument("--learning-rate", type=float, default=0.05, help="Learning rate used by supported tree/linear models.")
+    parser.add_argument("--max-depth", type=int, default=3, help="Max tree depth for supported backends.")
+    parser.add_argument("--n-estimators", type=int, default=250, help="Number of estimators for supported ensemble backends.")
+    parser.add_argument("--validation-split", type=float, default=0.25, help="Validation split ratio, grouped by request.")
+    parser.add_argument("--random-seed", type=int, default=plan_scorer.DEFAULT_RANDOM_SEED, help="Random seed for splitting/training.")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    summary = plan_scorer_training.train_and_save_model(
+        db_path=args.db_path,
+        output_dir=args.output_dir,
+        candidate_count=args.candidate_count,
+        backend=args.backend,
+        learning_rate=args.learning_rate,
+        max_depth=args.max_depth,
+        n_estimators=args.n_estimators,
+        validation_split=args.validation_split,
+        random_seed=args.random_seed,
+    )
+    metrics = summary["metrics"]
+    print(f"dataset_path={summary['dataset_path']}")
+    print(f"schema_path={summary['schema_path']}")
+    print(f"model_path={summary['model_path']}")
+    print(f"metrics_path={summary['metrics_path']}")
+    print(f"feature_summary_path={summary['feature_summary_path']}")
+    print(f"row_count={summary['row_count']}")
+    print(f"request_count={summary['request_count']}")
+    print(f"backend={metrics['backend']}")
+    print(f"validation_mae={metrics['validation_mae']}")
+    print(f"validation_rmse={metrics['validation_rmse']}")
+    print(f"validation_r2={metrics['validation_r2']}")
+    print(f"validation_top1_accuracy={metrics['validation_top1_accuracy']}")
+    print(f"validation_pairwise_accuracy={metrics['validation_pairwise_accuracy']}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

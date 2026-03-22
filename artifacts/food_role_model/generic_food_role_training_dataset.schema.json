@@ -1,0 +1,64 @@
+{
+  "boolean_features": [
+    "vegetarian",
+    "vegan",
+    "dairy_free",
+    "gluten_free",
+    "high_protein",
+    "breakfast_friendly",
+    "shelf_stable",
+    "cold_only",
+    "microwave_friendly",
+    "price_available",
+    "usda_price_reference",
+    "bls_area_price_reference",
+    "bls_fallback_price_reference",
+    "meal_tag_breakfast",
+    "meal_tag_lunch",
+    "meal_tag_dinner",
+    "meal_tag_snack",
+    "meal_tag_side"
+  ],
+  "categorical_features": [
+    "food_family",
+    "purchase_unit",
+    "prep_level",
+    "shelf_stability",
+    "price_reference_source"
+  ],
+  "label_column": "label_role",
+  "label_counts": {
+    "calorie_booster": 10,
+    "carb_base": 17,
+    "produce": 30,
+    "protein_anchor": 18
+  },
+  "label_sources": {
+    "heuristic_vote": 74,
+    "manual_override": 1
+  },
+  "numeric_features": [
+    "default_serving_g",
+    "purchase_unit_size_g",
+    "budget_score",
+    "commonality_rank",
+    "energy_fibre_kcal",
+    "protein",
+    "carbohydrate",
+    "fat",
+    "fiber",
+    "calcium",
+    "iron",
+    "vitamin_c",
+    "protein_density_score",
+    "fiber_score",
+    "calcium_score",
+    "iron_score",
+    "vitamin_c_score",
+    "representative_unit_price",
+    "regional_price_low",
+    "regional_price_high",
+    "regional_price_span"
+  ],
+  "row_count": 75
+}

@@ -1,0 +1,17 @@
+{
+  "backend": "sklearn_gradient_boosting",
+  "learning_rate": 0.05,
+  "max_depth": 3,
+  "n_estimators": 250,
+  "random_seed": 42,
+  "request_count": 72,
+  "row_count": 570,
+  "train_row_count": 428,
+  "validation_mae": 0.265208,
+  "validation_pairwise_accuracy": 0.716216,
+  "validation_r2": 0.976711,
+  "validation_rmse": 0.685995,
+  "validation_row_count": 142,
+  "validation_split": 0.25,
+  "validation_top1_accuracy": 0.5
+}

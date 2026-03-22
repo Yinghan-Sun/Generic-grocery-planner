@@ -46,12 +46,15 @@ def main() -> int:
         "targets": {"protein": 130, "energy_fibre_kcal": 2100},
         "preferences": {"vegetarian": False, "dairy_free": False},
         "store_limit": 5,
+        "debug_scorer": True,
     }
     balanced = client.post("/api/recommendations/generic", json=balanced_payload)
     assert_equal(balanced.status_code, 200, "balanced recommendation status")
     balanced_json = balanced.get_json()
     assert_true(len(balanced_json["shopping_list"]) >= 1, "balanced recommendation items")
     assert_true(len(balanced_json["stores"]) >= 1, "balanced recommendation stores")
+    assert_true(bool(balanced_json.get("scorer_used")), "balanced scorer used")
+    assert_true(isinstance(balanced_json.get("scoring_debug"), dict), "balanced scorer debug")
 
     vegetarian_payload = {
         "location": {"lat": 37.401, "lon": -122.09},
@@ -63,6 +66,18 @@ def main() -> int:
     assert_equal(vegetarian.status_code, 200, "vegetarian recommendation status")
     vegetarian_json = vegetarian.get_json()
     assert_true(len(vegetarian_json["shopping_list"]) >= 1, "vegetarian recommendation items")
+
+    missing_model_payload = {
+        **balanced_payload,
+        "scorer_model_path": "artifacts/plan_scorer/does_not_exist.joblib",
+    }
+    missing_model = client.post("/api/recommendations/generic", json=missing_model_payload)
+    assert_equal(missing_model.status_code, 500, "missing model recommendation status")
+    missing_model_json = missing_model.get_json()
+    assert_true(
+        "Required trained plan scorer artifact" in str(missing_model_json.get("error")),
+        "missing model recommendation error",
+    )
 
     invalid = client.get("/api/stores/nearby?lat=&lon=-122.09&radius_m=8000&limit=5")
     assert_equal(invalid.status_code, 400, "invalid nearby-store status")

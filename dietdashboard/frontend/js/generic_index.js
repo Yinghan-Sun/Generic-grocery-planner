@@ -197,6 +197,56 @@ function parseNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+export function parseBooleanParam(value) {
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+  return undefined;
+}
+
+export function parsePositiveIntParam(value) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return undefined;
+  }
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return undefined;
+  }
+  return parsed;
+}
+
+function currentLocationSearch() {
+  if (typeof window === "undefined" || !window.location || typeof window.location.search !== "string") {
+    return "";
+  }
+  return window.location.search;
+}
+
+export function getScorerQueryOverrides(search = currentLocationSearch()) {
+  const params = new URLSearchParams(search || "");
+  const overrides = {};
+
+  const debugScorer = parseBooleanParam(params.get("debug_scorer"));
+  if (debugScorer !== undefined) {
+    overrides.debug_scorer = debugScorer;
+  }
+
+  const candidateCount = parsePositiveIntParam(params.get("candidate_count"));
+  if (candidateCount !== undefined) {
+    overrides.candidate_count = candidateCount;
+  }
+
+  const scorerModelPath = String(params.get("scorer_model_path") || "").trim();
+  if (scorerModelPath) {
+    overrides.scorer_model_path = scorerModelPath;
+  }
+
+  return overrides;
+}
+
 function hasValidCoordinates(currentState) {
   const lat = parseNumber(currentState.lat);
   const lon = parseNumber(currentState.lon);
@@ -222,6 +272,58 @@ function sameStoreLookupContext(first, second) {
     return false;
   }
   return first.lat === second.lat && first.lon === second.lon && first.radius_m === second.radius_m;
+}
+
+export function buildRecommendationPayload(currentState, search = currentLocationSearch()) {
+  const payload = {
+    location: {
+      lat: Number(currentState.lat),
+      lon: Number(currentState.lon)
+    },
+    targets: {
+      protein: Number(currentState.protein),
+      energy_fibre_kcal: Number(currentState.calories)
+    },
+    preferences: {
+      vegetarian: currentState.vegetarian,
+      dairy_free: currentState.dairy_free,
+      vegan: currentState.vegan,
+      low_prep: currentState.low_prep,
+      budget_friendly: currentState.budget_friendly,
+      meal_style: currentState.meal_style || "any"
+    },
+    pantry_items: Array.isArray(currentState.pantry_items) ? currentState.pantry_items : [],
+    store_limit: Number(currentState.store_limit),
+    days: Number(currentState.days || 1),
+    shopping_mode: currentState.shopping_mode || "balanced"
+  };
+
+  const currentStoreContext = storeLookupContext(currentState);
+  if (
+    currentState.hasLookedUpStores &&
+    Array.isArray(currentState.stores) &&
+    currentState.stores.length &&
+    currentState.stores.length >= Number(currentState.store_limit) &&
+    sameStoreLookupContext(currentState.storesLookupContext, currentStoreContext)
+  ) {
+    payload.stores = currentState.stores.slice(0, Number(currentState.store_limit));
+  }
+
+  for (const [fieldName, value] of Object.entries({
+    carbohydrate: parseNumber(currentState.carbohydrate),
+    fat: parseNumber(currentState.fat),
+    fiber: parseNumber(currentState.fiber),
+    calcium: parseNumber(currentState.calcium),
+    iron: parseNumber(currentState.iron),
+    vitamin_c: parseNumber(currentState.vitamin_c)
+  })) {
+    if (value !== null) {
+      payload.targets[fieldName] = value;
+    }
+  }
+
+  Object.assign(payload, getScorerQueryOverrides(search));
+  return payload;
 }
 
 export function validateFormState(currentState, mode = "recommend") {
@@ -444,52 +546,8 @@ async function fetchRecommendations() {
   state.isGeneratingRecommendations = true;
   render();
 
-  const payload = {
-    location: {
-      lat: Number(state.lat),
-      lon: Number(state.lon)
-    },
-    targets: {
-      protein: Number(state.protein),
-      energy_fibre_kcal: Number(state.calories)
-    },
-    preferences: {
-      vegetarian: state.vegetarian,
-      dairy_free: state.dairy_free,
-      vegan: state.vegan,
-      low_prep: state.low_prep,
-      budget_friendly: state.budget_friendly,
-      meal_style: state.meal_style || "any"
-    },
-    pantry_items: Array.isArray(state.pantry_items) ? state.pantry_items : [],
-    store_limit: Number(state.store_limit),
-    days: Number(state.days || 1),
-    shopping_mode: state.shopping_mode || "balanced"
-  };
-
   const currentStoreContext = storeLookupContext(state);
-  if (
-    state.hasLookedUpStores &&
-    Array.isArray(state.stores) &&
-    state.stores.length &&
-    state.stores.length >= Number(state.store_limit) &&
-    sameStoreLookupContext(state.storesLookupContext, currentStoreContext)
-  ) {
-    payload.stores = state.stores.slice(0, Number(state.store_limit));
-  }
-
-  for (const [fieldName, value] of Object.entries({
-    carbohydrate: parseNumber(state.carbohydrate),
-    fat: parseNumber(state.fat),
-    fiber: parseNumber(state.fiber),
-    calcium: parseNumber(state.calcium),
-    iron: parseNumber(state.iron),
-    vitamin_c: parseNumber(state.vitamin_c)
-  })) {
-    if (value !== null) {
-      payload.targets[fieldName] = value;
-    }
-  }
+  const payload = buildRecommendationPayload(state);
 
   try {
     const response = await fetch("/api/recommendations/generic", {

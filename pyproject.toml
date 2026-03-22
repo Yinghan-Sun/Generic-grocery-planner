@@ -22,6 +22,9 @@ benchmark = [
     "mosek>=11.0.11",
     "pyscipopt>=5.4.1",
 ]
+ml = [
+    "scikit-learn>=1.7.0",
+]
 # "highspy>=1.9.0",
 # "pulp>=3.0.2",
 # "pyomo>=6.9.1",

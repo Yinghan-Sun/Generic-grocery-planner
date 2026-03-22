@@ -2544,6 +2544,36 @@ def resolve_bls_price_area(
     )
 
 
+def recommend_generic_food_candidates(
+    con: duckdb.DuckDBPyConnection,
+    protein_target_g: float,
+    calorie_target_kcal: float,
+    preferences: dict[str, object] | None = None,
+    nutrition_targets: dict[str, float] | None = None,
+    pantry_items: Iterable[str] | None = None,
+    days: int = 1,
+    shopping_mode: str = "balanced",
+    price_context: dict[str, str] | None = None,
+    stores: Sequence[dict[str, object]] | None = None,
+    candidate_count: int = 6,
+) -> list[dict[str, object]]:
+    from dietdashboard.hybrid_planner import recommend_generic_food_candidates as _recommend_generic_food_candidates
+
+    return _recommend_generic_food_candidates(
+        con,
+        protein_target_g=protein_target_g,
+        calorie_target_kcal=calorie_target_kcal,
+        preferences=preferences,
+        nutrition_targets=nutrition_targets,
+        pantry_items=pantry_items,
+        days=days,
+        shopping_mode=shopping_mode,
+        price_context=price_context,
+        stores=stores,
+        candidate_count=candidate_count,
+    )
+
+
 def recommend_generic_foods(
     con: duckdb.DuckDBPyConnection,
     protein_target_g: float,
@@ -2554,529 +2584,21 @@ def recommend_generic_foods(
     days: int = 1,
     shopping_mode: str = "balanced",
     price_context: dict[str, str] | None = None,
+    stores: Sequence[dict[str, object]] | None = None,
+    scorer_config: dict[str, object] | None = None,
 ) -> dict[str, object]:
-    preferences = _effective_preferences(preferences or {})
-    nutrition_targets = {key: float(value) for key, value in (nutrition_targets or {}).items() if value is not None and value > 0}
-    pantry_items = {str(food_id).strip() for food_id in (pantry_items or []) if str(food_id).strip()}
-    low_prep = preferences["low_prep"]
-    days = max(1, int(days))
-    shopping_mode = str(shopping_mode or "balanced").strip().lower()
-    if shopping_mode not in SHOPPING_MODE_OPTIONS:
-        shopping_mode = "balanced"
-    price_context = price_context or {
-        "usda_area_code": "US",
-        "usda_area_name": USDA_AREA_NAMES["US"],
-        "bls_area_code": "0",
-        "bls_area_name": BLS_AREA_NAMES["0"],
-    }
-    usda_area_code = str(price_context.get("usda_area_code") or "US")
-    usda_area_name = str(price_context.get("usda_area_name") or USDA_AREA_NAMES["US"])
-    bls_area_code = str(price_context.get("bls_area_code") or "0")
-    bls_area_name = str(price_context.get("bls_area_name") or BLS_AREA_NAMES["0"])
+    from dietdashboard.hybrid_planner import normalize_scorer_config, recommend_with_trained_scorer
 
-    available = _load_candidates(
+    return recommend_with_trained_scorer(
         con,
-        vegetarian=preferences["vegetarian"],
-        dairy_free=preferences["dairy_free"],
-        vegan=preferences["vegan"],
-        price_area_code=bls_area_code,
-        usda_area_code=usda_area_code,
-    )
-    if not available:
-        raise ValueError("No generic foods are available for the selected preferences.")
-
-    goal_profile = _detect_goal_profile(protein_target_g, calorie_target_kcal, preferences, nutrition_targets)
-    basket_policy = _goal_basket_policy(goal_profile, protein_target_g, calorie_target_kcal, nutrition_targets)
-
-    protein_scores = _build_role_scores(available, "protein_anchor", preferences, nutrition_targets, goal_profile)
-    carb_scores = _build_role_scores(available, "carb_base", preferences, nutrition_targets, goal_profile)
-    produce_scores = _build_role_scores(available, "produce", preferences, nutrition_targets, goal_profile)
-    booster_scores = _build_role_scores(available, "calorie_booster", preferences, nutrition_targets, goal_profile)
-
-    protein_order = _build_role_order(available, "protein_anchor", preferences, nutrition_targets, goal_profile)
-    carb_order = _build_role_order(available, "carb_base", preferences, nutrition_targets, goal_profile)
-    produce_order = _build_role_order(available, "produce", preferences, nutrition_targets, goal_profile)
-    booster_order = _build_role_order(available, "calorie_booster", preferences, nutrition_targets, goal_profile)
-
-    role_orders = {
-        "protein_anchor": protein_order,
-        "carb_base": carb_order,
-        "produce": produce_order,
-        "calorie_booster": booster_order,
-    }
-
-    chosen: list[tuple[str, str]] = []
-    excluded: set[str] = set()
-
-    desired_protein_anchors = int(basket_policy["desired_protein_anchors"])
-    for _ in range(desired_protein_anchors):
-        protein_anchor = _pick_diverse_candidate(
-            "protein_anchor",
-            available,
-            protein_scores,
-            excluded,
-            chosen,
-            preferences,
-            goal_profile,
-        )
-        if protein_anchor is None:
-            break
-        chosen.append((protein_anchor, "protein_anchor"))
-        excluded.add(protein_anchor)
-
-    carb_base = _pick_diverse_candidate(
-        "carb_base",
-        available,
-        carb_scores,
-        excluded,
-        chosen,
-        preferences,
-        goal_profile,
-    )
-    if carb_base is not None:
-        chosen.append((carb_base, "carb_base"))
-        excluded.add(carb_base)
-
-    desired_produce_items = int(basket_policy["desired_produce_items"])
-    for _ in range(desired_produce_items):
-        produce = _pick_diverse_candidate(
-            "produce",
-            available,
-            produce_scores,
-            excluded,
-            chosen,
-            preferences,
-            goal_profile,
-        )
-        if produce is None:
-            break
-        chosen.append((produce, "produce"))
-        excluded.add(produce)
-
-    if not chosen:
-        raise ValueError("No generic foods could be selected for the recommendation.")
-
-    quantities: dict[str, float] = {}
-    protein_anchors = [food_id for food_id, role in chosen if role == "protein_anchor"]
-    primary_protein_share, secondary_protein_share = basket_policy["protein_anchor_shares"]
-    for idx, food_id in enumerate(protein_anchors):
-        food = available[food_id]
-        if len(protein_anchors) == 1:
-            protein_share = protein_target_g * 0.45
-        else:
-            protein_share = protein_target_g * (primary_protein_share if idx == 0 else secondary_protein_share)
-        grams = max(float(food["default_serving_g"]), 100.0 * protein_share / max(float(food["protein"]), 1.0))
-        quantities[food_id] = grams
-
-    if carb_base is not None:
-        food = available[carb_base]
-        carb_share = float(basket_policy["carb_share"])
-        grams = max(
-            float(food["default_serving_g"]),
-            100.0 * (calorie_target_kcal * carb_share) / max(float(food["energy_fibre_kcal"]), 1.0),
-        )
-        carbohydrate_target_g = nutrition_targets.get("carbohydrate")
-        if carbohydrate_target_g:
-            grams = max(grams, 100.0 * (carbohydrate_target_g * 0.55) / max(float(food["carbohydrate"]), 1.0))
-        fiber_target_g = nutrition_targets.get("fiber")
-        if fiber_target_g:
-            carb_fiber = float(food.get("fiber") or 0.0)
-            fiber_ratio = float(basket_policy["carb_fiber_ratio"])
-            if carb_fiber >= 5.0:
-                grams = max(grams, 100.0 * (fiber_target_g * fiber_ratio) / max(carb_fiber, 0.5))
-            elif carb_fiber >= 3.0:
-                grams = max(grams, 100.0 * (fiber_target_g * min(fiber_ratio, 0.18)) / max(carb_fiber, 0.5))
-        quantities[carb_base] = grams
-
-    for food_id, role in chosen:
-        if role != "produce":
-            continue
-        food = available[food_id]
-        servings = 1 if calorie_target_kcal < 1800 else 2
-        if low_prep and str(food["generic_food_id"]) == "spinach":
-            servings = 1
-        if goal_profile == "fat_loss":
-            servings += 1
-        elif goal_profile == "muscle_gain" and _produce_cluster(food) == "fruit":
-            servings += 1
-        if nutrition_targets.get("fiber"):
-            servings += 1
-        if nutrition_targets.get("vitamin_c") and float(food["vitamin_c"]) >= 20:
-            servings += 1
-        quantities[food_id] = max(float(food["default_serving_g"]), float(food["default_serving_g"]) * servings)
-
-    def totals() -> dict[str, float]:
-        total = {key: 0.0 for key in NUTRIENT_SUMMARY_META}
-        for food_id, quantity_g in quantities.items():
-            for nutrient_id, value in _tracked_totals(available[food_id], quantity_g).items():
-                total[nutrient_id] += value
-        return total
-
-    total_nutrients = totals()
-    protein_deficit = max(0.0, protein_target_g - total_nutrients["protein"])
-    if protein_deficit > 0 and protein_anchors:
-        first_anchor = protein_anchors[0]
-        quantities[first_anchor] += 100.0 * protein_deficit * 0.7 / max(float(available[first_anchor]["protein"]), 1.0)
-        if len(protein_anchors) > 1:
-            second_anchor = protein_anchors[1]
-            quantities[second_anchor] += 100.0 * protein_deficit * 0.3 / max(float(available[second_anchor]["protein"]), 1.0)
-
-    total_nutrients = totals()
-    calorie_deficit = max(0.0, calorie_target_kcal - total_nutrients["energy_fibre_kcal"])
-    booster = None
-    fat_target_g = nutrition_targets.get("fat")
-    fat_gap = max(0.0, fat_target_g - total_nutrients["fat"]) if fat_target_g else 0.0
-    booster_threshold = max(float(basket_policy["booster_gap_floor"]), calorie_target_kcal * float(basket_policy["booster_gap_ratio"]))
-    if bool(basket_policy["booster_enabled"]) and (calorie_deficit > booster_threshold or fat_gap > float(basket_policy["booster_fat_gap"])):
-        booster = _pick_diverse_candidate(
-            "calorie_booster",
-            available,
-            booster_scores,
-            excluded,
-            chosen,
-            preferences,
-            goal_profile,
-        )
-        if booster is not None:
-            chosen.append((booster, "calorie_booster"))
-            excluded.add(booster)
-            booster_grams = 100.0 * max(calorie_deficit, 0.0) / max(float(available[booster]["energy_fibre_kcal"]), 1.0)
-            if fat_gap > 0:
-                booster_grams = max(booster_grams, 100.0 * fat_gap * 0.7 / max(float(available[booster]["fat"]), 1.0))
-            quantities[booster] = booster_grams
-
-    _apply_goal_quantity_caps(chosen, available, quantities, goal_profile)
-
-    if goal_profile == "fat_loss":
-        overshoot_tolerance = max(
-            float(basket_policy["fat_loss_overshoot_floor"]),
-            calorie_target_kcal * float(basket_policy["fat_loss_overshoot_ratio"]),
-        )
-        total_nutrients = totals()
-        calorie_overshoot = total_nutrients["energy_fibre_kcal"] - calorie_target_kcal
-        if calorie_overshoot > overshoot_tolerance and booster is not None and booster in quantities:
-            booster_food = available[booster]
-            min_booster_g = max(float(booster_food.get("default_serving_g") or 0.0) * 0.6, 20.0)
-            reducible_g = max(0.0, quantities[booster] - min_booster_g)
-            reduce_g = min(
-                reducible_g,
-                100.0 * calorie_overshoot / max(float(booster_food["energy_fibre_kcal"]), 1.0),
-            )
-            quantities[booster] = max(0.0, quantities[booster] - reduce_g)
-            if quantities[booster] < min_booster_g:
-                quantities[booster] = 0.0
-
-        total_nutrients = totals()
-        calorie_overshoot = total_nutrients["energy_fibre_kcal"] - calorie_target_kcal
-        if calorie_overshoot > overshoot_tolerance and carb_base is not None and carb_base in quantities:
-            carb_food = available[carb_base]
-            min_carb_g = max(float(carb_food.get("default_serving_g") or 0.0), 60.0)
-            reducible_g = max(0.0, quantities[carb_base] - min_carb_g)
-            reduce_g = min(
-                reducible_g,
-                100.0 * calorie_overshoot / max(float(carb_food["energy_fibre_kcal"]), 1.0),
-            )
-            quantities[carb_base] = max(min_carb_g, quantities[carb_base] - reduce_g)
-
-        total_nutrients = totals()
-        calorie_overshoot = total_nutrients["energy_fibre_kcal"] - calorie_target_kcal
-        protein_surplus = total_nutrients["protein"] - protein_target_g
-        if calorie_overshoot > overshoot_tolerance and len(protein_anchors) > 1 and protein_surplus > 10:
-            secondary_anchor = protein_anchors[-1]
-            if secondary_anchor in quantities:
-                anchor_food = available[secondary_anchor]
-                min_anchor_g = max(float(anchor_food.get("default_serving_g") or 0.0), 80.0)
-                reducible_g = max(0.0, quantities[secondary_anchor] - min_anchor_g)
-                reduce_g = min(
-                    reducible_g,
-                    100.0 * calorie_overshoot / max(float(anchor_food["energy_fibre_kcal"]), 1.0),
-                    100.0 * max(0.0, protein_surplus - 5.0) / max(float(anchor_food["protein"]), 1.0),
-                )
-                quantities[secondary_anchor] = max(min_anchor_g, quantities[secondary_anchor] - reduce_g)
-
-    total_nutrients = totals()
-    calorie_deficit = max(0.0, calorie_target_kcal - total_nutrients["energy_fibre_kcal"])
-    final_carb_fill_ratio = float(basket_policy["final_carb_fill_ratio"])
-    final_booster_fill_ratio = float(basket_policy["final_booster_fill_ratio"])
-    protein_close_enough = total_nutrients["protein"] >= (protein_target_g * 0.95)
-    if goal_profile == "fat_loss" and protein_close_enough:
-        final_carb_fill_ratio = 0.0
-        final_booster_fill_ratio = 0.0
-    if calorie_deficit > 0 and carb_base is not None and final_carb_fill_ratio > 0:
-        quantities[carb_base] += (
-            100.0
-            * calorie_deficit
-            * final_carb_fill_ratio
-            / max(float(available[carb_base]["energy_fibre_kcal"]), 1.0)
-        )
-    total_nutrients = totals()
-    calorie_deficit = max(0.0, calorie_target_kcal - total_nutrients["energy_fibre_kcal"])
-    if calorie_deficit > 0 and booster is not None and final_booster_fill_ratio > 0:
-        quantities[booster] += (
-            100.0
-            * calorie_deficit
-            * final_booster_fill_ratio
-            / max(float(available[booster]["energy_fibre_kcal"]), 1.0)
-        )
-
-    _apply_goal_quantity_caps(chosen, available, quantities, goal_profile)
-
-    scaled_quantities: dict[str, float] = {}
-    warnings: list[str] = []
-    scaling_notes: list[str] = []
-    for food_id, role in chosen:
-        effective_days, item_scaling_notes, item_warnings = _shopping_mode_days(available[food_id], days, shopping_mode)
-        quantity_g = _round_quantity_g(available[food_id], quantities.get(food_id, 0.0) * effective_days)
-        quantity_g, sanity_notes, sanity_warnings = _apply_quantity_sanity(available[food_id], quantity_g, shopping_mode)
-        if quantity_g <= 0:
-            continue
-        scaled_quantities[food_id] = quantity_g
-        scaling_notes.extend(item_scaling_notes)
-        scaling_notes.extend(sanity_notes)
-        warnings.extend(item_warnings)
-        warnings.extend(sanity_warnings)
-
-    def scaled_totals() -> dict[str, float]:
-        total = {key: 0.0 for key in NUTRIENT_SUMMARY_META}
-        for scaled_food_id, scaled_quantity_g in scaled_quantities.items():
-            for nutrient_id, value in _tracked_totals(available[scaled_food_id], scaled_quantity_g).items():
-                total[nutrient_id] += value
-        return total
-
-    target_protein_total = protein_target_g * days
-    target_calorie_total = calorie_target_kcal * days
-    if days > 1 and shopping_mode in {"fresh", "bulk"} and scaled_quantities:
-        current_totals = scaled_totals()
-        protein_gap = max(0.0, target_protein_total - current_totals["protein"])
-        stable_protein_anchors = [
-            food_id for food_id in protein_anchors if food_id in scaled_quantities and (_is_shelf_stable(available[food_id]) or not _is_perishable(available[food_id]))
-        ]
-        if protein_gap > max(20.0, target_protein_total * 0.08) and stable_protein_anchors:
-            fill_food_id = stable_protein_anchors[0]
-            scaled_quantities[fill_food_id] += 100.0 * protein_gap * 0.8 / max(float(available[fill_food_id]["protein"]), 1.0)
-            scaling_notes.append("Stable protein items were topped up after perishable items were softened for the shopping window.")
-
-        current_totals = scaled_totals()
-        calorie_gap = max(0.0, target_calorie_total - current_totals["energy_fibre_kcal"])
-        if calorie_gap > max(250.0, target_calorie_total * 0.08) and carb_base is not None and carb_base in scaled_quantities:
-            if _is_bulk_friendly(available[carb_base]):
-                scaled_quantities[carb_base] += 100.0 * calorie_gap * 0.75 / max(float(available[carb_base]["energy_fibre_kcal"]), 1.0)
-                scaling_notes.append("Shelf-stable carb items were topped up to keep the shopping list usable across the full window.")
-
-        current_totals = scaled_totals()
-        calorie_gap = max(0.0, target_calorie_total - current_totals["energy_fibre_kcal"])
-        if calorie_gap > max(150.0, target_calorie_total * 0.04) and booster is not None and booster in scaled_quantities:
-            if _is_bulk_friendly(available[booster]):
-                scaled_quantities[booster] += 100.0 * calorie_gap / max(float(available[booster]["energy_fibre_kcal"]), 1.0)
-                scaling_notes.append("Pantry-friendly extras were topped up to reduce large calorie gaps after perishable items were softened.")
-
-    chosen, scaled_quantities, split_notes, realism_notes, adjusted_by_split = _apply_split_realism(
-        chosen,
-        available,
-        role_orders,
-        scaled_quantities,
-        days,
-        shopping_mode,
-    )
-    plan_quantities = dict(scaled_quantities)
-    shopping_quantities, pantry_notes = _apply_pantry_adjustments(
-        chosen,
-        available,
-        scaled_quantities,
-        pantry_items,
+        protein_target_g=protein_target_g,
+        calorie_target_kcal=calorie_target_kcal,
+        preferences=preferences,
+        nutrition_targets=nutrition_targets,
+        pantry_items=pantry_items,
         days=days,
         shopping_mode=shopping_mode,
+        price_context=price_context,
+        stores=stores,
+        scorer_config=normalize_scorer_config(scorer_config),
     )
-
-    shopping_list: list[dict[str, object]] = []
-    estimated_totals = {key: 0.0 for key in NUTRIENT_SUMMARY_META}
-    for planned_food_id, planned_quantity_g in plan_quantities.items():
-        for nutrient_id, value in _tracked_totals(available[planned_food_id], planned_quantity_g).items():
-            estimated_totals[nutrient_id] += value
-    estimated_basket_cost = 0.0
-    estimated_basket_cost_low = 0.0
-    estimated_basket_cost_high = 0.0
-    priced_item_count = 0
-    priced_from_usda_count = 0
-    priced_from_bls_area_count = 0
-    priced_from_fallback_count = 0
-    range_supported_item_count = 0
-    for food_id, role in chosen:
-        quantity_g = shopping_quantities.get(food_id, 0.0)
-        if quantity_g <= 0:
-            continue
-        nutrient_totals = _tracked_totals(available[food_id], quantity_g)
-        protein = nutrient_totals["protein"]
-        calories = nutrient_totals["energy_fibre_kcal"]
-        substitution = _substitution(food_id, role, available, role_orders)
-        estimated_unit_price, estimated_item_cost, price_unit_display = _price_reference(available[food_id], quantity_g)
-        estimated_price_low, estimated_price_high = _price_range(available[food_id], quantity_g)
-        price_source_used = _price_source_used(available[food_id])
-        value_reason_short, price_efficiency_note = _value_explanation(role, available[food_id], preferences, nutrition_targets)
-        if estimated_item_cost is not None:
-            estimated_basket_cost += estimated_item_cost
-            priced_item_count += 1
-            if price_source_used == "usda_area":
-                priced_from_usda_count += 1
-            elif price_source_used == "bls_area":
-                priced_from_bls_area_count += 1
-            elif price_source_used == "bls_fallback":
-                priced_from_fallback_count += 1
-            if estimated_price_low is not None and estimated_price_high is not None:
-                estimated_basket_cost_low += estimated_price_low
-                estimated_basket_cost_high += estimated_price_high
-                range_supported_item_count += 1
-            else:
-                estimated_basket_cost_low += estimated_item_cost
-                estimated_basket_cost_high += estimated_item_cost
-        shopping_list.append(
-            {
-                "generic_food_id": food_id,
-                "name": available[food_id]["display_name"],
-                "role": role,
-                "substitution": substitution,
-                "substitution_reason": _substitution_reason(role, substitution),
-                "reason_short": _reason_short(role, available[food_id], preferences, nutrition_targets),
-                "why_selected": _why_selected(role, available[food_id], preferences, nutrition_targets),
-                "quantity_g": round(quantity_g, 1),
-                "quantity_display": _quantity_display(available[food_id], quantity_g, days=days),
-                "estimated_unit_price": estimated_unit_price,
-                "estimated_item_cost": estimated_item_cost,
-                "typical_unit_price": estimated_unit_price,
-                "typical_item_cost": estimated_item_cost,
-                "estimated_price_low": estimated_price_low,
-                "estimated_price_high": estimated_price_high,
-                "price_unit_display": price_unit_display,
-                "price_source_used": price_source_used,
-                "value_reason_short": value_reason_short,
-                "price_efficiency_note": price_efficiency_note,
-                "estimated_protein_g": round(protein, 1),
-                "estimated_calories_kcal": round(calories, 1),
-                "reason": _reason(role, available[food_id]),
-            }
-        )
-
-    nutrition_summary = {
-        "protein_target_g": round(protein_target_g * days, 1),
-        "protein_estimated_g": round(estimated_totals["protein"], 1),
-        "calorie_target_kcal": round(calorie_target_kcal * days, 1),
-        "calorie_estimated_kcal": round(estimated_totals["energy_fibre_kcal"], 1),
-    }
-    for nutrient_id, target_value in nutrition_targets.items():
-        if nutrient_id in {"protein", "energy_fibre_kcal"}:
-            continue
-        target_key, estimated_key = NUTRIENT_SUMMARY_META[nutrient_id]
-        nutrition_summary[target_key] = round(target_value * days, 1)
-        nutrition_summary[estimated_key] = round(estimated_totals[nutrient_id], 1)
-
-    assumptions = list(DEFAULT_ASSUMPTIONS)
-    if days > 1:
-        assumptions.append(f"Shopping quantities and nutrition totals are scaled for {days} days using the same daily targets.")
-    if pantry_notes:
-        assumptions.append("Items marked as already available were reduced or removed from the shopping list. Nutrition totals still assume you use those pantry items.")
-    unpriced_item_count = len(shopping_list) - priced_item_count
-    price_confidence_note = None
-    if priced_item_count:
-        assumptions.append("Price estimates use local USDA monthly area prices when available, with local BLS average-price fallback and simple unit conversions. They are representative regional guidance, not store-specific quotes.")
-        assumptions.append("Estimated basket cost only includes items that currently have a local USDA or BLS price reference.")
-        if range_supported_item_count:
-            assumptions.append("Price ranges reflect the spread across available USDA or BLS regional price areas where current mappings support it.")
-        usda_adjustment_context = _usda_adjustment_context(available)
-        if priced_from_usda_count:
-            price_confidence_note = (
-                "These are representative grocery price estimates built from local USDA Food-at-Home Monthly Area Prices where available, "
-                "inflation-adjusted with local BLS Food at Home CPI and backed by local BLS average-price fallback when USDA coverage is missing. Treat them as typical regional price references, "
-                "not exact store or SKU quotes."
-            )
-        else:
-            price_confidence_note = (
-                "These are representative grocery price estimates from local BLS average-price tables. "
-                "Treat them as a typical regional price level, not an exact store or SKU quote."
-            )
-
-    if priced_item_count:
-        if priced_from_usda_count and priced_from_bls_area_count == 0 and priced_from_fallback_count == 0:
-            price_source_note = (
-                f"Using inflation-adjusted {usda_area_name} USDA Food-at-Home Monthly Area Prices as the typical regional grocery reference for this basket."
-            )
-        elif priced_from_usda_count:
-            price_source_note = (
-                f"Using inflation-adjusted {usda_area_name} USDA Food-at-Home Monthly Area Prices for {priced_from_usda_count} item{'' if priced_from_usda_count == 1 else 's'}, "
-                f"{bls_area_name} BLS average prices for {priced_from_bls_area_count} item{'' if priced_from_bls_area_count == 1 else 's'}, "
-                f"and U.S. city average BLS fallback for {priced_from_fallback_count} item{'' if priced_from_fallback_count == 1 else 's'}."
-            )
-        elif bls_area_code == "0":
-            price_source_note = "Using U.S. city average BLS average prices as the typical grocery reference."
-        else:
-            price_source_note = (
-                f"Using {bls_area_name} BLS average prices as the typical regional grocery reference"
-                if priced_from_fallback_count == 0
-                else (
-                    f"Using {bls_area_name} BLS average prices as the typical regional grocery reference "
-                    f"for {priced_from_bls_area_count} item{'' if priced_from_bls_area_count == 1 else 's'}, "
-                    f"with U.S. city average fallback for {priced_from_fallback_count} item{'' if priced_from_fallback_count == 1 else 's'}."
-                )
-            )
-    else:
-        price_source_note = None
-
-    if priced_from_usda_count:
-        price_area_code = usda_area_code
-        price_area_name = usda_area_name
-    else:
-        price_area_code = bls_area_code
-        price_area_name = bls_area_name
-
-    response = {
-        "days": days,
-        "goal_profile": goal_profile,
-        "shopping_mode": shopping_mode,
-        "adjusted_by_split": adjusted_by_split,
-        "shopping_list": shopping_list,
-        "meal_suggestions": _build_meal_suggestions(shopping_list, available),
-        "nutrition_summary": nutrition_summary,
-        "assumptions": assumptions,
-        "price_area_code": price_area_code,
-        "price_area_name": price_area_name,
-        "price_source_note": price_source_note,
-        "usda_priced_item_count": priced_from_usda_count,
-        "bls_priced_item_count": priced_from_bls_area_count + priced_from_fallback_count,
-        "unpriced_item_count": unpriced_item_count,
-    }
-    if priced_item_count:
-        response["estimated_basket_cost"] = round(estimated_basket_cost, 2)
-        response["typical_basket_cost"] = round(estimated_basket_cost, 2)
-        response["priced_item_count"] = priced_item_count
-        response["price_coverage_note"] = (
-            f"{priced_from_usda_count} basket item{'' if priced_from_usda_count == 1 else 's'} use USDA monthly area prices, "
-            f"{priced_from_bls_area_count + priced_from_fallback_count} use BLS reference pricing, "
-            f"and {unpriced_item_count} remain unpriced."
-        )
-        response["basket_cost_note"] = (
-            f"Estimated typical basket cost covers {priced_item_count} priced items using local USDA or BLS regional price references "
-            f"and excludes {unpriced_item_count} unpriced items."
-        )
-        response["price_confidence_note"] = price_confidence_note
-        if priced_from_usda_count:
-            usda_adjustment_context = usda_adjustment_context or _usda_adjustment_context(available)
-            if usda_adjustment_context:
-                response["price_adjustment_note"] = (
-                    "USDA Food-at-Home Monthly Area Prices end in "
-                    f"{usda_adjustment_context['base_period']}. USDA-priced items are scaled toward current grocery levels "
-                    f"using the local BLS Food at Home CPI through {usda_adjustment_context['current_period']} "
-                    f"(multiplier {usda_adjustment_context['multiplier']:.3f})."
-                )
-        if range_supported_item_count:
-            response["estimated_basket_cost_low"] = round(estimated_basket_cost_low, 2)
-            response["estimated_basket_cost_high"] = round(estimated_basket_cost_high, 2)
-    if split_notes:
-        response["split_notes"] = split_notes
-    if realism_notes:
-        response["realism_notes"] = realism_notes
-    if pantry_notes:
-        response["pantry_notes"] = pantry_notes
-    if scaling_notes:
-        response["scaling_notes"] = sorted(set(scaling_notes))
-    if warnings:
-        response["warnings"] = sorted(set(warnings))
-    return response

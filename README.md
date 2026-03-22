@@ -166,6 +166,95 @@ make store-discovery-summary
 make ingest-foursquare-os-places
 ```
 
+## Model-Ranked Plan Scorer
+
+The generic planner runtime is now model-ranked:
+
+1. the deterministic candidate generator builds multiple candidate baskets
+2. a local trained scorer ranks those candidates
+3. the highest-scoring candidate is returned
+
+The trained scorer is required at runtime. If the scorer artifact is missing or invalid, the
+recommendation request fails clearly instead of falling back to a different path.
+
+Optional install for training and scorer tests:
+
+```bash
+uv sync --frozen --extra ml
+```
+
+Train the scorer and write local artifacts:
+
+```bash
+make train-plan-scorer
+```
+
+Run the scorer regression checks:
+
+```bash
+make test-plan-scorer
+```
+
+Generated artifacts land in:
+
+```text
+artifacts/plan_scorer/
+```
+
+Runtime request flags:
+- `candidate_count`
+- `scorer_model_path`
+- `debug_scorer`
+
+Runtime environment variables:
+- `TRAINED_SCORER_CANDIDATE_COUNT=6`
+- `TRAINED_SCORER_MODEL_PATH=artifacts/plan_scorer/plan_candidate_scorer.joblib`
+- `TRAINED_SCORER_DEBUG=0|1`
+
+See [Plan Scorer Runtime](docs/plan-scorer.md) for the training-data strategy, feature set,
+artifact layout, and runtime behavior.
+
+## Trainable Model Component
+
+This repo now also includes an additive, offline trainable model component for course-project
+presentation: a supervised classifier that predicts each generic food's primary planner role:
+
+- `protein_anchor`
+- `carb_base`
+- `produce`
+- `calorie_booster`
+
+What it uses:
+- the current `generic_foods` table and representative price features
+- labels derived deterministically from the current heuristic planner logic across a fixed scenario grid
+- simple baseline models compared with cross-validation
+
+This model does **not** replace the live planner logic. The runtime planner stays heuristic-first.
+
+Optional install for model training:
+
+```bash
+uv sync --frozen --extra ml
+```
+
+Build the training dataset:
+
+```bash
+make build-food-role-dataset
+```
+
+Train and evaluate the baseline models:
+
+```bash
+make train-food-role-model
+```
+
+Generated artifacts land in:
+
+```text
+artifacts/food_role_model/
+```
+
 ## Deployment Notes
 
 Runtime assumptions for the demo:
@@ -201,6 +290,8 @@ API routes:
 
 - [Generic Flow](docs/generic-flow.md)
 - [Generic QA Checklist](docs/generic-qa-checklist.md)
+- [Hybrid Plan Scorer](docs/plan-scorer.md)
+- [Food Role Model](docs/food-role-model.md)
 
 ## Data Attribution Notes
 

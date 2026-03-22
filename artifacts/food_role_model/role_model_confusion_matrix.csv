@@ -1,0 +1,5 @@
+true_label,protein_anchor,carb_base,produce,calorie_booster
+protein_anchor,17,1,0,0
+carb_base,0,16,1,0
+produce,0,0,30,0
+calorie_booster,1,0,1,8

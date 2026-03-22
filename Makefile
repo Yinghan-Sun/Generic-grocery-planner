@@ -8,6 +8,8 @@ SHELL := /bin/sh
 	open-db \
 	smoke-generic test-generic test-generic-behavior check-generic-catalog check-generic-price-coverage qa-generic \
 	store-discovery-summary store-discovery-prune-cache store-discovery-dedupe-live backfill-generic-stores ingest-foursquare-stores ingest-foursquare-os-places \
+	build-food-role-dataset train-food-role-model \
+	build-plan-scorer-dataset train-plan-scorer test-plan-scorer \
 	run-app run-dev \
 	frontend-bundle frontend-watch frontend-copy \
 	build-container run-container
@@ -78,10 +80,13 @@ open-db: $(DATA_DB)
 smoke-generic:
 	uv run ./scripts/generic_smoke_test.py
 
-test-generic: smoke-generic test-generic-behavior
+test-generic: smoke-generic test-generic-behavior test-plan-scorer
 
 test-generic-behavior:
 	uv run ./scripts/generic_behavior_test.py
+
+test-plan-scorer:
+	uv run --extra ml ./scripts/hybrid_planner_test.py
 
 check-generic-catalog:
 	uv run python ./scripts/generic_catalog_admin.py
@@ -111,6 +116,18 @@ ingest-foursquare-stores:
 
 ingest-foursquare-os-places:
 	uv run python ./scripts/ingest_foursquare_stores.py --input $(FOURSQUARE_OS_INPUT) --source foursquare_os_places
+
+build-food-role-dataset:
+	uv run --extra ml python ./scripts/build_food_role_training_dataset.py
+
+train-food-role-model:
+	uv run --extra ml python ./scripts/train_food_role_model.py
+
+build-plan-scorer-dataset:
+	uv run --extra ml python ./scripts/train_plan_scorer.py --candidate-count 3 --backend sklearn_ridge --n-estimators 40 --max-depth 2
+
+train-plan-scorer:
+	uv run --extra ml python ./scripts/train_plan_scorer.py
 
 run-app:
 	uv run python -m dietdashboard.app

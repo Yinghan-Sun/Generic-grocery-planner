@@ -6,10 +6,11 @@ import os
 from pathlib import Path
 
 import duckdb
-from flask import Flask, g, render_template, request
+from flask import Flask, g, render_template, request, url_for
 from flask_compress import Compress
 
 from dietdashboard.generic_recommender import recommend_generic_foods, resolve_price_context
+from dietdashboard.plan_scorer import PlanScorerArtifactError
 from dietdashboard.request_logging import setup_logging
 from dietdashboard.store_discovery import DEFAULT_LIMIT as DEFAULT_STORE_LIMIT
 from dietdashboard.store_discovery import (
@@ -26,6 +27,9 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 TEMPLATE_FOLDER = Path(__file__).parent / "frontend/html"
 STATIC_FOLDER = Path(__file__).parent / "static"
 IS_PROD = os.getenv("PROD", "0") == "1"
+DEFAULT_TRAINED_SCORER_CANDIDATE_COUNT = 6
+MAX_TRAINED_SCORER_CANDIDATE_COUNT = 12
+DEFAULT_TRAINED_SCORER_MODEL_PATH = str(Path(__file__).parent.parent / "artifacts" / "plan_scorer" / "plan_candidate_scorer.joblib")
 
 
 def get_con() -> duckdb.DuckDBPyConnection:
@@ -90,6 +94,15 @@ def create_app() -> Flask:
     app.config["COMPRESS_MIMETYPES"] = ["text/html", "text/css", "text/javascript", "text/csv", "text/plain"]
     Compress(app)
     setup_logging(app, DEBUG_DIR / "requests.db")
+
+    @app.context_processor
+    def inject_static_asset_url():
+        def static_asset_url(filename: str) -> str:
+            asset_path = STATIC_FOLDER / filename
+            version = str(asset_path.stat().st_mtime_ns) if asset_path.exists() else "missing"
+            return url_for("static", filename=filename, v=version)
+
+        return {"static_asset_url": static_asset_url}
 
     def json_error(message: str, status: int = 400):
         return app.json.response({"error": message}), status
@@ -166,6 +179,11 @@ def create_app() -> Flask:
             store_limit = parse_int(data.get("store_limit", DEFAULT_STORE_LIMIT), "store_limit")
             days = parse_int(data.get("days", 1), "days")
             shopping_mode = parse_choice(data.get("shopping_mode"), "shopping_mode", {"fresh", "balanced", "bulk"}, "balanced")
+            candidate_count = parse_int(
+                data.get("candidate_count", os.getenv("TRAINED_SCORER_CANDIDATE_COUNT", str(DEFAULT_TRAINED_SCORER_CANDIDATE_COUNT))),
+                "candidate_count",
+            )
+            debug_scorer = parse_bool(data.get("debug_scorer"), default=os.getenv("TRAINED_SCORER_DEBUG", "0") == "1")
             preferences = {
                 "vegetarian": parse_bool(preferences_raw.get("vegetarian"), default=False),
                 "dairy_free": parse_bool(preferences_raw.get("dairy_free"), default=False),
@@ -180,6 +198,8 @@ def create_app() -> Flask:
                 ),
             }
             pantry_items = [str(food_id).strip() for food_id in pantry_items_raw if str(food_id).strip()]
+            scorer_model_path_raw = data.get("scorer_model_path", os.getenv("TRAINED_SCORER_MODEL_PATH", DEFAULT_TRAINED_SCORER_MODEL_PATH))
+            scorer_model_path = str(scorer_model_path_raw).strip() if scorer_model_path_raw is not None and str(scorer_model_path_raw).strip() else None
         except ValueError as e:
             return json_error(str(e))
 
@@ -194,6 +214,8 @@ def create_app() -> Flask:
             return json_error(f"store_limit must be between 1 and {MAX_STORE_LIMIT}.")
         if days not in {1, 3, 5, 7}:
             return json_error("days must be one of 1 3 5 or 7.")
+        if candidate_count < 1 or candidate_count > MAX_TRAINED_SCORER_CANDIDATE_COUNT:
+            return json_error(f"candidate_count must be between 1 and {MAX_TRAINED_SCORER_CANDIDATE_COUNT}.")
 
         with get_con() as con:
             stores = normalize_store_snapshot(stores_raw, limit=store_limit) if stores_raw is not None else []
@@ -211,7 +233,15 @@ def create_app() -> Flask:
                     days=days,
                     shopping_mode=shopping_mode,
                     price_context=price_context,
+                    stores=stores,
+                    scorer_config={
+                        "candidate_count": candidate_count,
+                        "scorer_model_path": scorer_model_path,
+                        "debug": debug_scorer,
+                    },
                 )
+            except PlanScorerArtifactError as e:
+                return json_error(str(e), status=500)
             except ValueError as e:
                 return json_error(str(e), status=422)
 
@@ -223,6 +253,11 @@ def create_app() -> Flask:
         g.request_metadata["shopping_mode"] = shopping_mode
         g.request_metadata["pantry_item_count"] = len(pantry_items)
         g.request_metadata["price_area_code"] = recommendation.get("price_area_code")
+        g.request_metadata["candidate_count"] = candidate_count
+        if "scorer_used" in recommendation:
+            g.request_metadata["scorer_used"] = bool(recommendation.get("scorer_used"))
+        if recommendation.get("scorer_backend"):
+            g.request_metadata["scorer_backend"] = recommendation.get("scorer_backend")
         store_fit = recommend_store_fits(
             stores,
             recommendation["shopping_list"],

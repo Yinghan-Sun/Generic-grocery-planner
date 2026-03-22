@@ -1,0 +1,41 @@
+{
+  "dataset_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/food_role_model/generic_food_role_training_dataset.csv",
+  "dataset_size": 75,
+  "label_distribution": {
+    "calorie_booster": 10,
+    "carb_base": 17,
+    "produce": 30,
+    "protein_anchor": 18
+  },
+  "label_source_distribution": {
+    "heuristic_vote": 74,
+    "manual_override": 1
+  },
+  "models": [
+    {
+      "accuracy": 0.9467,
+      "best_params": {
+        "classifier__C": 1.0,
+        "classifier__class_weight": "balanced"
+      },
+      "cv_macro_f1": 0.9291,
+      "macro_f1": 0.9356,
+      "model_name": "logistic_regression",
+      "weighted_f1": 0.9456
+    },
+    {
+      "accuracy": 0.9333,
+      "best_params": {
+        "classifier__class_weight": null,
+        "classifier__max_depth": 4,
+        "classifier__min_samples_leaf": 1,
+        "classifier__n_estimators": 200
+      },
+      "cv_macro_f1": 0.9147,
+      "macro_f1": 0.9212,
+      "model_name": "random_forest",
+      "weighted_f1": 0.9322
+    }
+  ],
+  "selected_model": "logistic_regression"
+}

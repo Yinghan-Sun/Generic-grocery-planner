@@ -1,0 +1,76 @@
+generic_food_id,display_name,label_source,true_label,predicted_label,correct
+eggs,Eggs,heuristic_vote,protein_anchor,protein_anchor,1
+milk,Milk,manual_override,protein_anchor,protein_anchor,1
+greek_yogurt,Greek yogurt,heuristic_vote,protein_anchor,protein_anchor,1
+oats,Oats,heuristic_vote,carb_base,carb_base,1
+rice,Rice,heuristic_vote,carb_base,carb_base,1
+beans,Beans,heuristic_vote,carb_base,carb_base,1
+lentils,Lentils,heuristic_vote,protein_anchor,carb_base,0
+tofu,Tofu,heuristic_vote,protein_anchor,protein_anchor,1
+chicken_breast,Chicken breast,heuristic_vote,protein_anchor,protein_anchor,1
+tuna,Tuna,heuristic_vote,protein_anchor,protein_anchor,1
+peanut_butter,Peanut butter,heuristic_vote,calorie_booster,calorie_booster,1
+wholemeal_bread,Wholemeal bread,heuristic_vote,carb_base,carb_base,1
+bananas,Bananas,heuristic_vote,produce,produce,1
+spinach,Spinach,heuristic_vote,produce,produce,1
+broccoli,Broccoli,heuristic_vote,produce,produce,1
+potatoes,Potatoes,heuristic_vote,produce,produce,1
+olive_oil,Olive oil,heuristic_vote,calorie_booster,calorie_booster,1
+salmon,Salmon,heuristic_vote,protein_anchor,protein_anchor,1
+ground_beef,Ground beef,heuristic_vote,protein_anchor,protein_anchor,1
+turkey,Turkey,heuristic_vote,protein_anchor,protein_anchor,1
+rotisserie_chicken,Rotisserie chicken,heuristic_vote,protein_anchor,protein_anchor,1
+chickpeas,Chickpeas,heuristic_vote,carb_base,carb_base,1
+black_beans,Black beans,heuristic_vote,carb_base,carb_base,1
+edamame,Edamame,heuristic_vote,protein_anchor,protein_anchor,1
+shrimp,Shrimp,heuristic_vote,protein_anchor,protein_anchor,1
+sardines,Sardines,heuristic_vote,protein_anchor,protein_anchor,1
+cottage_cheese,Cottage cheese,heuristic_vote,protein_anchor,protein_anchor,1
+protein_yogurt,Protein yogurt,heuristic_vote,protein_anchor,protein_anchor,1
+ricotta,Ricotta,heuristic_vote,calorie_booster,protein_anchor,0
+cheese,Cheese,heuristic_vote,calorie_booster,calorie_booster,1
+hummus,Hummus,heuristic_vote,protein_anchor,protein_anchor,1
+veggie_burger,Veggie burger,heuristic_vote,protein_anchor,protein_anchor,1
+almond_butter,Almond butter,heuristic_vote,calorie_booster,calorie_booster,1
+nuts,Nuts,heuristic_vote,calorie_booster,calorie_booster,1
+almonds,Almonds,heuristic_vote,calorie_booster,calorie_booster,1
+walnuts,Walnuts,heuristic_vote,calorie_booster,calorie_booster,1
+cashews,Cashews,heuristic_vote,calorie_booster,calorie_booster,1
+pasta,Pasta,heuristic_vote,carb_base,carb_base,1
+quinoa,Quinoa,heuristic_vote,carb_base,carb_base,1
+tortilla,Tortilla,heuristic_vote,carb_base,carb_base,1
+sweet_potatoes,Sweet potatoes,heuristic_vote,carb_base,produce,0
+couscous,Couscous,heuristic_vote,carb_base,carb_base,1
+barley,Barley,heuristic_vote,carb_base,carb_base,1
+bagel,Bagel,heuristic_vote,carb_base,carb_base,1
+pita,Pita bread,heuristic_vote,carb_base,carb_base,1
+corn,Corn,heuristic_vote,carb_base,carb_base,1
+corn_tortilla,Corn tortilla,heuristic_vote,carb_base,carb_base,1
+corn_flakes,Corn flakes,heuristic_vote,carb_base,carb_base,1
+apples,Apples,heuristic_vote,produce,produce,1
+oranges,Oranges,heuristic_vote,produce,produce,1
+berries,Berries,heuristic_vote,produce,produce,1
+carrots,Carrots,heuristic_vote,produce,produce,1
+tomatoes,Tomatoes,heuristic_vote,produce,produce,1
+cucumber,Cucumber,heuristic_vote,produce,produce,1
+bell_peppers,Bell peppers,heuristic_vote,produce,produce,1
+avocado,Avocado,heuristic_vote,calorie_booster,produce,0
+cauliflower,Cauliflower,heuristic_vote,produce,produce,1
+lettuce,Lettuce,heuristic_vote,produce,produce,1
+grapes,Grapes,heuristic_vote,produce,produce,1
+mushrooms,Mushrooms,heuristic_vote,produce,produce,1
+zucchini,Zucchini,heuristic_vote,produce,produce,1
+kale,Kale,heuristic_vote,produce,produce,1
+onions,Onions,heuristic_vote,produce,produce,1
+peas,Peas,heuristic_vote,produce,produce,1
+celery,Celery,heuristic_vote,produce,produce,1
+brussels_sprouts,Brussels sprouts,heuristic_vote,produce,produce,1
+green_beans,Green beans,heuristic_vote,produce,produce,1
+asparagus,Asparagus,heuristic_vote,produce,produce,1
+cabbage,Cabbage,heuristic_vote,produce,produce,1
+beetroot,Beetroot,heuristic_vote,produce,produce,1
+pears,Pears,heuristic_vote,produce,produce,1
+kiwi,Kiwi,heuristic_vote,produce,produce,1
+pineapple,Pineapple,heuristic_vote,produce,produce,1
+mango,Mango,heuristic_vote,produce,produce,1
+frozen_vegetables,Frozen vegetables,heuristic_vote,produce,produce,1
