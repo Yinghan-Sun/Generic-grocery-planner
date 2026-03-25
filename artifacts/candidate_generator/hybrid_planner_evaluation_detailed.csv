@@ -1,0 +1,566 @@
+system_id,system_label,scenario_id,split,goal_profile,days,shopping_mode,selected_candidate_source,model_selected,candidate_count_considered,generation_time_ms,protein_abs_gap_g,calorie_abs_gap_kcal,macro_gap_ratio_sum,estimated_basket_cost,price_per_1000_kcal,price_per_100g_protein,unique_ingredient_count,role_diversity_count,warning_count,scorer_score
+heuristic_only,Heuristic Only,balanced_any:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,58.462,3.9,79.1,7.490509,21.46,3.449662,6.026397,6,4,2,10.661014
+hybrid_best,Hybrid Best Model,balanced_any:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,382.944,3.9,79.1,7.490509,21.46,3.449662,6.026397,6,4,2,10.661014
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,87.561,3.9,79.1,7.490509,21.46,3.449662,6.026397,6,4,2,10.661014
+hybrid_random_forest,Hybrid random_forest,balanced_any:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,348.577,3.9,79.1,7.490509,21.46,3.449662,6.026397,6,4,2,10.661014
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,134.215,3.9,79.1,7.490509,21.46,3.449662,6.026397,6,4,2,10.661014
+heuristic_only,Heuristic Only,balanced_any:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,64.646,25.4,59.6,8.731637,43.42,4.111898,6.942757,8,4,2,2.263617
+hybrid_best,Hybrid Best Model,balanced_any:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,495.258,25.4,59.6,8.731637,43.42,4.111898,6.942757,8,4,2,2.263617
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,93.227,25.4,59.6,8.731637,43.42,4.111898,6.942757,8,4,2,2.263617
+hybrid_random_forest,Hybrid random_forest,balanced_any:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,370.597,25.4,59.6,8.731637,43.42,4.111898,6.942757,8,4,2,2.263617
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,129.465,25.4,59.6,8.731637,43.42,4.111898,6.942757,8,4,2,2.263617
+heuristic_only,Heuristic Only,balanced_any:new_york:7:bulk:empty,test,maintenance,7,bulk,heuristic,0,6,69.275,65.7,307.1,6.773039,58.33,4.052693,7.533256,8,4,4,1.498768
+hybrid_best,Hybrid Best Model,balanced_any:new_york:7:bulk:empty,test,maintenance,7,bulk,hybrid,1,6,379.55,65.7,307.1,6.773039,58.33,4.052693,7.533256,8,4,4,1.498768
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:new_york:7:bulk:empty,test,maintenance,7,bulk,hybrid,1,6,83.582,65.7,307.1,6.773039,58.33,4.052693,7.533256,8,4,4,1.498768
+hybrid_random_forest,Hybrid random_forest,balanced_any:new_york:7:bulk:empty,test,maintenance,7,bulk,hybrid,1,6,352.651,65.7,307.1,6.773039,58.33,4.052693,7.533256,8,4,4,1.498768
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:new_york:7:bulk:empty,test,maintenance,7,bulk,hybrid,1,6,118.402,65.7,307.1,6.773039,58.33,4.052693,7.533256,8,4,4,1.498768
+heuristic_only,Heuristic Only,balanced_any:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,64.072,69.7,91.5,8.361537,36.73,3.467875,5.484545,8,4,2,2.796197
+hybrid_best,Hybrid Best Model,balanced_any:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,376.685,69.7,91.5,8.361537,36.73,3.467875,5.484545,8,4,2,2.796197
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,80.355,69.7,91.5,8.361537,36.73,3.467875,5.484545,8,4,2,2.796197
+hybrid_random_forest,Hybrid random_forest,balanced_any:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,359.691,69.7,91.5,8.361537,36.73,3.467875,5.484545,8,4,2,2.796197
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,126.715,69.7,91.5,8.361537,36.73,3.467875,5.484545,8,4,2,2.796197
+heuristic_only,Heuristic Only,balanced_any:us:3:fresh:empty,test,maintenance,3,fresh,heuristic,0,6,58.518,3.9,79.1,7.490509,22.67,3.644167,6.366189,6,4,2,10.468918
+hybrid_best,Hybrid Best Model,balanced_any:us:3:fresh:empty,test,maintenance,3,fresh,hybrid,1,6,384.572,3.9,79.1,7.490509,22.67,3.644167,6.366189,6,4,2,10.468918
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:us:3:fresh:empty,test,maintenance,3,fresh,heuristic,0,6,80.536,3.9,79.1,7.490509,22.67,3.644167,6.366189,6,4,2,10.468918
+hybrid_random_forest,Hybrid random_forest,balanced_any:us:3:fresh:empty,test,maintenance,3,fresh,hybrid,1,6,361.983,3.9,79.1,7.490509,22.67,3.644167,6.366189,6,4,2,10.468918
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:us:3:fresh:empty,test,maintenance,3,fresh,heuristic,0,6,114.483,3.9,79.1,7.490509,22.67,3.644167,6.366189,6,4,2,10.468918
+heuristic_only,Heuristic Only,balanced_any:us:3:fresh:protein_stocked,test,maintenance,3,fresh,heuristic,0,5,60.881,3.9,79.1,7.490509,17.16,2.758443,4.818871,5,4,2,11.13712
+hybrid_best,Hybrid Best Model,balanced_any:us:3:fresh:protein_stocked,test,maintenance,3,fresh,heuristic,0,5,374.279,3.9,79.1,7.490509,17.16,2.758443,4.818871,5,4,2,11.13712
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:us:3:fresh:protein_stocked,test,maintenance,3,fresh,heuristic,0,5,82.267,3.9,79.1,7.490509,17.16,2.758443,4.818871,5,4,2,11.13712
+hybrid_random_forest,Hybrid random_forest,balanced_any:us:3:fresh:protein_stocked,test,maintenance,3,fresh,heuristic,0,5,355.405,3.9,79.1,7.490509,17.16,2.758443,4.818871,5,4,2,11.13712
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:us:3:fresh:protein_stocked,test,maintenance,3,fresh,heuristic,0,5,163.111,3.9,79.1,7.490509,17.16,2.758443,4.818871,5,4,2,11.13712
+heuristic_only,Heuristic Only,balanced_any:us:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,61.371,25.4,59.6,8.731637,40.01,3.788969,6.397506,8,4,2,2.700021
+hybrid_best,Hybrid Best Model,balanced_any:us:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,375.5,25.4,59.6,8.731637,40.01,3.788969,6.397506,8,4,2,2.700021
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:us:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,83.329,25.4,59.6,8.731637,40.01,3.788969,6.397506,8,4,2,2.700021
+hybrid_random_forest,Hybrid random_forest,balanced_any:us:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,358.424,25.4,59.6,8.731637,40.01,3.788969,6.397506,8,4,2,2.700021
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:us:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,120.887,25.4,59.6,8.731637,40.01,3.788969,6.397506,8,4,2,2.700021
+heuristic_only,Heuristic Only,balanced_any:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,57.638,25.4,59.6,8.731637,33.57,3.179098,5.367765,8,4,2,2.785935
+hybrid_best,Hybrid Best Model,balanced_any:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,368.867,25.4,59.6,8.731637,33.57,3.179098,5.367765,8,4,2,2.785935
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,84.933,25.4,59.6,8.731637,33.57,3.179098,5.367765,8,4,2,2.785935
+hybrid_random_forest,Hybrid random_forest,balanced_any:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,359.051,25.4,59.6,8.731637,33.57,3.179098,5.367765,8,4,2,2.785935
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,120.36,25.4,59.6,8.731637,33.57,3.179098,5.367765,8,4,2,2.785935
+heuristic_only,Heuristic Only,balanced_any:us:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,58.25,65.7,307.1,6.773039,46.15,3.206442,5.960222,8,4,4,2.134278
+hybrid_best,Hybrid Best Model,balanced_any:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,365.135,65.7,307.1,6.773039,46.15,3.206442,5.960222,8,4,4,2.134278
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,84.045,65.7,307.1,6.773039,46.15,3.206442,5.960222,8,4,4,2.134278
+hybrid_random_forest,Hybrid random_forest,balanced_any:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,362.973,65.7,307.1,6.773039,46.15,3.206442,5.960222,8,4,4,2.134278
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,119.297,65.7,307.1,6.773039,46.15,3.206442,5.960222,8,4,4,2.134278
+heuristic_only,Heuristic Only,balanced_any:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,59.444,25.4,59.6,8.731637,41.1,3.892193,6.571794,8,4,2,2.454273
+hybrid_best,Hybrid Best Model,balanced_any:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,371.392,25.4,59.6,8.731637,41.1,3.892193,6.571794,8,4,2,2.454273
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,86.391,25.4,59.6,8.731637,41.1,3.892193,6.571794,8,4,2,2.454273
+hybrid_random_forest,Hybrid random_forest,balanced_any:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,360.074,25.4,59.6,8.731637,41.1,3.892193,6.571794,8,4,2,2.454273
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,116.165,25.4,59.6,8.731637,41.1,3.892193,6.571794,8,4,2,2.454273
+heuristic_only,Heuristic Only,balanced_any:west:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,59.399,79.0,359.9,6.360555,51.23,3.572499,6.731932,8,4,4,1.971389
+hybrid_best,Hybrid Best Model,balanced_any:west:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,371.255,79.0,359.9,6.360555,51.23,3.572499,6.731932,8,4,4,1.971389
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:west:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,81.67,79.0,359.9,6.360555,51.23,3.572499,6.731932,8,4,4,1.971389
+hybrid_random_forest,Hybrid random_forest,balanced_any:west:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,356.406,79.0,359.9,6.360555,51.23,3.572499,6.731932,8,4,4,1.971389
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:west:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,119.958,79.0,359.9,6.360555,51.23,3.572499,6.731932,8,4,4,1.971389
+heuristic_only,Heuristic Only,balanced_any:west:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,62.006,65.7,307.1,6.773039,43.76,3.040388,5.651556,8,4,4,2.142702
+hybrid_best,Hybrid Best Model,balanced_any:west:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,397.843,65.7,307.1,6.773039,43.76,3.040388,5.651556,8,4,4,2.142702
+hybrid_logistic_regression,Hybrid logistic_regression,balanced_any:west:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,88.368,65.7,307.1,6.773039,43.76,3.040388,5.651556,8,4,4,2.142702
+hybrid_random_forest,Hybrid random_forest,balanced_any:west:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,439.465,65.7,307.1,6.773039,43.76,3.040388,5.651556,8,4,4,2.142702
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,balanced_any:west:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,122.449,65.7,307.1,6.773039,43.76,3.040388,5.651556,8,4,4,2.142702
+heuristic_only,Heuristic Only,breakfast:new_york:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,62.785,36.4,4239.3,1.464769,48.92,3.560589,8.713929,8,3,1,4.195509
+hybrid_best,Hybrid Best Model,breakfast:new_york:5:balanced:empty,test,generic_balanced,5,balanced,repaired_model,1,8,378.803,30.2,3835.5,1.56712,48.07,3.604664,9.715036,8,4,2,4.796346
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:new_york:5:balanced:empty,test,generic_balanced,5,balanced,repaired_model,1,8,84.945,30.2,3835.5,1.56712,48.07,3.604664,9.715036,8,4,2,4.796346
+hybrid_random_forest,Hybrid random_forest,breakfast:new_york:5:balanced:empty,test,generic_balanced,5,balanced,repaired_model,1,8,374.298,30.2,3835.5,1.56712,48.07,3.604664,9.715036,8,4,2,4.796346
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:new_york:5:balanced:empty,test,generic_balanced,5,balanced,repaired_model,1,8,138.298,30.2,3835.5,1.56712,48.07,3.604664,9.715036,8,4,2,4.796346
+heuristic_only,Heuristic Only,breakfast:new_york:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,65.532,36.4,4239.3,1.464769,42.76,3.11224,7.616673,7,3,1,5.662103
+hybrid_best,Hybrid Best Model,breakfast:new_york:5:balanced:mixed_staples,test,generic_balanced,5,balanced,repaired_model,1,8,364.079,30.2,3835.5,1.56712,42.1,3.156987,8.508488,7,4,2,6.544084
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:new_york:5:balanced:mixed_staples,test,generic_balanced,5,balanced,repaired_model,1,8,85.658,30.2,3835.5,1.56712,42.1,3.156987,8.508488,7,4,2,6.544084
+hybrid_random_forest,Hybrid random_forest,breakfast:new_york:5:balanced:mixed_staples,test,generic_balanced,5,balanced,repaired_model,1,8,368.038,30.2,3835.5,1.56712,42.1,3.156987,8.508488,7,4,2,6.544084
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:new_york:5:balanced:mixed_staples,test,generic_balanced,5,balanced,repaired_model,1,8,119.844,30.2,3835.5,1.56712,42.1,3.156987,8.508488,7,4,2,6.544084
+heuristic_only,Heuristic Only,breakfast:new_york:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,6,60.262,94.3,3369.8,0.942983,55.95,3.356369,8.732636,7,3,6,4.784134
+hybrid_best,Hybrid Best Model,breakfast:new_york:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,375.308,94.3,3369.8,0.942983,55.95,3.356369,8.732636,7,3,6,4.784134
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:new_york:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,8,87.78,94.3,3369.8,0.942983,55.95,3.356369,8.732636,7,3,6,4.784134
+hybrid_random_forest,Hybrid random_forest,breakfast:new_york:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,354.549,94.3,3369.8,0.942983,55.95,3.356369,8.732636,7,3,6,4.784134
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:new_york:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,120.057,94.3,3369.8,0.942983,55.95,3.356369,8.732636,7,3,6,4.784134
+heuristic_only,Heuristic Only,breakfast:south:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,6,55.786,6.7,13.5,0.953169,7.24,3.783643,7.365209,5,3,0,14.34161
+hybrid_best,Hybrid Best Model,breakfast:south:1:balanced:empty,test,generic_balanced,1,balanced,hybrid,1,8,373.851,6.7,13.5,0.953169,7.24,3.783643,7.365209,5,3,0,14.34161
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:south:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,8,83.216,6.7,13.5,0.953169,7.24,3.783643,7.365209,5,3,0,14.34161
+hybrid_random_forest,Hybrid random_forest,breakfast:south:1:balanced:empty,test,generic_balanced,1,balanced,hybrid,1,8,354.306,6.7,13.5,0.953169,7.24,3.783643,7.365209,5,3,0,14.34161
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:south:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,8,117.324,6.7,13.5,0.953169,7.24,3.783643,7.365209,5,3,0,14.34161
+heuristic_only,Heuristic Only,breakfast:south:3:fresh:empty,test,generic_balanced,3,fresh,heuristic,0,6,58.858,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_best,Hybrid Best Model,breakfast:south:3:fresh:empty,test,generic_balanced,3,fresh,hybrid,1,8,360.996,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:south:3:fresh:empty,test,generic_balanced,3,fresh,model,1,8,83.606,66.1,309.5,0.617139,23.97,3.988685,9.630374,6,4,2,12.919904
+hybrid_random_forest,Hybrid random_forest,breakfast:south:3:fresh:empty,test,generic_balanced,3,fresh,hybrid,1,8,346.915,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:south:3:fresh:empty,test,generic_balanced,3,fresh,hybrid,1,8,114.385,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+heuristic_only,Heuristic Only,breakfast:south:3:fresh:mixed_staples,test,generic_balanced,3,fresh,heuristic,0,6,54.295,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_best,Hybrid Best Model,breakfast:south:3:fresh:mixed_staples,test,generic_balanced,3,fresh,hybrid,1,8,355.436,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:south:3:fresh:mixed_staples,test,generic_balanced,3,fresh,model,1,8,79.714,66.1,309.5,0.617139,23.97,3.988685,9.630374,6,4,2,12.919904
+hybrid_random_forest,Hybrid random_forest,breakfast:south:3:fresh:mixed_staples,test,generic_balanced,3,fresh,hybrid,1,8,337.214,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:south:3:fresh:mixed_staples,test,generic_balanced,3,fresh,hybrid,1,8,117.257,7.6,106.0,0.761896,21.24,3.658285,6.909564,5,3,1,12.866285
+heuristic_only,Heuristic Only,breakfast:south:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,57.988,30.5,3239.8,1.520167,36.2,2.841489,7.320526,7,3,1,8.460685
+hybrid_best,Hybrid Best Model,breakfast:south:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,8,379.363,30.5,3239.8,1.520167,36.2,2.841489,7.320526,7,3,1,8.460685
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:south:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,8,82.784,30.5,3239.8,1.520167,36.2,2.841489,7.320526,7,3,1,8.460685
+hybrid_random_forest,Hybrid random_forest,breakfast:south:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,8,360.638,30.5,3239.8,1.520167,36.2,2.841489,7.320526,7,3,1,8.460685
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:south:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,8,133.913,30.5,3239.8,1.520167,36.2,2.841489,7.320526,7,3,1,8.460685
+heuristic_only,Heuristic Only,breakfast:us:1:balanced:protein_stocked,test,generic_balanced,1,balanced,heuristic,0,6,59.001,3.3,229.2,0.633135,6.62,3.109149,6.509341,4,3,0,14.488963
+hybrid_best,Hybrid Best Model,breakfast:us:1:balanced:protein_stocked,test,generic_balanced,1,balanced,heuristic,0,8,372.37,3.3,229.2,0.633135,6.62,3.109149,6.509341,4,3,0,14.488963
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:us:1:balanced:protein_stocked,test,generic_balanced,1,balanced,heuristic,0,8,80.802,3.3,229.2,0.633135,6.62,3.109149,6.509341,4,3,0,14.488963
+hybrid_random_forest,Hybrid random_forest,breakfast:us:1:balanced:protein_stocked,test,generic_balanced,1,balanced,heuristic,0,8,475.344,3.3,229.2,0.633135,6.62,3.109149,6.509341,4,3,0,14.488963
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:us:1:balanced:protein_stocked,test,generic_balanced,1,balanced,heuristic,0,10,116.684,3.3,229.2,0.633135,6.62,3.109149,6.509341,4,3,0,14.488963
+heuristic_only,Heuristic Only,breakfast:us:3:fresh:mixed_staples,test,generic_balanced,3,fresh,heuristic,0,6,60.403,4.7,720.3,0.38596,26.17,4.076134,8.185799,5,3,1,12.564293
+hybrid_best,Hybrid Best Model,breakfast:us:3:fresh:mixed_staples,test,generic_balanced,3,fresh,model,1,10,363.085,7.6,106.0,0.761896,21.93,3.777127,7.134027,5,3,1,12.873645
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:us:3:fresh:mixed_staples,test,generic_balanced,3,fresh,model,1,8,81.818,66.1,309.5,0.617139,24.35,4.051918,9.783045,6,4,2,12.940904
+hybrid_random_forest,Hybrid random_forest,breakfast:us:3:fresh:mixed_staples,test,generic_balanced,3,fresh,model,1,10,365.79,7.6,106.0,0.761896,21.93,3.777127,7.134027,5,3,1,12.873645
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:us:3:fresh:mixed_staples,test,generic_balanced,3,fresh,model,1,10,121.034,7.6,106.0,0.761896,21.93,3.777127,7.134027,5,3,1,12.873645
+heuristic_only,Heuristic Only,breakfast:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,55.875,30.5,3239.8,1.520167,31.78,2.494545,6.426694,6,3,1,9.686856
+hybrid_best,Hybrid Best Model,breakfast:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,8,416.387,30.5,3239.8,1.520167,31.78,2.494545,6.426694,6,3,1,9.686856
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,8,82.511,30.5,3239.8,1.520167,31.78,2.494545,6.426694,6,3,1,9.686856
+hybrid_random_forest,Hybrid random_forest,breakfast:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,8,355.824,30.5,3239.8,1.520167,31.78,2.494545,6.426694,6,3,1,9.686856
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,8,122.786,30.5,3239.8,1.520167,31.78,2.494545,6.426694,6,3,1,9.686856
+heuristic_only,Heuristic Only,breakfast:us:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,6,61.661,30.5,3239.8,1.520167,33.38,2.620135,6.750253,7,3,1,8.571131
+hybrid_best,Hybrid Best Model,breakfast:us:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,8,371.627,30.5,3239.8,1.520167,33.38,2.620135,6.750253,7,3,1,8.571131
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:us:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,8,84.469,30.5,3239.8,1.520167,33.38,2.620135,6.750253,7,3,1,8.571131
+hybrid_random_forest,Hybrid random_forest,breakfast:us:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,8,365.331,30.5,3239.8,1.520167,33.38,2.620135,6.750253,7,3,1,8.571131
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:us:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,8,120.089,30.5,3239.8,1.520167,33.38,2.620135,6.750253,7,3,1,8.571131
+heuristic_only,Heuristic Only,breakfast:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,6,61.201,15.6,6280.5,2.085985,47.71,2.436608,6.631915,6,3,5,6.2049
+hybrid_best,Hybrid Best Model,breakfast:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,10,378.425,15.6,6280.5,2.085985,47.71,2.436608,6.631915,6,3,5,6.2049
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,8,85.841,15.6,6280.5,2.085985,47.71,2.436608,6.631915,6,3,5,6.2049
+hybrid_random_forest,Hybrid random_forest,breakfast:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,10,372.296,15.6,6280.5,2.085985,47.71,2.436608,6.631915,6,3,5,6.2049
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,10,117.56,15.6,6280.5,2.085985,47.71,2.436608,6.631915,6,3,5,6.2049
+heuristic_only,Heuristic Only,breakfast:west:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,6,59.344,15.6,6280.5,2.085985,43.86,2.239984,6.096747,6,3,5,6.434066
+hybrid_best,Hybrid Best Model,breakfast:west:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,377.165,15.6,6280.5,2.085985,43.86,2.239984,6.096747,6,3,5,6.434066
+hybrid_logistic_regression,Hybrid logistic_regression,breakfast:west:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,8,85.096,15.6,6280.5,2.085985,43.86,2.239984,6.096747,6,3,5,6.434066
+hybrid_random_forest,Hybrid random_forest,breakfast:west:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,399.658,15.6,6280.5,2.085985,43.86,2.239984,6.096747,6,3,5,6.434066
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,breakfast:west:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,10,119.364,15.6,6280.5,2.085985,43.86,2.239984,6.096747,6,3,5,6.434066
+heuristic_only,Heuristic Only,budget_friendly:midwest:3:fresh:empty,test,budget_friendly_healthy,3,fresh,heuristic,0,6,58.093,5.4,592.3,5.08666,16.99,2.46507,5.234134,6,4,0,15.297915
+hybrid_best,Hybrid Best Model,budget_friendly:midwest:3:fresh:empty,test,budget_friendly_healthy,3,fresh,model,1,10,374.532,7.2,173.1,4.841202,16.5,2.549011,5.111524,6,4,0,15.365979
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:midwest:3:fresh:empty,test,budget_friendly_healthy,3,fresh,heuristic,0,6,83.219,5.4,592.3,5.08666,16.99,2.46507,5.234134,6,4,0,15.297915
+hybrid_random_forest,Hybrid random_forest,budget_friendly:midwest:3:fresh:empty,test,budget_friendly_healthy,3,fresh,model,1,10,355.936,7.2,173.1,4.841202,16.5,2.549011,5.111524,6,4,0,15.365979
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:midwest:3:fresh:empty,test,budget_friendly_healthy,3,fresh,model,1,10,113.103,7.2,173.1,4.841202,16.5,2.549011,5.111524,6,4,0,15.365979
+heuristic_only,Heuristic Only,budget_friendly:midwest:3:fresh:protein_stocked,test,budget_friendly_healthy,3,fresh,heuristic,0,6,55.371,5.4,592.3,5.08666,14.08,2.042859,4.337646,6,4,0,15.297915
+hybrid_best,Hybrid Best Model,budget_friendly:midwest:3:fresh:protein_stocked,test,budget_friendly_healthy,3,fresh,model,1,10,362.139,7.2,173.1,4.841202,16.5,2.549011,5.111524,6,4,0,15.365979
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:midwest:3:fresh:protein_stocked,test,budget_friendly_healthy,3,fresh,heuristic,0,6,79.137,5.4,592.3,5.08666,14.08,2.042859,4.337646,6,4,0,15.297915
+hybrid_random_forest,Hybrid random_forest,budget_friendly:midwest:3:fresh:protein_stocked,test,budget_friendly_healthy,3,fresh,model,1,10,365.084,7.2,173.1,4.841202,16.5,2.549011,5.111524,6,4,0,15.365979
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:midwest:3:fresh:protein_stocked,test,budget_friendly_healthy,3,fresh,hybrid,1,6,117.492,5.4,592.3,5.08666,14.08,2.042859,4.337646,6,4,0,15.297915
+heuristic_only,Heuristic Only,budget_friendly:new_york:1:balanced:empty,test,budget_friendly_healthy,1,balanced,heuristic,0,6,53.392,8.8,107.8,4.915657,6.26,2.835402,6.185771,6,4,0,16.993295
+hybrid_best,Hybrid Best Model,budget_friendly:new_york:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,420.022,2.5,51.5,4.875383,6.13,2.849175,5.702326,6,4,0,17.24755
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:new_york:1:balanced:empty,test,budget_friendly_healthy,1,balanced,hybrid,1,6,88.464,8.8,107.8,4.915657,6.26,2.835402,6.185771,6,4,0,16.993295
+hybrid_random_forest,Hybrid random_forest,budget_friendly:new_york:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,369.129,2.5,51.5,4.875383,6.13,2.849175,5.702326,6,4,0,17.24755
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:new_york:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,120.912,2.5,51.5,4.875383,6.13,2.849175,5.702326,6,4,0,17.24755
+heuristic_only,Heuristic Only,budget_friendly:new_york:7:bulk:empty,test,budget_friendly_healthy,7,bulk,heuristic,0,6,61.539,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_best,Hybrid Best Model,budget_friendly:new_york:7:bulk:empty,test,budget_friendly_healthy,7,bulk,hybrid,1,6,397.599,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:new_york:7:bulk:empty,test,budget_friendly_healthy,7,bulk,heuristic,0,6,88.962,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_random_forest,Hybrid random_forest,budget_friendly:new_york:7:bulk:empty,test,budget_friendly_healthy,7,bulk,hybrid,1,6,364.778,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:new_york:7:bulk:empty,test,budget_friendly_healthy,7,bulk,hybrid,1,6,120.97,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+heuristic_only,Heuristic Only,budget_friendly:new_york:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,heuristic,0,6,59.566,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_best,Hybrid Best Model,budget_friendly:new_york:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,377.391,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:new_york:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,heuristic,0,6,81.738,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_random_forest,Hybrid random_forest,budget_friendly:new_york:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,362.843,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:new_york:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,114.613,16.5,4457.4,6.093919,42.47,2.216898,5.399873,6,4,1,9.504572
+heuristic_only,Heuristic Only,budget_friendly:new_york:7:bulk:protein_stocked,test,budget_friendly_healthy,7,bulk,heuristic,0,6,62.223,19.6,4063.3,6.07837,39.47,2.103575,5.259861,6,4,1,9.753747
+hybrid_best,Hybrid Best Model,budget_friendly:new_york:7:bulk:protein_stocked,test,budget_friendly_healthy,7,bulk,hybrid,1,6,368.552,19.6,4063.3,6.07837,39.47,2.103575,5.259861,6,4,1,9.753747
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:new_york:7:bulk:protein_stocked,test,budget_friendly_healthy,7,bulk,heuristic,0,6,80.827,19.6,4063.3,6.07837,39.47,2.103575,5.259861,6,4,1,9.753747
+hybrid_random_forest,Hybrid random_forest,budget_friendly:new_york:7:bulk:protein_stocked,test,budget_friendly_healthy,7,bulk,hybrid,1,6,362.001,19.6,4063.3,6.07837,39.47,2.103575,5.259861,6,4,1,9.753747
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:new_york:7:bulk:protein_stocked,test,budget_friendly_healthy,7,bulk,hybrid,1,6,114.136,19.6,4063.3,6.07837,39.47,2.103575,5.259861,6,4,1,9.753747
+heuristic_only,Heuristic Only,budget_friendly:south:5:balanced:empty,test,budget_friendly_healthy,5,balanced,heuristic,0,6,58.928,22.8,2135.1,6.376646,27.68,2.190723,5.250379,6,4,0,12.854249
+hybrid_best,Hybrid Best Model,budget_friendly:south:5:balanced:empty,test,budget_friendly_healthy,5,balanced,hybrid,1,6,384.547,22.8,2135.1,6.376646,27.68,2.190723,5.250379,6,4,0,12.854249
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:south:5:balanced:empty,test,budget_friendly_healthy,5,balanced,heuristic,0,10,83.001,22.8,2135.1,6.376646,27.68,2.190723,5.250379,6,4,0,12.854249
+hybrid_random_forest,Hybrid random_forest,budget_friendly:south:5:balanced:empty,test,budget_friendly_healthy,5,balanced,hybrid,1,6,366.165,22.8,2135.1,6.376646,27.68,2.190723,5.250379,6,4,0,12.854249
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:south:5:balanced:empty,test,budget_friendly_healthy,5,balanced,hybrid,1,6,134.084,22.8,2135.1,6.376646,27.68,2.190723,5.250379,6,4,0,12.854249
+heuristic_only,Heuristic Only,budget_friendly:south:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,heuristic,0,6,67.744,16.5,4457.4,6.093919,38.63,2.016453,4.911634,6,4,1,9.906951
+hybrid_best,Hybrid Best Model,budget_friendly:south:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,377.078,16.5,4457.4,6.093919,38.63,2.016453,4.911634,6,4,1,9.906951
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:south:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,heuristic,0,6,85.421,16.5,4457.4,6.093919,38.63,2.016453,4.911634,6,4,1,9.906951
+hybrid_random_forest,Hybrid random_forest,budget_friendly:south:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,360.297,16.5,4457.4,6.093919,38.63,2.016453,4.911634,6,4,1,9.906951
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:south:7:bulk:mixed_staples,test,budget_friendly_healthy,7,bulk,hybrid,1,6,114.707,16.5,4457.4,6.093919,38.63,2.016453,4.911634,6,4,1,9.906951
+heuristic_only,Heuristic Only,budget_friendly:us:1:balanced:protein_stocked,test,budget_friendly_healthy,1,balanced,heuristic,0,6,67.547,12.5,67.9,4.908945,4.36,2.011163,4.471795,5,3,0,16.540511
+hybrid_best,Hybrid Best Model,budget_friendly:us:1:balanced:protein_stocked,test,budget_friendly_healthy,1,balanced,model,1,10,428.875,2.5,51.5,4.875383,5.59,2.598187,5.2,6,4,0,17.113328
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:us:1:balanced:protein_stocked,test,budget_friendly_healthy,1,balanced,heuristic,0,6,80.857,12.5,67.9,4.908945,4.36,2.011163,4.471795,5,3,0,16.540511
+hybrid_random_forest,Hybrid random_forest,budget_friendly:us:1:balanced:protein_stocked,test,budget_friendly_healthy,1,balanced,model,1,10,353.33,2.5,51.5,4.875383,5.59,2.598187,5.2,6,4,0,17.113328
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:us:1:balanced:protein_stocked,test,budget_friendly_healthy,1,balanced,model,1,10,114.145,2.5,51.5,4.875383,5.59,2.598187,5.2,6,4,0,17.113328
+heuristic_only,Heuristic Only,budget_friendly:west:1:balanced:empty,test,budget_friendly_healthy,1,balanced,heuristic,0,6,58.132,8.8,107.8,4.915657,5.75,2.604403,5.681818,6,4,0,17.081773
+hybrid_best,Hybrid Best Model,budget_friendly:west:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,375.452,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:west:1:balanced:empty,test,budget_friendly_healthy,1,balanced,heuristic,0,6,84.184,8.8,107.8,4.915657,5.75,2.604403,5.681818,6,4,0,17.081773
+hybrid_random_forest,Hybrid random_forest,budget_friendly:west:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,348.569,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:west:1:balanced:empty,test,budget_friendly_healthy,1,balanced,model,1,10,112.486,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+heuristic_only,Heuristic Only,budget_friendly:west:1:balanced:mixed_staples,test,budget_friendly_healthy,1,balanced,heuristic,0,6,54.703,8.8,107.8,4.915657,5.75,2.604403,5.681818,6,4,0,17.081773
+hybrid_best,Hybrid Best Model,budget_friendly:west:1:balanced:mixed_staples,test,budget_friendly_healthy,1,balanced,model,1,10,422.311,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:west:1:balanced:mixed_staples,test,budget_friendly_healthy,1,balanced,heuristic,0,6,79.674,8.8,107.8,4.915657,5.75,2.604403,5.681818,6,4,0,17.081773
+hybrid_random_forest,Hybrid random_forest,budget_friendly:west:1:balanced:mixed_staples,test,budget_friendly_healthy,1,balanced,model,1,10,379.025,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:west:1:balanced:mixed_staples,test,budget_friendly_healthy,1,balanced,model,1,10,118.667,2.5,51.5,4.875383,5.7,2.649314,5.302326,6,4,0,17.127518
+heuristic_only,Heuristic Only,budget_friendly:west:5:balanced:mixed_staples,test,budget_friendly_healthy,5,balanced,heuristic,0,6,67.816,22.8,2135.1,6.376646,26.83,2.12345,5.08915,6,4,0,12.854249
+hybrid_best,Hybrid Best Model,budget_friendly:west:5:balanced:mixed_staples,test,budget_friendly_healthy,5,balanced,hybrid,1,6,460.174,22.8,2135.1,6.376646,26.83,2.12345,5.08915,6,4,0,12.854249
+hybrid_logistic_regression,Hybrid logistic_regression,budget_friendly:west:5:balanced:mixed_staples,test,budget_friendly_healthy,5,balanced,hybrid,1,6,86.971,22.8,2135.1,6.376646,26.83,2.12345,5.08915,6,4,0,12.854249
+hybrid_random_forest,Hybrid random_forest,budget_friendly:west:5:balanced:mixed_staples,test,budget_friendly_healthy,5,balanced,hybrid,1,6,353.528,22.8,2135.1,6.376646,26.83,2.12345,5.08915,6,4,0,12.854249
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,budget_friendly:west:5:balanced:mixed_staples,test,budget_friendly_healthy,5,balanced,hybrid,1,6,115.288,22.8,2135.1,6.376646,26.83,2.12345,5.08915,6,4,0,12.854249
+heuristic_only,Heuristic Only,dairy_free_high_protein:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,58.63,0.2,13.6,0.911316,19.11,2.969051,4.71619,6,4,0,10.363525
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,365.339,1.6,23.0,1.15117,19.16,2.981173,4.712248,6,4,0,10.751291
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,81.805,1.6,23.0,1.15117,19.16,2.981173,4.712248,6,4,0,10.751291
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,358.433,1.6,23.0,1.15117,19.16,2.981173,4.712248,6,4,0,10.751291
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,119.791,1.6,23.0,1.15117,19.16,2.981173,4.712248,6,4,0,10.751291
+heuristic_only,Heuristic Only,dairy_free_high_protein:midwest:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,64.378,27.5,147.4,0.990592,35.55,3.262246,5.060498,8,4,0,4.002146
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:midwest:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,364.637,4.0,4.4,0.986481,30.22,2.810013,4.503726,7,4,0,9.210013
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:midwest:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,86.211,4.0,4.4,0.986481,30.22,2.810013,4.503726,7,4,0,9.210013
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:midwest:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,353.022,4.0,4.4,0.986481,30.22,2.810013,4.503726,7,4,0,9.210013
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:midwest:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,116.707,4.0,4.4,0.986481,30.22,2.810013,4.503726,7,4,0,9.210013
+heuristic_only,Heuristic Only,dairy_free_high_protein:midwest:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,70.051,154.2,321.2,1.120758,40.93,2.778909,5.175771,8,4,4,3.588921
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:midwest:7:bulk:mixed_staples,test,maintenance,7,bulk,repaired_model,1,10,381.629,181.0,264.8,1.001681,36.43,2.46395,4.768325,7,4,3,8.834696
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:midwest:7:bulk:mixed_staples,test,maintenance,7,bulk,repaired_model,1,10,83.443,181.0,264.8,1.001681,36.43,2.46395,4.768325,7,4,3,8.834696
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:midwest:7:bulk:mixed_staples,test,maintenance,7,bulk,repaired_model,1,10,366.983,181.0,264.8,1.001681,36.43,2.46395,4.768325,7,4,3,8.834696
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:midwest:7:bulk:mixed_staples,test,maintenance,7,bulk,repaired_model,1,10,118.051,181.0,264.8,1.001681,36.43,2.46395,4.768325,7,4,3,8.834696
+heuristic_only,Heuristic Only,dairy_free_high_protein:new_york:1:balanced:mixed_staples,test,maintenance,1,balanced,heuristic,0,6,61.394,0.0,30.0,1.122498,8.83,4.050459,6.540741,6,4,0,12.390812
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:new_york:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,373.323,0.8,15.6,1.220731,7.05,3.255449,5.191458,6,4,0,12.923258
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:new_york:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,83.643,1.2,17.3,1.157859,7.92,3.713602,5.919283,6,4,0,12.973182
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:new_york:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,366.831,0.8,15.6,1.220731,7.05,3.255449,5.191458,6,4,0,12.923258
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:new_york:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,113.679,1.2,17.3,1.157859,7.92,3.713602,5.919283,6,4,0,12.973182
+heuristic_only,Heuristic Only,dairy_free_high_protein:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,63.406,0.2,13.6,0.911316,23.58,3.663539,5.819348,6,4,0,10.326322
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,394.136,1.8,6.9,1.216943,21.01,3.260853,5.210813,6,4,0,10.707694
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,84.512,1.6,23.0,1.15117,24.09,3.74825,5.924742,6,4,0,10.702788
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,359.561,1.8,6.9,1.216943,21.01,3.260853,5.210813,6,4,0,10.707694
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,115.526,1.6,23.0,1.15117,24.09,3.74825,5.924742,6,4,0,10.702788
+heuristic_only,Heuristic Only,dairy_free_high_protein:south:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,58.019,0.2,13.6,0.911316,18.55,2.882046,4.577986,6,4,0,10.364272
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:south:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,364.766,1.6,23.0,1.15117,18.53,2.883149,4.557304,6,4,0,10.752038
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:south:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,82.279,1.6,23.0,1.15117,18.53,2.883149,4.557304,6,4,0,10.752038
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:south:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,361.062,1.6,23.0,1.15117,18.53,2.883149,4.557304,6,4,0,10.752038
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:south:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,122.772,1.6,23.0,1.15117,18.53,2.883149,4.557304,6,4,0,10.752038
+heuristic_only,Heuristic Only,dairy_free_high_protein:south:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,58.283,27.5,147.4,0.990592,34.77,3.190669,4.949466,8,4,0,3.988727
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:south:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,386.913,4.0,4.4,0.986481,29.32,2.726326,4.369598,7,4,0,9.207094
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:south:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,90.817,4.0,4.4,0.986481,29.32,2.726326,4.369598,7,4,0,9.207094
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:south:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,366.029,4.0,4.4,0.986481,29.32,2.726326,4.369598,7,4,0,9.207094
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:south:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,151.766,4.0,4.4,0.986481,29.32,2.726326,4.369598,7,4,0,9.207094
+heuristic_only,Heuristic Only,dairy_free_high_protein:us:3:fresh:empty,test,maintenance,3,fresh,heuristic,0,6,59.808,3.1,11.9,1.680739,22.37,3.46183,5.4815,6,4,0,10.270156
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:us:3:fresh:empty,test,maintenance,3,fresh,model,1,10,379.33,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:us:3:fresh:empty,test,maintenance,3,fresh,model,1,10,83.549,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:us:3:fresh:empty,test,maintenance,3,fresh,model,1,10,366.863,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:us:3:fresh:empty,test,maintenance,3,fresh,model,1,10,116.537,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+heuristic_only,Heuristic Only,dairy_free_high_protein:us:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,59.269,0.2,13.6,0.911316,19.7,3.060717,4.861797,6,4,0,10.363525
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:us:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,371.817,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:us:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,82.97,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:us:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,354.893,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:us:3:fresh:mixed_staples,test,maintenance,3,fresh,model,1,10,114.626,1.6,23.0,1.15117,19.76,3.074529,4.859813,6,4,0,10.751291
+heuristic_only,Heuristic Only,dairy_free_high_protein:us:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,58.757,112.2,476.0,1.371166,31.31,3.047499,3.977388,8,3,0,7.021082
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:us:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,376.284,4.0,4.4,0.986481,27.34,2.542215,4.074516,7,4,0,9.210013
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:us:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,84.298,4.0,4.4,0.986481,27.34,2.542215,4.074516,7,4,0,9.210013
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:us:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,366.871,4.0,4.4,0.986481,27.34,2.542215,4.074516,7,4,0,9.210013
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:us:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,118.935,4.0,4.4,0.986481,27.34,2.542215,4.074516,7,4,0,9.210013
+heuristic_only,Heuristic Only,dairy_free_high_protein:west:1:balanced:protein_stocked,test,maintenance,1,balanced,heuristic,0,5,56.512,4.3,82.2,1.473342,3.92,1.895735,2.81407,3,2,0,12.754358
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:west:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,9,369.93,1.2,17.3,1.157859,5.16,2.419468,3.856502,5,3,0,12.826945
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:west:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,9,80.429,1.2,17.3,1.157859,5.16,2.419468,3.856502,5,3,0,12.826945
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:west:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,9,363.856,1.2,17.3,1.157859,5.16,2.419468,3.856502,5,3,0,12.826945
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:west:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,9,118.994,1.2,17.3,1.157859,5.16,2.419468,3.856502,5,3,0,12.826945
+heuristic_only,Heuristic Only,dairy_free_high_protein:west:5:balanced:empty,test,maintenance,5,balanced,heuristic,0,6,57.95,25.9,145.0,1.339244,38.29,3.514456,5.462976,8,4,0,3.754935
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:west:5:balanced:empty,test,maintenance,5,balanced,repaired_model,1,10,376.524,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:west:5:balanced:empty,test,maintenance,5,balanced,repaired_model,1,10,84.075,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:west:5:balanced:empty,test,maintenance,5,balanced,repaired_model,1,10,357.452,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:west:5:balanced:empty,test,maintenance,5,balanced,repaired_model,1,10,121.845,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+heuristic_only,Heuristic Only,dairy_free_high_protein:west:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,61.848,27.5,147.4,0.990592,37.6,3.450364,5.352313,8,4,0,3.946161
+hybrid_best,Hybrid Best Model,dairy_free_high_protein:west:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,380.952,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_logistic_regression,Hybrid logistic_regression,dairy_free_high_protein:west:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,85.231,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_random_forest,Hybrid random_forest,dairy_free_high_protein:west:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,361.596,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,dairy_free_high_protein:west:5:balanced:mixed_staples,test,maintenance,5,balanced,repaired_model,1,10,122.573,4.0,4.4,0.986481,32.51,3.022949,4.845007,7,4,0,9.207094
+heuristic_only,Heuristic Only,fat_loss_high_protein:new_york:3:fresh:mixed_staples,test,fat_loss,3,fresh,heuristic,0,6,61.586,1.1,138.5,10.003339,55.58,10.87352,12.381377,6,3,1,8.852986
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:new_york:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,398.483,25.9,263.4,12.047698,39.28,7.877111,8.253835,6,3,1,9.448564
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:new_york:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,102.761,28.0,281.9,10.436493,42.09,8.472052,8.805439,6,3,1,9.340752
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:new_york:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,382.285,25.9,263.4,12.047698,39.28,7.877111,8.253835,6,3,1,9.448564
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:new_york:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,130.449,25.9,263.4,12.047698,39.28,7.877111,8.253835,6,3,1,9.448564
+heuristic_only,Heuristic Only,fat_loss_high_protein:new_york:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,6,64.898,16.3,797.1,8.37354,105.61,8.094519,9.904342,10,3,4,-4.302674
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:new_york:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,9,429.5,16.3,797.1,8.37354,105.61,8.094519,9.904342,10,3,4,-4.302674
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:new_york:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,8,109.004,16.3,797.1,8.37354,105.61,8.094519,9.904342,10,3,4,-4.302674
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:new_york:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,9,374.129,16.3,797.1,8.37354,105.61,8.094519,9.904342,10,3,4,-4.302674
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:new_york:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,9,150.692,16.3,797.1,8.37354,105.61,8.094519,9.904342,10,3,4,-4.302674
+heuristic_only,Heuristic Only,fat_loss_high_protein:south:3:fresh:empty,test,fat_loss,3,fresh,heuristic,0,6,60.664,1.1,138.5,10.003339,44.03,8.61391,9.808421,6,3,1,9.470578
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:south:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,393.603,25.9,263.4,12.047698,30.73,6.162516,6.457239,6,3,1,9.831564
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:south:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,103.932,28.0,281.9,10.436493,32.55,6.5518,6.809623,6,3,1,9.737819
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:south:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,386.309,25.9,263.4,12.047698,30.73,6.162516,6.457239,6,3,1,9.831564
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:south:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,141.068,25.9,263.4,12.047698,30.73,6.162516,6.457239,6,3,1,9.831564
+heuristic_only,Heuristic Only,fat_loss_high_protein:south:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,6,61.678,68.2,391.1,11.019584,60.47,7.234205,8.86917,10,3,1,-5.127807
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:south:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,8,391.214,68.2,391.1,11.019584,60.47,7.234205,8.86917,10,3,1,-5.127807
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:south:5:balanced:protein_stocked,test,fat_loss,5,balanced,hybrid,1,6,103.269,68.2,391.1,11.019584,60.47,7.234205,8.86917,10,3,1,-5.127807
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:south:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,8,384.858,68.2,391.1,11.019584,60.47,7.234205,8.86917,10,3,1,-5.127807
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:south:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,7,145.027,68.2,391.1,11.019584,60.47,7.234205,8.86917,10,3,1,-5.127807
+heuristic_only,Heuristic Only,fat_loss_high_protein:south:7:bulk:empty,test,fat_loss,7,bulk,heuristic,0,6,61.694,6.5,522.1,8.173323,82.96,6.495408,7.950168,10,3,4,-3.577388
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:south:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,8,395.619,6.5,522.1,8.173323,82.96,6.495408,7.950168,10,3,4,-3.577388
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:south:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,6,106.053,6.5,522.1,8.173323,82.96,6.495408,7.950168,10,3,4,-3.577388
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:south:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,8,384.418,6.5,522.1,8.173323,82.96,6.495408,7.950168,10,3,4,-3.577388
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:south:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,9,147.387,6.5,522.1,8.173323,82.96,6.495408,7.950168,10,3,4,-3.577388
+heuristic_only,Heuristic Only,fat_loss_high_protein:us:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,6,60.569,0.7,168.9,10.147333,15.2,9.61356,10.180844,6,3,0,11.811838
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:us:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,398.886,0.7,168.9,10.147333,15.2,9.61356,10.180844,6,3,0,11.811838
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:us:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,104.152,0.7,168.9,10.147333,15.2,9.61356,10.180844,6,3,0,11.811838
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:us:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,377.274,0.7,168.9,10.147333,15.2,9.61356,10.180844,6,3,0,11.811838
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:us:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,137.811,0.7,168.9,10.147333,15.2,9.61356,10.180844,6,3,0,11.811838
+heuristic_only,Heuristic Only,fat_loss_high_protein:us:3:fresh:empty,test,fat_loss,3,fresh,heuristic,0,6,60.37,10.9,110.6,11.640161,44.09,8.578822,9.566066,6,3,1,9.473119
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:us:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,387.119,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:us:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,102.715,28.0,281.9,10.436493,34.41,6.926189,7.198745,6,3,1,9.645181
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:us:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,389.278,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:us:3:fresh:empty,test,fat_loss,3,fresh,model,1,10,136.44,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+heuristic_only,Heuristic Only,fat_loss_high_protein:us:3:fresh:mixed_staples,test,fat_loss,3,fresh,heuristic,0,6,62.984,10.9,110.6,11.640161,44.09,8.578822,9.566066,6,3,1,9.473119
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:us:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,390.7,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:us:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,99.748,28.0,281.9,10.436493,34.41,6.926189,7.198745,6,3,1,9.645181
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:us:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,359.84,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:us:3:fresh:mixed_staples,test,fat_loss,3,fresh,model,1,10,133.097,25.9,263.4,12.047698,32.45,6.50744,6.818659,6,3,1,9.781464
+heuristic_only,Heuristic Only,fat_loss_high_protein:us:7:bulk:empty,test,fat_loss,7,bulk,heuristic,0,6,60.897,6.5,522.1,8.173323,85.64,6.70524,8.206996,10,3,4,-3.577708
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:us:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,9,393.757,6.5,522.1,8.173323,85.64,6.70524,8.206996,10,3,4,-3.577708
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:us:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,6,108.563,6.5,522.1,8.173323,85.64,6.70524,8.206996,10,3,4,-3.577708
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:us:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,9,383.012,6.5,522.1,8.173323,85.64,6.70524,8.206996,10,3,4,-3.577708
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:us:7:bulk:empty,test,fat_loss,7,bulk,hybrid,1,8,148.428,6.5,522.1,8.173323,85.64,6.70524,8.206996,10,3,4,-3.577708
+heuristic_only,Heuristic Only,fat_loss_high_protein:west:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,6,61.668,0.7,168.9,10.147333,15.03,9.50604,10.066979,6,3,0,11.814097
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:west:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,389.134,0.7,168.9,10.147333,15.03,9.50604,10.066979,6,3,0,11.814097
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:west:1:balanced:empty,test,fat_loss,1,balanced,hybrid,1,6,160.29,0.7,168.9,10.147333,15.03,9.50604,10.066979,6,3,0,11.814097
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:west:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,389.743,0.7,168.9,10.147333,15.03,9.50604,10.066979,6,3,0,11.814097
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:west:1:balanced:empty,test,fat_loss,1,balanced,heuristic,0,10,139.094,0.7,168.9,10.147333,15.03,9.50604,10.066979,6,3,0,11.814097
+heuristic_only,Heuristic Only,fat_loss_high_protein:west:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,6,65.88,47.9,33.9,10.66228,66.81,7.665125,8.37323,10,3,1,-5.321227
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:west:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,6,402.56,47.9,33.9,10.66228,66.81,7.665125,8.37323,10,3,1,-5.321227
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:west:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,6,124.743,47.9,33.9,10.66228,66.81,7.665125,8.37323,10,3,1,-5.321227
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:west:5:balanced:protein_stocked,test,fat_loss,5,balanced,heuristic,0,6,377.664,47.9,33.9,10.66228,66.81,7.665125,8.37323,10,3,1,-5.321227
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:west:5:balanced:protein_stocked,test,fat_loss,5,balanced,repaired_model,1,8,142.649,13.0,1760.0,10.897717,58.21,8.327611,7.629096,9,3,1,-5.207999
+heuristic_only,Heuristic Only,fat_loss_high_protein:west:7:bulk:protein_stocked,test,fat_loss,7,bulk,heuristic,0,6,66.557,6.5,522.1,8.173323,84.94,6.650433,8.139914,10,3,4,-3.577388
+hybrid_best,Hybrid Best Model,fat_loss_high_protein:west:7:bulk:protein_stocked,test,fat_loss,7,bulk,hybrid,1,9,394.561,6.5,522.1,8.173323,84.94,6.650433,8.139914,10,3,4,-3.577388
+hybrid_logistic_regression,Hybrid logistic_regression,fat_loss_high_protein:west:7:bulk:protein_stocked,test,fat_loss,7,bulk,hybrid,1,6,106.562,6.5,522.1,8.173323,84.94,6.650433,8.139914,10,3,4,-3.577388
+hybrid_random_forest,Hybrid random_forest,fat_loss_high_protein:west:7:bulk:protein_stocked,test,fat_loss,7,bulk,hybrid,1,9,390.585,6.5,522.1,8.173323,84.94,6.650433,8.139914,10,3,4,-3.577388
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,fat_loss_high_protein:west:7:bulk:protein_stocked,test,fat_loss,7,bulk,hybrid,1,9,148.479,6.5,522.1,8.173323,84.94,6.650433,8.139914,10,3,4,-3.577388
+heuristic_only,Heuristic Only,high_protein_vegetarian:midwest:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,51.433,0.2,295.6,9.656212,33.17,4.910873,7.621783,5,3,1,9.316894
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:midwest:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,401.05,0.2,295.6,9.656212,33.17,4.910873,7.621783,5,3,1,9.316894
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:midwest:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,77.507,0.2,295.6,9.656212,33.17,4.910873,7.621783,5,3,1,9.316894
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:midwest:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,340.734,0.2,295.6,9.656212,33.17,4.910873,7.621783,5,3,1,9.316894
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:midwest:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,107.393,0.2,295.6,9.656212,33.17,4.910873,7.621783,5,3,1,9.316894
+heuristic_only,Heuristic Only,high_protein_vegetarian:midwest:5:balanced:empty,test,high_protein_vegetarian,5,balanced,heuristic,0,6,59.458,143.7,1662.4,11.606766,52.1,3.884465,5.997467,9,3,1,-0.3133
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:midwest:5:balanced:empty,test,high_protein_vegetarian,5,balanced,heuristic,0,6,369.656,143.7,1662.4,11.606766,52.1,3.884465,5.997467,9,3,1,-0.3133
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:midwest:5:balanced:empty,test,high_protein_vegetarian,5,balanced,hybrid,1,6,82.827,143.7,1662.4,11.606766,52.1,3.884465,5.997467,9,3,1,-0.3133
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:midwest:5:balanced:empty,test,high_protein_vegetarian,5,balanced,heuristic,0,6,363.981,143.7,1662.4,11.606766,52.1,3.884465,5.997467,9,3,1,-0.3133
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:midwest:5:balanced:empty,test,high_protein_vegetarian,5,balanced,hybrid,1,6,115.22,143.7,1662.4,11.606766,52.1,3.884465,5.997467,9,3,1,-0.3133
+heuristic_only,Heuristic Only,high_protein_vegetarian:new_york:3:fresh:veg_mixed,test,high_protein_vegetarian,3,fresh,heuristic,0,3,52.607,1.6,258.5,7.30938,28.11,4.138997,6.485925,4,3,2,10.053093
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:new_york:3:fresh:veg_mixed,test,high_protein_vegetarian,3,fresh,heuristic,0,3,373.031,1.6,258.5,7.30938,28.11,4.138997,6.485925,4,3,2,10.053093
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:new_york:3:fresh:veg_mixed,test,high_protein_vegetarian,3,fresh,model,1,5,85.959,7.7,113.8,9.464606,31.94,4.604827,7.214818,4,3,2,10.166292
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:new_york:3:fresh:veg_mixed,test,high_protein_vegetarian,3,fresh,heuristic,0,3,353.058,1.6,258.5,7.30938,28.11,4.138997,6.485925,4,3,2,10.053093
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:new_york:3:fresh:veg_mixed,test,high_protein_vegetarian,3,fresh,hybrid,1,3,114.401,1.6,258.5,7.30938,28.11,4.138997,6.485925,4,3,2,10.053093
+heuristic_only,Heuristic Only,high_protein_vegetarian:new_york:7:bulk:empty,test,high_protein_vegetarian,7,bulk,heuristic,0,6,57.018,26.7,740.9,6.85109,84.68,4.925862,8.568249,8,3,6,0.020537
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:new_york:7:bulk:empty,test,high_protein_vegetarian,7,bulk,heuristic,0,6,389.701,26.7,740.9,6.85109,84.68,4.925862,8.568249,8,3,6,0.020537
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:new_york:7:bulk:empty,test,high_protein_vegetarian,7,bulk,heuristic,0,6,92.013,26.7,740.9,6.85109,84.68,4.925862,8.568249,8,3,6,0.020537
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:new_york:7:bulk:empty,test,high_protein_vegetarian,7,bulk,heuristic,0,6,369.795,26.7,740.9,6.85109,84.68,4.925862,8.568249,8,3,6,0.020537
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:new_york:7:bulk:empty,test,high_protein_vegetarian,7,bulk,heuristic,0,6,119.427,26.7,740.9,6.85109,84.68,4.925862,8.568249,8,3,6,0.020537
+heuristic_only,Heuristic Only,high_protein_vegetarian:south:1:balanced:empty,test,high_protein_vegetarian,1,balanced,heuristic,0,6,58.141,4.8,29.2,7.975389,11.73,5.054292,7.830441,5,3,0,11.5591
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:south:1:balanced:empty,test,high_protein_vegetarian,1,balanced,hybrid,1,6,370.091,4.8,29.2,7.975389,11.73,5.054292,7.830441,5,3,0,11.5591
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:south:1:balanced:empty,test,high_protein_vegetarian,1,balanced,heuristic,0,6,76.353,4.8,29.2,7.975389,11.73,5.054292,7.830441,5,3,0,11.5591
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:south:1:balanced:empty,test,high_protein_vegetarian,1,balanced,hybrid,1,6,339.277,4.8,29.2,7.975389,11.73,5.054292,7.830441,5,3,0,11.5591
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:south:1:balanced:empty,test,high_protein_vegetarian,1,balanced,hybrid,1,6,106.826,4.8,29.2,7.975389,11.73,5.054292,7.830441,5,3,0,11.5591
+heuristic_only,Heuristic Only,high_protein_vegetarian:south:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,52.123,0.2,295.6,9.656212,33.74,4.995262,7.752757,5,3,1,9.315586
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:south:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,371.4,0.2,295.6,9.656212,33.74,4.995262,7.752757,5,3,1,9.315586
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:south:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,76.342,0.2,295.6,9.656212,33.74,4.995262,7.752757,5,3,1,9.315586
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:south:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,372.895,0.2,295.6,9.656212,33.74,4.995262,7.752757,5,3,1,9.315586
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:south:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,114.037,0.2,295.6,9.656212,33.74,4.995262,7.752757,5,3,1,9.315586
+heuristic_only,Heuristic Only,high_protein_vegetarian:us:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,54.165,0.2,295.6,9.656212,34.88,5.164041,8.014706,5,3,1,9.223184
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:us:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,386.082,0.2,295.6,9.656212,34.88,5.164041,8.014706,5,3,1,9.223184
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:us:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,75.792,0.2,295.6,9.656212,34.88,5.164041,8.014706,5,3,1,9.223184
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:us:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,438.76,0.2,295.6,9.656212,34.88,5.164041,8.014706,5,3,1,9.223184
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:us:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,108.938,0.2,295.6,9.656212,34.88,5.164041,8.014706,5,3,1,9.223184
+heuristic_only,Heuristic Only,high_protein_vegetarian:us:5:balanced:veg_staples,test,high_protein_vegetarian,5,balanced,heuristic,0,6,58.757,29.4,16.7,8.692712,51.41,4.369109,6.814687,8,3,3,0.602368
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:us:5:balanced:veg_staples,test,high_protein_vegetarian,5,balanced,hybrid,1,6,361.553,29.4,16.7,8.692712,51.41,4.369109,6.814687,8,3,3,0.602368
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:us:5:balanced:veg_staples,test,high_protein_vegetarian,5,balanced,heuristic,0,6,84.528,29.4,16.7,8.692712,51.41,4.369109,6.814687,8,3,3,0.602368
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:us:5:balanced:veg_staples,test,high_protein_vegetarian,5,balanced,hybrid,1,6,360.101,29.4,16.7,8.692712,51.41,4.369109,6.814687,8,3,3,0.602368
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:us:5:balanced:veg_staples,test,high_protein_vegetarian,5,balanced,heuristic,0,6,116.529,29.4,16.7,8.692712,51.41,4.369109,6.814687,8,3,3,0.602368
+heuristic_only,Heuristic Only,high_protein_vegetarian:west:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,55.362,0.2,295.6,9.656212,35.03,5.186249,8.049173,5,3,1,9.221876
+hybrid_best,Hybrid Best Model,high_protein_vegetarian:west:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,366.913,0.2,295.6,9.656212,35.03,5.186249,8.049173,5,3,1,9.221876
+hybrid_logistic_regression,Hybrid logistic_regression,high_protein_vegetarian:west:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,97.21,0.2,295.6,9.656212,35.03,5.186249,8.049173,5,3,1,9.221876
+hybrid_random_forest,Hybrid random_forest,high_protein_vegetarian:west:3:fresh:empty,test,high_protein_vegetarian,3,fresh,hybrid,1,6,377.439,0.2,295.6,9.656212,35.03,5.186249,8.049173,5,3,1,9.221876
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,high_protein_vegetarian:west:3:fresh:empty,test,high_protein_vegetarian,3,fresh,heuristic,0,6,113.381,0.2,295.6,9.656212,35.03,5.186249,8.049173,5,3,1,9.221876
+heuristic_only,Heuristic Only,low_prep:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,60.653,0.7,1.5,0.401772,18.68,3.036658,5.198998,6,4,0,13.542973
+hybrid_best,Hybrid Best Model,low_prep:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,367.798,0.7,1.5,0.401772,18.68,3.036658,5.198998,6,4,0,13.542973
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,94.824,0.7,1.5,0.401772,18.68,3.036658,5.198998,6,4,0,13.542973
+hybrid_random_forest,Hybrid random_forest,low_prep:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,376.989,0.7,1.5,0.401772,18.68,3.036658,5.198998,6,4,0,13.542973
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:midwest:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,122.947,0.7,1.5,0.401772,18.68,3.036658,5.198998,6,4,0,13.542973
+heuristic_only,Heuristic Only,low_prep:midwest:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,59.625,8.1,214.3,0.509073,39.05,3.891109,6.421641,7,4,0,9.665135
+hybrid_best,Hybrid Best Model,low_prep:midwest:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,375.831,7.2,92.5,0.718968,36.62,3.54073,6.030962,7,4,0,9.871955
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:midwest:5:balanced:protein_stocked,test,maintenance,5,balanced,hybrid,1,6,87.199,8.1,214.3,0.509073,39.05,3.891109,6.421641,7,4,0,9.665135
+hybrid_random_forest,Hybrid random_forest,low_prep:midwest:5:balanced:protein_stocked,test,maintenance,5,balanced,repaired_model,1,10,361.192,7.2,92.5,0.718968,36.62,3.54073,6.030962,7,4,0,9.871955
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:midwest:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,116.569,8.1,214.3,0.509073,39.05,3.891109,6.421641,7,4,0,9.665135
+heuristic_only,Heuristic Only,low_prep:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,heuristic,0,6,57.974,0.7,1.5,0.401772,23.54,3.826709,6.551628,6,4,0,13.418978
+hybrid_best,Hybrid Best Model,low_prep:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,367.966,0.7,1.5,0.401772,23.54,3.826709,6.551628,6,4,0,13.418978
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,85.551,0.7,1.5,0.401772,23.54,3.826709,6.551628,6,4,0,13.418978
+hybrid_random_forest,Hybrid random_forest,low_prep:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,376.818,0.7,1.5,0.401772,23.54,3.826709,6.551628,6,4,0,13.418978
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:new_york:3:fresh:mixed_staples,test,maintenance,3,fresh,hybrid,1,6,119.13,0.7,1.5,0.401772,23.54,3.826709,6.551628,6,4,0,13.418978
+heuristic_only,Heuristic Only,low_prep:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,heuristic,0,6,61.853,5.7,133.4,0.629108,44.39,4.275093,7.328711,7,4,0,9.376424
+hybrid_best,Hybrid Best Model,low_prep:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,hybrid,1,6,383.734,5.7,133.4,0.629108,44.39,4.275093,7.328711,7,4,0,9.376424
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,hybrid,1,6,87.761,5.7,133.4,0.629108,44.39,4.275093,7.328711,7,4,0,9.376424
+hybrid_random_forest,Hybrid random_forest,low_prep:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,hybrid,1,6,367.296,5.7,133.4,0.629108,44.39,4.275093,7.328711,7,4,0,9.376424
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:new_york:5:balanced:protein_stocked,test,maintenance,5,balanced,hybrid,1,6,121.503,5.7,133.4,0.629108,44.39,4.275093,7.328711,7,4,0,9.376424
+heuristic_only,Heuristic Only,low_prep:south:1:balanced:mixed_staples,test,maintenance,1,balanced,heuristic,0,6,61.493,1.1,27.3,0.396508,5.55,2.671737,4.582989,5,3,0,15.066449
+hybrid_best,Hybrid Best Model,low_prep:south:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,375.25,0.3,4.4,0.636524,4.0,1.955417,3.341688,5,3,0,15.101008
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:south:1:balanced:mixed_staples,test,maintenance,1,balanced,hybrid,1,6,85.105,1.1,27.3,0.396508,5.55,2.671737,4.582989,5,3,0,15.066449
+hybrid_random_forest,Hybrid random_forest,low_prep:south:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,365.41,0.3,4.4,0.636524,4.0,1.955417,3.341688,5,3,0,15.101008
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:south:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,120.976,0.3,4.4,0.636524,4.0,1.955417,3.341688,5,3,0,15.101008
+heuristic_only,Heuristic Only,low_prep:south:1:balanced:protein_stocked,test,maintenance,1,balanced,heuristic,0,6,64.039,0.1,8.1,0.447302,8.17,4.001175,6.814012,6,4,0,15.06272
+hybrid_best,Hybrid Best Model,low_prep:south:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,10,377.201,0.3,4.4,0.636524,6.71,3.280211,5.605681,6,4,0,15.153378
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:south:1:balanced:protein_stocked,test,maintenance,1,balanced,hybrid,1,6,83.972,0.1,8.1,0.447302,8.17,4.001175,6.814012,6,4,0,15.06272
+hybrid_random_forest,Hybrid random_forest,low_prep:south:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,10,363.221,0.3,4.4,0.636524,6.71,3.280211,5.605681,6,4,0,15.153378
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:south:1:balanced:protein_stocked,test,maintenance,1,balanced,model,1,10,115.895,0.3,4.4,0.636524,6.71,3.280211,5.605681,6,4,0,15.153378
+heuristic_only,Heuristic Only,low_prep:us:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,64.117,7.2,92.5,0.718968,31.5,3.045685,5.187747,7,4,0,10.020287
+hybrid_best,Hybrid Best Model,low_prep:us:5:balanced:mixed_staples,test,maintenance,5,balanced,hybrid,1,6,370.911,7.2,92.5,0.718968,31.5,3.045685,5.187747,7,4,0,10.020287
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:us:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,85.12,7.2,92.5,0.718968,31.5,3.045685,5.187747,7,4,0,10.020287
+hybrid_random_forest,Hybrid random_forest,low_prep:us:5:balanced:mixed_staples,test,maintenance,5,balanced,hybrid,1,6,362.91,7.2,92.5,0.718968,31.5,3.045685,5.187747,7,4,0,10.020287
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:us:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,120.648,7.2,92.5,0.718968,31.5,3.045685,5.187747,7,4,0,10.020287
+heuristic_only,Heuristic Only,low_prep:us:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,64.442,151.4,73.9,0.697866,40.98,2.870532,5.951205,7,4,4,8.760253
+hybrid_best,Hybrid Best Model,low_prep:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,382.369,151.4,73.9,0.697866,40.98,2.870532,5.951205,7,4,4,8.760253
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:us:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,87.2,151.4,73.9,0.697866,40.98,2.870532,5.951205,7,4,4,8.760253
+hybrid_random_forest,Hybrid random_forest,low_prep:us:7:bulk:mixed_staples,test,maintenance,7,bulk,hybrid,1,6,360.622,151.4,73.9,0.697866,40.98,2.870532,5.951205,7,4,4,8.760253
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:us:7:bulk:mixed_staples,test,maintenance,7,bulk,heuristic,0,6,133.676,151.4,73.9,0.697866,40.98,2.870532,5.951205,7,4,4,8.760253
+heuristic_only,Heuristic Only,low_prep:us:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,63.629,151.4,73.9,0.697866,47.16,3.303423,6.848678,7,4,4,8.296339
+hybrid_best,Hybrid Best Model,low_prep:us:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,377.082,151.4,73.9,0.697866,47.16,3.303423,6.848678,7,4,4,8.296339
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:us:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,85.885,151.4,73.9,0.697866,47.16,3.303423,6.848678,7,4,4,8.296339
+hybrid_random_forest,Hybrid random_forest,low_prep:us:7:bulk:protein_stocked,test,maintenance,7,bulk,hybrid,1,6,369.748,151.4,73.9,0.697866,47.16,3.303423,6.848678,7,4,4,8.296339
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:us:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,120.783,151.4,73.9,0.697866,47.16,3.303423,6.848678,7,4,4,8.296339
+heuristic_only,Heuristic Only,low_prep:west:1:balanced:mixed_staples,test,maintenance,1,balanced,heuristic,0,6,53.331,1.1,27.3,0.396508,6.03,2.902807,4.979356,5,3,0,15.069941
+hybrid_best,Hybrid Best Model,low_prep:west:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,374.168,0.3,4.4,0.636524,4.45,2.175401,3.717627,5,3,0,15.092771
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:west:1:balanced:mixed_staples,test,maintenance,1,balanced,hybrid,1,6,96.653,1.1,27.3,0.396508,6.03,2.902807,4.979356,5,3,0,15.069941
+hybrid_random_forest,Hybrid random_forest,low_prep:west:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,385.157,0.3,4.4,0.636524,4.45,2.175401,3.717627,5,3,0,15.092771
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:west:1:balanced:mixed_staples,test,maintenance,1,balanced,model,1,10,118.051,0.3,4.4,0.636524,4.45,2.175401,3.717627,5,3,0,15.092771
+heuristic_only,Heuristic Only,low_prep:west:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,61.552,7.2,92.5,0.718968,32.23,3.116268,5.307971,7,4,0,10.089643
+hybrid_best,Hybrid Best Model,low_prep:west:5:balanced:mixed_staples,test,maintenance,5,balanced,model,1,10,445.242,1.4,6.7,0.643229,28.66,2.797926,4.765547,6,4,0,11.105605
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:west:5:balanced:mixed_staples,test,maintenance,5,balanced,heuristic,0,6,84.809,7.2,92.5,0.718968,32.23,3.116268,5.307971,7,4,0,10.089643
+hybrid_random_forest,Hybrid random_forest,low_prep:west:5:balanced:mixed_staples,test,maintenance,5,balanced,model,1,10,367.506,1.4,6.7,0.643229,28.66,2.797926,4.765547,6,4,0,11.105605
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:west:5:balanced:mixed_staples,test,maintenance,5,balanced,model,1,10,126.064,1.4,6.7,0.643229,28.66,2.797926,4.765547,6,4,0,11.105605
+heuristic_only,Heuristic Only,low_prep:west:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,65.109,151.4,73.9,0.697866,48.79,3.4176,7.085391,7,4,4,8.345821
+hybrid_best,Hybrid Best Model,low_prep:west:7:bulk:protein_stocked,test,maintenance,7,bulk,model,1,10,376.612,156.1,77.7,0.67463,47.23,3.309207,6.90598,6,4,3,9.801743
+hybrid_logistic_regression,Hybrid logistic_regression,low_prep:west:7:bulk:protein_stocked,test,maintenance,7,bulk,heuristic,0,6,87.652,151.4,73.9,0.697866,48.79,3.4176,7.085391,7,4,4,8.345821
+hybrid_random_forest,Hybrid random_forest,low_prep:west:7:bulk:protein_stocked,test,maintenance,7,bulk,model,1,10,361.703,156.1,77.7,0.67463,47.23,3.309207,6.90598,6,4,3,9.801743
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,low_prep:west:7:bulk:protein_stocked,test,maintenance,7,bulk,model,1,10,122.708,156.1,77.7,0.67463,47.23,3.309207,6.90598,6,4,3,9.801743
+heuristic_only,Heuristic Only,muscle_gain_any:midwest:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,6,59.802,4.5,14.9,9.412471,9.58,3.403318,5.458689,6,4,0,12.619318
+hybrid_best,Hybrid Best Model,muscle_gain_any:midwest:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,379.043,4.5,14.9,9.412471,9.58,3.403318,5.458689,6,4,0,12.619318
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:midwest:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,82.617,4.5,14.9,9.412471,9.58,3.403318,5.458689,6,4,0,12.619318
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:midwest:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,349.343,4.5,14.9,9.412471,9.58,3.403318,5.458689,6,4,0,12.619318
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:midwest:1:balanced:mixed_staples,test,muscle_gain,1,balanced,hybrid,1,6,117.114,4.5,14.9,9.412471,9.58,3.403318,5.458689,6,4,0,12.619318
+heuristic_only,Heuristic Only,muscle_gain_any:midwest:1:balanced:protein_stocked,test,muscle_gain,1,balanced,heuristic,0,5,57.195,2.5,1.1,8.421731,5.56,1.986495,3.132394,3,2,0,12.387169
+hybrid_best,Hybrid Best Model,muscle_gain_any:midwest:1:balanced:protein_stocked,test,muscle_gain,1,balanced,model,1,7,373.467,5.6,2.1,9.354568,5.78,2.062739,3.31422,4,3,0,12.708907
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:midwest:1:balanced:protein_stocked,test,muscle_gain,1,balanced,heuristic,0,7,80.565,2.5,1.1,8.421731,5.56,1.986495,3.132394,3,2,0,12.387169
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:midwest:1:balanced:protein_stocked,test,muscle_gain,1,balanced,model,1,7,358.463,5.6,2.1,9.354568,5.78,2.062739,3.31422,4,3,0,12.708907
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:midwest:1:balanced:protein_stocked,test,muscle_gain,1,balanced,model,1,9,114.886,21.5,437.1,8.927307,7.51,3.178298,4.73817,5,3,0,12.587805
+heuristic_only,Heuristic Only,muscle_gain_any:midwest:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,6,59.529,13.5,54.5,9.033259,19.81,2.373734,3.762583,6,4,1,10.876915
+hybrid_best,Hybrid Best Model,muscle_gain_any:midwest:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,468.103,13.5,54.5,9.033259,19.81,2.373734,3.762583,6,4,1,10.876915
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:midwest:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,83.148,13.5,54.5,9.033259,19.81,2.373734,3.762583,6,4,1,10.876915
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:midwest:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,366.528,13.5,54.5,9.033259,19.81,2.373734,3.762583,6,4,1,10.876915
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:midwest:3:fresh:protein_stocked,test,muscle_gain,3,fresh,hybrid,1,6,118.733,13.5,54.5,9.033259,19.81,2.373734,3.762583,6,4,1,10.876915
+heuristic_only,Heuristic Only,muscle_gain_any:midwest:7:bulk:empty,test,muscle_gain,7,bulk,heuristic,0,6,61.178,235.1,41.0,8.770805,59.23,3.015631,5.7791,8,4,4,2.914788
+hybrid_best,Hybrid Best Model,muscle_gain_any:midwest:7:bulk:empty,test,muscle_gain,7,bulk,hybrid,1,6,376.205,235.1,41.0,8.770805,59.23,3.015631,5.7791,8,4,4,2.914788
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:midwest:7:bulk:empty,test,muscle_gain,7,bulk,heuristic,0,8,86.959,235.1,41.0,8.770805,59.23,3.015631,5.7791,8,4,4,2.914788
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:midwest:7:bulk:empty,test,muscle_gain,7,bulk,hybrid,1,6,342.401,235.1,41.0,8.770805,59.23,3.015631,5.7791,8,4,4,2.914788
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:midwest:7:bulk:empty,test,muscle_gain,7,bulk,hybrid,1,6,125.52,235.1,41.0,8.770805,59.23,3.015631,5.7791,8,4,4,2.914788
+heuristic_only,Heuristic Only,muscle_gain_any:new_york:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,6,56.61,4.5,14.9,9.412471,12.3,4.369605,7.008547,6,4,0,12.486542
+hybrid_best,Hybrid Best Model,muscle_gain_any:new_york:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,374.807,4.5,14.9,9.412471,12.3,4.369605,7.008547,6,4,0,12.486542
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:new_york:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,84.226,4.5,14.9,9.412471,12.3,4.369605,7.008547,6,4,0,12.486542
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:new_york:1:balanced:mixed_staples,test,muscle_gain,1,balanced,heuristic,0,10,365.256,4.5,14.9,9.412471,12.3,4.369605,7.008547,6,4,0,12.486542
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:new_york:1:balanced:mixed_staples,test,muscle_gain,1,balanced,hybrid,1,6,121.072,4.5,14.9,9.412471,12.3,4.369605,7.008547,6,4,0,12.486542
+heuristic_only,Heuristic Only,muscle_gain_any:new_york:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,6,60.039,13.5,54.5,9.033259,36.55,4.379606,6.94207,6,4,1,10.367022
+hybrid_best,Hybrid Best Model,muscle_gain_any:new_york:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,366.087,13.5,54.5,9.033259,36.55,4.379606,6.94207,6,4,1,10.367022
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:new_york:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,84.422,13.5,54.5,9.033259,36.55,4.379606,6.94207,6,4,1,10.367022
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:new_york:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,371.999,13.5,54.5,9.033259,36.55,4.379606,6.94207,6,4,1,10.367022
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:new_york:3:fresh:empty,test,muscle_gain,3,fresh,hybrid,1,6,113.367,13.5,54.5,9.033259,36.55,4.379606,6.94207,6,4,1,10.367022
+heuristic_only,Heuristic Only,muscle_gain_any:new_york:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,6,56.545,13.5,54.5,9.033259,24.23,2.903361,4.602089,6,4,1,10.881365
+hybrid_best,Hybrid Best Model,muscle_gain_any:new_york:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,358.457,13.5,54.5,9.033259,24.23,2.903361,4.602089,6,4,1,10.881365
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:new_york:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,82.944,13.5,54.5,9.033259,24.23,2.903361,4.602089,6,4,1,10.881365
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:new_york:3:fresh:protein_stocked,test,muscle_gain,3,fresh,heuristic,0,10,356.663,13.5,54.5,9.033259,24.23,2.903361,4.602089,6,4,1,10.881365
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:new_york:3:fresh:protein_stocked,test,muscle_gain,3,fresh,hybrid,1,6,115.617,13.5,54.5,9.033259,24.23,2.903361,4.602089,6,4,1,10.881365
+heuristic_only,Heuristic Only,muscle_gain_any:us:1:balanced:empty,test,muscle_gain,1,balanced,heuristic,0,6,58.28,4.5,14.9,9.412471,10.66,3.786991,6.074074,6,4,0,12.61712
+hybrid_best,Hybrid Best Model,muscle_gain_any:us:1:balanced:empty,test,muscle_gain,1,balanced,heuristic,0,10,381.094,4.5,14.9,9.412471,10.66,3.786991,6.074074,6,4,0,12.61712
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:us:1:balanced:empty,test,muscle_gain,1,balanced,heuristic,0,10,95.634,4.5,14.9,9.412471,10.66,3.786991,6.074074,6,4,0,12.61712
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:us:1:balanced:empty,test,muscle_gain,1,balanced,heuristic,0,10,358.715,4.5,14.9,9.412471,10.66,3.786991,6.074074,6,4,0,12.61712
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:us:1:balanced:empty,test,muscle_gain,1,balanced,hybrid,1,6,118.307,4.5,14.9,9.412471,10.66,3.786991,6.074074,6,4,0,12.61712
+heuristic_only,Heuristic Only,muscle_gain_any:us:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,6,58.693,13.5,54.5,9.033259,31.6,3.786472,6.001899,6,4,1,10.691559
+hybrid_best,Hybrid Best Model,muscle_gain_any:us:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,364.577,13.5,54.5,9.033259,31.6,3.786472,6.001899,6,4,1,10.691559
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:us:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,84.827,13.5,54.5,9.033259,31.6,3.786472,6.001899,6,4,1,10.691559
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:us:3:fresh:empty,test,muscle_gain,3,fresh,heuristic,0,10,367.346,13.5,54.5,9.033259,31.6,3.786472,6.001899,6,4,1,10.691559
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:us:3:fresh:empty,test,muscle_gain,3,fresh,hybrid,1,6,115.809,13.5,54.5,9.033259,31.6,3.786472,6.001899,6,4,1,10.691559
+heuristic_only,Heuristic Only,muscle_gain_any:us:5:balanced:mixed_staples,test,muscle_gain,5,balanced,heuristic,0,6,58.568,86.2,811.1,8.573615,45.16,3.424091,5.549275,8,4,2,3.096531
+hybrid_best,Hybrid Best Model,muscle_gain_any:us:5:balanced:mixed_staples,test,muscle_gain,5,balanced,heuristic,0,8,374.456,86.2,811.1,8.573615,45.16,3.424091,5.549275,8,4,2,3.096531
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:us:5:balanced:mixed_staples,test,muscle_gain,5,balanced,heuristic,0,8,84.177,86.2,811.1,8.573615,45.16,3.424091,5.549275,8,4,2,3.096531
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:us:5:balanced:mixed_staples,test,muscle_gain,5,balanced,heuristic,0,8,388.716,86.2,811.1,8.573615,45.16,3.424091,5.549275,8,4,2,3.096531
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:us:5:balanced:mixed_staples,test,muscle_gain,5,balanced,heuristic,0,6,155.903,86.2,811.1,8.573615,45.16,3.424091,5.549275,8,4,2,3.096531
+heuristic_only,Heuristic Only,muscle_gain_any:us:7:bulk:mixed_staples,test,muscle_gain,7,bulk,heuristic,0,6,79.818,235.1,41.0,8.770805,63.65,3.24067,6.210362,8,4,4,2.815755
+hybrid_best,Hybrid Best Model,muscle_gain_any:us:7:bulk:mixed_staples,test,muscle_gain,7,bulk,hybrid,1,6,380.617,235.1,41.0,8.770805,63.65,3.24067,6.210362,8,4,4,2.815755
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:us:7:bulk:mixed_staples,test,muscle_gain,7,bulk,heuristic,0,8,89.811,235.1,41.0,8.770805,63.65,3.24067,6.210362,8,4,4,2.815755
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:us:7:bulk:mixed_staples,test,muscle_gain,7,bulk,hybrid,1,6,377.458,235.1,41.0,8.770805,63.65,3.24067,6.210362,8,4,4,2.815755
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:us:7:bulk:mixed_staples,test,muscle_gain,7,bulk,hybrid,1,6,124.536,235.1,41.0,8.770805,63.65,3.24067,6.210362,8,4,4,2.815755
+heuristic_only,Heuristic Only,muscle_gain_any:west:5:balanced:empty,test,muscle_gain,5,balanced,heuristic,0,6,62.361,57.4,381.2,11.428252,56.46,4.14574,6.700688,8,4,1,2.943086
+hybrid_best,Hybrid Best Model,muscle_gain_any:west:5:balanced:empty,test,muscle_gain,5,balanced,heuristic,0,8,384.291,57.4,381.2,11.428252,56.46,4.14574,6.700688,8,4,1,2.943086
+hybrid_logistic_regression,Hybrid logistic_regression,muscle_gain_any:west:5:balanced:empty,test,muscle_gain,5,balanced,heuristic,0,8,87.529,57.4,381.2,11.428252,56.46,4.14574,6.700688,8,4,1,2.943086
+hybrid_random_forest,Hybrid random_forest,muscle_gain_any:west:5:balanced:empty,test,muscle_gain,5,balanced,heuristic,0,8,368.493,57.4,381.2,11.428252,56.46,4.14574,6.700688,8,4,1,2.943086
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,muscle_gain_any:west:5:balanced:empty,test,muscle_gain,5,balanced,hybrid,1,6,121.421,57.4,381.2,11.428252,56.46,4.14574,6.700688,8,4,1,2.943086
+heuristic_only,Heuristic Only,snack_low_prep:new_york:1:balanced:mixed_staples,test,generic_balanced,1,balanced,heuristic,0,3,59.325,1.3,549.4,1.207807,9.73,4.141483,10.384205,4,3,0,14.787609
+hybrid_best,Hybrid Best Model,snack_low_prep:new_york:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,392.13,1.3,549.4,1.207807,9.73,4.141483,10.384205,4,3,0,14.787609
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:new_york:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,85.823,1.3,549.4,1.207807,9.73,4.141483,10.384205,4,3,0,14.787609
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:new_york:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,359.636,1.3,549.4,1.207807,9.73,4.141483,10.384205,4,3,0,14.787609
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:new_york:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,115.129,1.3,549.4,1.207807,9.73,4.141483,10.384205,4,3,0,14.787609
+heuristic_only,Heuristic Only,snack_low_prep:new_york:5:balanced:protein_stocked,test,generic_balanced,5,balanced,heuristic,0,6,63.392,78.0,1769.2,0.921184,48.05,4.461798,12.103275,6,3,1,8.802422
+hybrid_best,Hybrid Best Model,snack_low_prep:new_york:5:balanced:protein_stocked,test,generic_balanced,5,balanced,hybrid,1,6,366.199,78.0,1769.2,0.921184,48.05,4.461798,12.103275,6,3,1,8.802422
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:new_york:5:balanced:protein_stocked,test,generic_balanced,5,balanced,hybrid,1,6,84.774,78.0,1769.2,0.921184,48.05,4.461798,12.103275,6,3,1,8.802422
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:new_york:5:balanced:protein_stocked,test,generic_balanced,5,balanced,hybrid,1,6,365.211,78.0,1769.2,0.921184,48.05,4.461798,12.103275,6,3,1,8.802422
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:new_york:5:balanced:protein_stocked,test,generic_balanced,5,balanced,hybrid,1,6,120.544,78.0,1769.2,0.921184,48.05,4.461798,12.103275,6,3,1,8.802422
+heuristic_only,Heuristic Only,snack_low_prep:new_york:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,6,62.146,16.0,6738.7,1.853045,60.81,3.144472,9.3698,5,3,3,9.063409
+hybrid_best,Hybrid Best Model,snack_low_prep:new_york:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,392.987,16.0,6738.7,1.853045,60.81,3.144472,9.3698,5,3,3,9.063409
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:new_york:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,85.738,16.0,6738.7,1.853045,60.81,3.144472,9.3698,5,3,3,9.063409
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:new_york:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,364.201,16.0,6738.7,1.853045,60.81,3.144472,9.3698,5,3,3,9.063409
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:new_york:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,120.52,16.0,6738.7,1.853045,60.81,3.144472,9.3698,5,3,3,9.063409
+heuristic_only,Heuristic Only,snack_low_prep:south:1:balanced:mixed_staples,test,generic_balanced,1,balanced,heuristic,0,3,63.266,1.3,549.4,1.207807,7.82,3.328509,8.345784,4,3,0,15.10784
+hybrid_best,Hybrid Best Model,snack_low_prep:south:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,373.851,1.3,549.4,1.207807,7.82,3.328509,8.345784,4,3,0,15.10784
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:south:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,83.816,1.3,549.4,1.207807,7.82,3.328509,8.345784,4,3,0,15.10784
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:south:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,366.742,1.3,549.4,1.207807,7.82,3.328509,8.345784,4,3,0,15.10784
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:south:1:balanced:mixed_staples,test,generic_balanced,1,balanced,hybrid,1,3,122.252,1.3,549.4,1.207807,7.82,3.328509,8.345784,4,3,0,15.10784
+heuristic_only,Heuristic Only,snack_low_prep:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,64.287,78.7,2645.2,1.270211,32.6,2.799437,8.226091,6,3,2,9.531188
+hybrid_best,Hybrid Best Model,snack_low_prep:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,378.805,78.7,2645.2,1.270211,32.6,2.799437,8.226091,6,3,2,9.531188
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,84.389,78.7,2645.2,1.270211,32.6,2.799437,8.226091,6,3,2,9.531188
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,368.384,78.7,2645.2,1.270211,32.6,2.799437,8.226091,6,3,2,9.531188
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:us:5:balanced:mixed_staples,test,generic_balanced,5,balanced,heuristic,0,6,169.109,78.7,2645.2,1.270211,32.6,2.799437,8.226091,6,3,2,9.531188
+heuristic_only,Heuristic Only,snack_low_prep:us:7:bulk:protein_stocked,test,generic_balanced,7,bulk,heuristic,0,6,77.203,16.0,6738.7,1.853045,48.41,2.503271,7.459168,5,3,3,9.382491
+hybrid_best,Hybrid Best Model,snack_low_prep:us:7:bulk:protein_stocked,test,generic_balanced,7,bulk,hybrid,1,6,503.618,16.0,6738.7,1.853045,48.41,2.503271,7.459168,5,3,3,9.382491
+hybrid_logistic_regression,Hybrid logistic_regression,snack_low_prep:us:7:bulk:protein_stocked,test,generic_balanced,7,bulk,hybrid,1,6,86.503,16.0,6738.7,1.853045,48.41,2.503271,7.459168,5,3,3,9.382491
+hybrid_random_forest,Hybrid random_forest,snack_low_prep:us:7:bulk:protein_stocked,test,generic_balanced,7,bulk,hybrid,1,6,353.265,16.0,6738.7,1.853045,48.41,2.503271,7.459168,5,3,3,9.382491
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,snack_low_prep:us:7:bulk:protein_stocked,test,generic_balanced,7,bulk,hybrid,1,6,118.37,16.0,6738.7,1.853045,48.41,2.503271,7.459168,5,3,3,9.382491
+heuristic_only,Heuristic Only,vegan_balanced:midwest:3:fresh:empty,test,generic_balanced,3,fresh,heuristic,0,6,54.994,1.1,1534.2,8.933193,20.83,2.560793,5.571008,6,4,1,9.681081
+hybrid_best,Hybrid Best Model,vegan_balanced:midwest:3:fresh:empty,test,generic_balanced,3,fresh,heuristic,0,6,372.366,1.1,1534.2,8.933193,20.83,2.560793,5.571008,6,4,1,9.681081
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:midwest:3:fresh:empty,test,generic_balanced,3,fresh,model,1,10,81.966,5.9,1536.8,7.426042,20.86,2.563661,5.651585,5,3,1,10.319761
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:midwest:3:fresh:empty,test,generic_balanced,3,fresh,heuristic,0,6,619.595,1.1,1534.2,8.933193,20.83,2.560793,5.571008,6,4,1,9.681081
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:midwest:3:fresh:empty,test,generic_balanced,3,fresh,heuristic,0,6,166.293,1.1,1534.2,8.933193,20.83,2.560793,5.571008,6,4,1,9.681081
+heuristic_only,Heuristic Only,vegan_balanced:new_york:1:balanced:produce_stocked,test,generic_balanced,1,balanced,heuristic,0,6,100.871,1.4,454.0,9.039607,9.08,3.421251,7.346278,6,4,0,11.442711
+hybrid_best,Hybrid Best Model,vegan_balanced:new_york:1:balanced:produce_stocked,test,generic_balanced,1,balanced,heuristic,0,10,592.494,1.4,454.0,9.039607,9.08,3.421251,7.346278,6,4,0,11.442711
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:new_york:1:balanced:produce_stocked,test,generic_balanced,1,balanced,model,1,10,78.858,0.3,543.6,8.140198,9.41,3.4298,7.509976,5,3,0,12.439762
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:new_york:1:balanced:produce_stocked,test,generic_balanced,1,balanced,heuristic,0,10,357.329,1.4,454.0,9.039607,9.08,3.421251,7.346278,6,4,0,11.442711
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:new_york:1:balanced:produce_stocked,test,generic_balanced,1,balanced,hybrid,1,6,346.875,1.4,454.0,9.039607,9.08,3.421251,7.346278,6,4,0,11.442711
+heuristic_only,Heuristic Only,vegan_balanced:new_york:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,59.793,1.1,1534.2,8.933193,25.72,3.161958,6.878845,6,4,1,9.477861
+hybrid_best,Hybrid Best Model,vegan_balanced:new_york:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,363.303,1.1,1534.2,8.933193,25.72,3.161958,6.878845,6,4,1,9.477861
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:new_york:3:fresh:produce_stocked,test,generic_balanced,3,fresh,model,1,10,77.139,5.9,1536.8,7.426042,27.02,3.320716,7.320509,5,3,1,10.014941
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:new_york:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,355.92,1.1,1534.2,8.933193,25.72,3.161958,6.878845,6,4,1,9.477861
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:new_york:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,110.482,1.1,1534.2,8.933193,25.72,3.161958,6.878845,6,4,1,9.477861
+heuristic_only,Heuristic Only,vegan_balanced:south:1:balanced:vegan_staples,test,generic_balanced,1,balanced,heuristic,0,3,56.882,0.5,499.6,9.053563,4.82,1.78545,3.840637,4,3,0,12.708632
+hybrid_best,Hybrid Best Model,vegan_balanced:south:1:balanced:vegan_staples,test,generic_balanced,1,balanced,heuristic,0,5,364.227,0.5,499.6,9.053563,4.82,1.78545,3.840637,4,3,0,12.708632
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:south:1:balanced:vegan_staples,test,generic_balanced,1,balanced,heuristic,0,5,75.024,0.5,499.6,9.053563,4.82,1.78545,3.840637,4,3,0,12.708632
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:south:1:balanced:vegan_staples,test,generic_balanced,1,balanced,heuristic,0,5,356.561,0.5,499.6,9.053563,4.82,1.78545,3.840637,4,3,0,12.708632
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:south:1:balanced:vegan_staples,test,generic_balanced,1,balanced,heuristic,0,5,110.605,0.5,499.6,9.053563,4.82,1.78545,3.840637,4,3,0,12.708632
+heuristic_only,Heuristic Only,vegan_balanced:south:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,56.668,1.1,1534.2,8.933193,19.98,2.456296,5.343675,6,4,1,9.681164
+hybrid_best,Hybrid Best Model,vegan_balanced:south:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,365.713,1.1,1534.2,8.933193,19.98,2.456296,5.343675,6,4,1,9.681164
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:south:3:fresh:produce_stocked,test,generic_balanced,3,fresh,model,1,10,76.245,5.9,1536.8,7.426042,19.99,2.45674,5.415876,5,3,1,10.316177
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:south:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,333.389,1.1,1534.2,8.933193,19.98,2.456296,5.343675,6,4,1,9.681164
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:south:3:fresh:produce_stocked,test,generic_balanced,3,fresh,heuristic,0,6,133.761,1.1,1534.2,8.933193,19.98,2.456296,5.343675,6,4,1,9.681164
+heuristic_only,Heuristic Only,vegan_balanced:south:5:balanced:produce_stocked,test,generic_balanced,5,balanced,heuristic,0,6,67.807,16.7,2525.4,9.459363,32.67,2.415455,5.370705,8,4,1,3.347948
+hybrid_best,Hybrid Best Model,vegan_balanced:south:5:balanced:produce_stocked,test,generic_balanced,5,balanced,heuristic,0,6,372.805,16.7,2525.4,9.459363,32.67,2.415455,5.370705,8,4,1,3.347948
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:south:5:balanced:produce_stocked,test,generic_balanced,5,balanced,repaired_model,1,10,78.538,23.4,2522.8,7.036641,31.12,2.301299,5.172872,7,3,1,7.558664
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:south:5:balanced:produce_stocked,test,generic_balanced,5,balanced,heuristic,0,6,358.376,16.7,2525.4,9.459363,32.67,2.415455,5.370705,8,4,1,3.347948
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:south:5:balanced:produce_stocked,test,generic_balanced,5,balanced,heuristic,0,6,114.653,16.7,2525.4,9.459363,32.67,2.415455,5.370705,8,4,1,3.347948
+heuristic_only,Heuristic Only,vegan_balanced:south:7:bulk:produce_stocked,test,generic_balanced,7,bulk,heuristic,0,6,60.658,4.6,4488.0,6.629811,40.08,2.015286,4.556617,8,4,2,3.085617
+hybrid_best,Hybrid Best Model,vegan_balanced:south:7:bulk:produce_stocked,test,generic_balanced,7,bulk,hybrid,1,6,375.998,4.6,4488.0,6.629811,40.08,2.015286,4.556617,8,4,2,3.085617
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:south:7:bulk:produce_stocked,test,generic_balanced,7,bulk,repaired_model,1,10,81.607,2.4,4894.5,5.668565,40.73,2.006948,4.642124,7,3,2,6.997082
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:south:7:bulk:produce_stocked,test,generic_balanced,7,bulk,hybrid,1,6,365.553,4.6,4488.0,6.629811,40.08,2.015286,4.556617,8,4,2,3.085617
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:south:7:bulk:produce_stocked,test,generic_balanced,7,bulk,hybrid,1,6,116.45,4.6,4488.0,6.629811,40.08,2.015286,4.556617,8,4,2,3.085617
+heuristic_only,Heuristic Only,vegan_balanced:south:7:bulk:vegan_staples,test,generic_balanced,7,bulk,heuristic,0,6,60.997,4.6,4488.0,6.629811,34.81,1.750302,3.957481,8,4,2,3.1905
+hybrid_best,Hybrid Best Model,vegan_balanced:south:7:bulk:vegan_staples,test,generic_balanced,7,bulk,hybrid,1,6,379.536,4.6,4488.0,6.629811,34.81,1.750302,3.957481,8,4,2,3.1905
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:south:7:bulk:vegan_staples,test,generic_balanced,7,bulk,repaired_model,1,10,83.167,2.4,4894.5,5.668565,35.46,1.747271,4.041486,7,3,2,7.228528
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:south:7:bulk:vegan_staples,test,generic_balanced,7,bulk,hybrid,1,6,356.115,4.6,4488.0,6.629811,34.81,1.750302,3.957481,8,4,2,3.1905
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:south:7:bulk:vegan_staples,test,generic_balanced,7,bulk,hybrid,1,6,115.966,4.6,4488.0,6.629811,34.81,1.750302,3.957481,8,4,2,3.1905
+heuristic_only,Heuristic Only,vegan_balanced:us:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,6,55.406,1.4,454.0,9.039607,7.02,2.645064,5.679612,6,4,0,11.577453
+hybrid_best,Hybrid Best Model,vegan_balanced:us:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,10,375.452,1.4,454.0,9.039607,7.02,2.645064,5.679612,6,4,0,11.577453
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:us:1:balanced:empty,test,generic_balanced,1,balanced,model,1,10,77.749,0.3,543.6,8.140198,7.2,2.624289,5.746209,5,3,0,12.703808
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:us:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,10,376.691,1.4,454.0,9.039607,7.02,2.645064,5.679612,6,4,0,11.577453
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:us:1:balanced:empty,test,generic_balanced,1,balanced,hybrid,1,6,109.981,1.4,454.0,9.039607,7.02,2.645064,5.679612,6,4,0,11.577453
+heuristic_only,Heuristic Only,vegan_balanced:west:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,6,53.638,1.4,454.0,9.039607,6.75,2.543331,5.461165,6,4,0,11.571849
+hybrid_best,Hybrid Best Model,vegan_balanced:west:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,10,364.498,1.4,454.0,9.039607,6.75,2.543331,5.461165,6,4,0,11.571849
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:west:1:balanced:empty,test,generic_balanced,1,balanced,model,1,10,74.838,0.3,543.6,8.140198,7.07,2.576906,5.642458,5,3,0,12.698204
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:west:1:balanced:empty,test,generic_balanced,1,balanced,heuristic,0,10,343.642,1.4,454.0,9.039607,6.75,2.543331,5.461165,6,4,0,11.571849
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:west:1:balanced:empty,test,generic_balanced,1,balanced,hybrid,1,6,109.676,1.4,454.0,9.039607,6.75,2.543331,5.461165,6,4,0,11.571849
+heuristic_only,Heuristic Only,vegan_balanced:west:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,56.753,15.4,2534.0,9.501754,33.32,2.461948,5.465879,8,4,1,3.347948
+hybrid_best,Hybrid Best Model,vegan_balanced:west:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,373.957,15.4,2534.0,9.501754,33.32,2.461948,5.465879,8,4,1,3.347948
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:west:5:balanced:empty,test,generic_balanced,5,balanced,repaired_model,1,10,81.4,23.4,2522.8,7.036641,32.3,2.388559,5.369016,7,3,1,7.558664
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:west:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,348.402,15.4,2534.0,9.501754,33.32,2.461948,5.465879,8,4,1,3.347948
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:west:5:balanced:empty,test,generic_balanced,5,balanced,heuristic,0,6,111.373,15.4,2534.0,9.501754,33.32,2.461948,5.465879,8,4,1,3.347948
+heuristic_only,Heuristic Only,vegan_balanced:west:7:bulk:empty,test,generic_balanced,7,bulk,heuristic,0,6,59.475,4.6,4488.0,6.629811,39.99,2.01076,4.546385,8,4,2,3.085617
+hybrid_best,Hybrid Best Model,vegan_balanced:west:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,370.99,4.6,4488.0,6.629811,39.99,2.01076,4.546385,8,4,2,3.085617
+hybrid_logistic_regression,Hybrid logistic_regression,vegan_balanced:west:7:bulk:empty,test,generic_balanced,7,bulk,repaired_model,1,10,80.247,2.4,4894.5,5.668565,42.16,2.07741,4.805106,7,3,2,6.997082
+hybrid_random_forest,Hybrid random_forest,vegan_balanced:west:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,338.575,4.6,4488.0,6.629811,39.99,2.01076,4.546385,8,4,2,3.085617
+hybrid_hist_gradient_boosting,Hybrid hist_gradient_boosting,vegan_balanced:west:7:bulk:empty,test,generic_balanced,7,bulk,hybrid,1,6,115.208,4.6,4488.0,6.629811,39.99,2.01076,4.546385,8,4,2,3.085617

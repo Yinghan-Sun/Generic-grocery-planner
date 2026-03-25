@@ -2556,6 +2556,7 @@ def recommend_generic_food_candidates(
     price_context: dict[str, str] | None = None,
     stores: Sequence[dict[str, object]] | None = None,
     candidate_count: int = 6,
+    candidate_generation_config: dict[str, object] | None = None,
 ) -> list[dict[str, object]]:
     from dietdashboard.hybrid_planner import recommend_generic_food_candidates as _recommend_generic_food_candidates
 
@@ -2571,6 +2572,7 @@ def recommend_generic_food_candidates(
         price_context=price_context,
         stores=stores,
         candidate_count=candidate_count,
+        candidate_generation_config=candidate_generation_config,
     )
 
 
@@ -2586,8 +2588,13 @@ def recommend_generic_foods(
     price_context: dict[str, str] | None = None,
     stores: Sequence[dict[str, object]] | None = None,
     scorer_config: dict[str, object] | None = None,
+    candidate_generation_config: dict[str, object] | None = None,
 ) -> dict[str, object]:
-    from dietdashboard.hybrid_planner import normalize_scorer_config, recommend_with_trained_scorer
+    from dietdashboard.hybrid_planner import (
+        normalize_candidate_generation_config,
+        normalize_scorer_config,
+        recommend_with_trained_scorer,
+    )
 
     return recommend_with_trained_scorer(
         con,
@@ -2601,4 +2608,5 @@ def recommend_generic_foods(
         price_context=price_context,
         stores=stores,
         scorer_config=normalize_scorer_config(scorer_config),
+        candidate_generation_config=normalize_candidate_generation_config(candidate_generation_config),
     )

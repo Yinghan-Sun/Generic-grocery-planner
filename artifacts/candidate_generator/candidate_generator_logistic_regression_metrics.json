@@ -1,0 +1,23 @@
+{
+  "backend": "logistic_regression",
+  "evaluation_split": "test",
+  "hyperparameters": {
+    "C": 0.25,
+    "class_weight": null,
+    "max_iter": 4000
+  },
+  "random_seed": 42,
+  "test_average_precision": 0.85087,
+  "test_brier_score": 0.040602,
+  "test_log_loss": 0.126195,
+  "test_positive_rate": 0.056872,
+  "test_roc_auc": 0.99181,
+  "test_role_exact_match_rate": 0.740196,
+  "test_role_hit_rate_at_budget": 0.941176,
+  "test_role_mean_jaccard": 0.816748,
+  "test_role_recall_at_budget": 0.850082,
+  "test_row_count": 12783,
+  "test_scenario_exact_seed_rate": 0.300885,
+  "test_scenario_mean_jaccard": 0.816028,
+  "train_validation_row_count": 55137
+}

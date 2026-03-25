@@ -9,7 +9,10 @@ SHELL := /bin/sh
 	smoke-generic test-generic test-generic-behavior check-generic-catalog check-generic-price-coverage qa-generic \
 	store-discovery-summary store-discovery-prune-cache store-discovery-dedupe-live backfill-generic-stores ingest-foursquare-stores ingest-foursquare-os-places \
 	build-food-role-dataset train-food-role-model \
+	build-candidate-generator-dataset tune-candidate-generator train-candidate-generator evaluate-hybrid-planner \
+	compare-preset-model-participation compare-preset-model-participation-final compare-plan-scorers \
 	build-plan-scorer-dataset train-plan-scorer test-plan-scorer \
+	route-b-ablation route-b-robustness route-b-final-summary route-b-final-evidence route-b-presentation-assets \
 	run-app run-dev \
 	frontend-bundle frontend-watch frontend-copy \
 	build-container run-container
@@ -122,6 +125,40 @@ build-food-role-dataset:
 
 train-food-role-model:
 	uv run --extra ml python ./scripts/train_food_role_model.py
+
+build-candidate-generator-dataset:
+	uv run --extra ml python ./scripts/build_candidate_generator_dataset.py
+
+tune-candidate-generator:
+	uv run --extra ml python ./scripts/tune_candidate_generator.py
+
+train-candidate-generator:
+	uv run --extra ml python ./scripts/train_candidate_generator.py
+
+evaluate-hybrid-planner:
+	uv run --extra ml python ./scripts/evaluate_hybrid_planner.py
+
+compare-preset-model-participation:
+	uv run --extra ml python ./scripts/compare_preset_model_participation.py
+
+compare-preset-model-participation-final: compare-preset-model-participation
+
+compare-plan-scorers:
+	uv run --extra ml python ./scripts/compare_plan_scorers.py
+
+route-b-ablation:
+	uv run --extra ml python ./scripts/run_route_b_ablation.py
+
+route-b-robustness:
+	uv run --extra ml python ./scripts/run_route_b_robustness.py
+
+route-b-final-summary:
+	uv run --extra ml python ./scripts/generate_route_b_final_summary.py
+
+route-b-final-evidence: compare-preset-model-participation-final route-b-ablation route-b-robustness route-b-final-summary
+
+route-b-presentation-assets: route-b-final-evidence
+	uv run --extra ml python ./scripts/generate_route_b_presentation_assets.py
 
 build-plan-scorer-dataset:
 	uv run --extra ml python ./scripts/train_plan_scorer.py --candidate-count 3 --backend sklearn_ridge --n-estimators 40 --max-depth 2

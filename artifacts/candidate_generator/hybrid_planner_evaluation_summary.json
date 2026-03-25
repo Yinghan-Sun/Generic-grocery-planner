@@ -1,0 +1,117 @@
+{
+  "baseline_comparison": {
+    "hybrid_best": {
+      "average_calorie_gap_improvement_kcal": 29.086726,
+      "average_cost_delta": -0.914867,
+      "average_protein_gap_improvement_g": 1.126549,
+      "average_scorer_improvement": 0.343128,
+      "fraction_beating_baseline_by_scorer": 0.292035,
+      "model_candidate_win_rate": 0.628319,
+      "scenario_count": 113
+    },
+    "hybrid_hist_gradient_boosting": {
+      "average_calorie_gap_improvement_kcal": 5.016814,
+      "average_cost_delta": -0.940619,
+      "average_protein_gap_improvement_g": 1.300885,
+      "average_scorer_improvement": 0.341024,
+      "fraction_beating_baseline_by_scorer": 0.283186,
+      "model_candidate_win_rate": 0.654867,
+      "scenario_count": 113
+    },
+    "hybrid_logistic_regression": {
+      "average_calorie_gap_improvement_kcal": -0.257522,
+      "average_cost_delta": -0.593805,
+      "average_protein_gap_improvement_g": -0.953097,
+      "average_scorer_improvement": 0.528954,
+      "fraction_beating_baseline_by_scorer": 0.300885,
+      "model_candidate_win_rate": 0.539823,
+      "scenario_count": 113
+    },
+    "hybrid_random_forest": {
+      "average_calorie_gap_improvement_kcal": 29.086726,
+      "average_cost_delta": -0.914867,
+      "average_protein_gap_improvement_g": 1.126549,
+      "average_scorer_improvement": 0.343128,
+      "fraction_beating_baseline_by_scorer": 0.292035,
+      "model_candidate_win_rate": 0.628319,
+      "scenario_count": 113
+    }
+  },
+  "systems": {
+    "heuristic_only": {
+      "avg_calorie_abs_gap_kcal": 1025.2,
+      "avg_estimated_basket_cost": 33.243894,
+      "avg_generation_time_ms": 60.785991,
+      "avg_macro_gap_ratio_sum": 5.456724,
+      "avg_price_per_1000_kcal": 3.75036,
+      "avg_price_per_100g_protein": 6.506645,
+      "avg_protein_abs_gap_g": 27.660177,
+      "avg_role_diversity_count": 3.566372,
+      "avg_scorer_score": 8.271185,
+      "avg_unique_ingredient_count": 6.539823,
+      "avg_warning_count": 1.318584,
+      "model_selected_rate": 0.0,
+      "scenario_count": 113
+    },
+    "hybrid_best": {
+      "avg_calorie_abs_gap_kcal": 996.113274,
+      "avg_estimated_basket_cost": 32.329027,
+      "avg_generation_time_ms": 385.25077,
+      "avg_macro_gap_ratio_sum": 5.509482,
+      "avg_price_per_1000_kcal": 3.616948,
+      "avg_price_per_100g_protein": 6.322811,
+      "avg_protein_abs_gap_g": 26.533628,
+      "avg_role_diversity_count": 3.619469,
+      "avg_scorer_score": 8.614313,
+      "avg_unique_ingredient_count": 6.504425,
+      "avg_warning_count": 1.318584,
+      "model_selected_rate": 0.628319,
+      "scenario_count": 113
+    },
+    "hybrid_hist_gradient_boosting": {
+      "avg_calorie_abs_gap_kcal": 1020.183186,
+      "avg_estimated_basket_cost": 32.303274,
+      "avg_generation_time_ms": 125.059841,
+      "avg_macro_gap_ratio_sum": 5.506961,
+      "avg_price_per_1000_kcal": 3.639672,
+      "avg_price_per_100g_protein": 6.338194,
+      "avg_protein_abs_gap_g": 26.359292,
+      "avg_role_diversity_count": 3.619469,
+      "avg_scorer_score": 8.612209,
+      "avg_unique_ingredient_count": 6.504425,
+      "avg_warning_count": 1.318584,
+      "model_selected_rate": 0.654867,
+      "scenario_count": 113
+    },
+    "hybrid_logistic_regression": {
+      "avg_calorie_abs_gap_kcal": 1025.457522,
+      "avg_estimated_basket_cost": 32.650088,
+      "avg_generation_time_ms": 86.875708,
+      "avg_macro_gap_ratio_sum": 5.324425,
+      "avg_price_per_1000_kcal": 3.668317,
+      "avg_price_per_100g_protein": 6.478297,
+      "avg_protein_abs_gap_g": 28.613274,
+      "avg_role_diversity_count": 3.530973,
+      "avg_scorer_score": 8.800139,
+      "avg_unique_ingredient_count": 6.433628,
+      "avg_warning_count": 1.353982,
+      "model_selected_rate": 0.539823,
+      "scenario_count": 113
+    },
+    "hybrid_random_forest": {
+      "avg_calorie_abs_gap_kcal": 996.113274,
+      "avg_estimated_basket_cost": 32.329027,
+      "avg_generation_time_ms": 368.430177,
+      "avg_macro_gap_ratio_sum": 5.509482,
+      "avg_price_per_1000_kcal": 3.616948,
+      "avg_price_per_100g_protein": 6.322811,
+      "avg_protein_abs_gap_g": 26.533628,
+      "avg_role_diversity_count": 3.619469,
+      "avg_scorer_score": 8.614313,
+      "avg_unique_ingredient_count": 6.504425,
+      "avg_warning_count": 1.318584,
+      "model_selected_rate": 0.628319,
+      "scenario_count": 113
+    }
+  }
+}

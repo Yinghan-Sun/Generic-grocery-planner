@@ -15,6 +15,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.pipeline import Pipeline
 
+from dietdashboard import candidate_debug
+
 
 class PlanScorerArtifactError(RuntimeError):
     """Raised when the required trained scorer artifact is missing or invalid."""
@@ -58,6 +60,19 @@ NUMERIC_FEATURES = (
     "unrealistic_basket_penalty",
     "preference_match_score",
     "heuristic_selection_score",
+    "overlap_with_best_heuristic_jaccard",
+    "changed_food_count_vs_best_heuristic",
+    "role_assignment_changes_vs_best_heuristic",
+    "cost_delta_vs_best_heuristic",
+    "protein_gap_delta_vs_best_heuristic",
+    "calorie_gap_delta_vs_best_heuristic",
+    "macro_gap_ratio_delta_vs_best_heuristic",
+    "diversity_gain_vs_best_heuristic",
+    "role_diversity_delta_vs_best_heuristic",
+    "repetition_penalty_delta_vs_best_heuristic",
+    "unrealistic_penalty_delta_vs_best_heuristic",
+    "preference_match_delta_vs_best_heuristic",
+    "alternative_quality_score",
     "nearby_store_count",
     "warning_count",
     "realism_note_count",
@@ -72,6 +87,10 @@ BOOLEAN_FEATURES = (
     "vegetarian_preference",
     "vegan_preference",
     "dairy_free_preference",
+    "materially_different_from_best_heuristic",
+    "nutritionally_competitive_with_best_heuristic",
+    "cost_competitive_with_best_heuristic",
+    "diversity_improved_vs_best_heuristic",
 )
 CATEGORICAL_FEATURES = (
     "goal_profile",
@@ -81,6 +100,8 @@ CATEGORICAL_FEATURES = (
 TRAINING_METADATA_FIELDS = (
     "request_id",
     "candidate_id",
+    "baseline_candidate_id",
+    "candidate_source",
     "label_score",
 )
 DEFAULT_RANDOM_SEED = 42
@@ -134,6 +155,135 @@ def _safe_bool(value: object) -> int:
 
 def _nutrition_value(summary: Mapping[str, object], key: str) -> float:
     return _safe_float(summary.get(key))
+
+
+def _goal_tradeoff_profile(feature_row: Mapping[str, object]) -> dict[str, float]:
+    goal_profile = str(feature_row.get("goal_profile") or "generic_balanced")
+    budget_friendly = bool(_safe_bool(feature_row.get("budget_friendly_preference")))
+    profile = {
+        "protein_gap_scale": 1.0,
+        "calorie_gap_scale": 1.0,
+        "macro_gap_scale": 1.0,
+        "cost_penalty_scale": 1.0,
+        "price_penalty_scale": 1.0,
+        "diversity_reward_scale": 1.0,
+        "repetition_penalty_scale": 1.0,
+        "preference_reward_scale": 1.0,
+        "alternative_protein_tolerance_g": 12.0,
+        "alternative_calorie_tolerance_kcal": 180.0,
+        "alternative_macro_tolerance": 0.3,
+        "alternative_cost_tolerance": 1.5,
+        "soft_cost_delta": 0.75,
+        "soft_protein_delta": 4.0,
+        "soft_calorie_delta": 60.0,
+    }
+
+    if goal_profile == "muscle_gain":
+        profile.update(
+            {
+                "protein_gap_scale": 1.18,
+                "calorie_gap_scale": 1.2,
+                "cost_penalty_scale": 0.88,
+                "price_penalty_scale": 0.9,
+                "diversity_reward_scale": 0.95,
+                "alternative_protein_tolerance_g": 14.0,
+                "alternative_calorie_tolerance_kcal": 220.0,
+                "alternative_cost_tolerance": 2.2,
+                "soft_cost_delta": 1.2,
+            }
+        )
+    elif goal_profile == "fat_loss":
+        profile.update(
+            {
+                "protein_gap_scale": 1.15,
+                "calorie_gap_scale": 1.08,
+                "cost_penalty_scale": 0.95,
+                "diversity_reward_scale": 0.9,
+                "repetition_penalty_scale": 1.05,
+                "alternative_protein_tolerance_g": 10.0,
+                "alternative_calorie_tolerance_kcal": 140.0,
+                "alternative_cost_tolerance": 1.2,
+                "soft_cost_delta": 0.6,
+            }
+        )
+    elif goal_profile == "maintenance":
+        profile.update(
+            {
+                "cost_penalty_scale": 0.92,
+                "diversity_reward_scale": 1.12,
+                "repetition_penalty_scale": 1.08,
+                "preference_reward_scale": 1.05,
+                "alternative_cost_tolerance": 1.6,
+            }
+        )
+    elif goal_profile == "budget_friendly_healthy":
+        profile.update(
+            {
+                "cost_penalty_scale": 1.45,
+                "price_penalty_scale": 1.35,
+                "diversity_reward_scale": 0.88,
+                "alternative_cost_tolerance": 0.75,
+                "soft_cost_delta": 0.35,
+                "alternative_protein_tolerance_g": 10.0,
+                "alternative_calorie_tolerance_kcal": 150.0,
+            }
+        )
+    elif goal_profile == "high_protein_vegetarian":
+        profile.update(
+            {
+                "protein_gap_scale": 1.1,
+                "calorie_gap_scale": 1.05,
+                "cost_penalty_scale": 0.88,
+                "diversity_reward_scale": 1.18,
+                "repetition_penalty_scale": 1.12,
+                "preference_reward_scale": 1.08,
+                "alternative_protein_tolerance_g": 13.0,
+                "alternative_calorie_tolerance_kcal": 190.0,
+                "alternative_cost_tolerance": 2.0,
+                "soft_cost_delta": 1.1,
+            }
+        )
+
+    if budget_friendly:
+        profile["cost_penalty_scale"] *= 1.12
+        profile["price_penalty_scale"] *= 1.08
+        profile["alternative_cost_tolerance"] = min(profile["alternative_cost_tolerance"], 0.85)
+        profile["soft_cost_delta"] = min(profile["soft_cost_delta"], 0.45)
+    return profile
+
+
+def _candidate_source_labels(candidate: Mapping[str, object]) -> set[str]:
+    metadata = candidate.get("candidate_metadata")
+    if not isinstance(metadata, Mapping):
+        return {"heuristic"}
+    labels = metadata.get("source_labels")
+    if isinstance(labels, Sequence):
+        normalized = {str(label or "").strip() for label in labels if str(label or "").strip()}
+        if normalized:
+            return normalized
+    return {str(metadata.get("source") or "heuristic")}
+
+
+def _best_heuristic_reference_index(
+    candidates: Sequence[Mapping[str, object]],
+    feature_rows: Sequence[Mapping[str, object]],
+) -> int:
+    heuristic_indices = [
+        index
+        for index, candidate in enumerate(candidates)
+        if "heuristic" in _candidate_source_labels(candidate)
+    ]
+    if not heuristic_indices:
+        return 0
+    return max(
+        heuristic_indices,
+        key=lambda index: (
+            float(heuristic_candidate_label(feature_rows[index])),
+            float(_safe_float(feature_rows[index].get("heuristic_selection_score"))),
+            -float(_safe_float(feature_rows[index].get("unrealistic_basket_penalty"))),
+            str(candidates[index].get("candidate_id") or ""),
+        ),
+    )
 
 
 def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, object]:
@@ -224,6 +374,19 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
         "unrealistic_basket_penalty": _safe_float(metadata.get("unrealistic_basket_penalty")),
         "preference_match_score": _safe_float(metadata.get("preference_match_score")),
         "heuristic_selection_score": _safe_float(metadata.get("heuristic_selection_score")),
+        "overlap_with_best_heuristic_jaccard": 1.0,
+        "changed_food_count_vs_best_heuristic": 0.0,
+        "role_assignment_changes_vs_best_heuristic": 0.0,
+        "cost_delta_vs_best_heuristic": 0.0,
+        "protein_gap_delta_vs_best_heuristic": 0.0,
+        "calorie_gap_delta_vs_best_heuristic": 0.0,
+        "macro_gap_ratio_delta_vs_best_heuristic": 0.0,
+        "diversity_gain_vs_best_heuristic": 0.0,
+        "role_diversity_delta_vs_best_heuristic": 0.0,
+        "repetition_penalty_delta_vs_best_heuristic": 0.0,
+        "unrealistic_penalty_delta_vs_best_heuristic": 0.0,
+        "preference_match_delta_vs_best_heuristic": 0.0,
+        "alternative_quality_score": 0.0,
         "nearby_store_count": _safe_int(metadata.get("nearby_store_count")),
         "warning_count": len(recommendation.get("warnings") or []),
         "realism_note_count": len(recommendation.get("realism_notes") or []),
@@ -236,6 +399,10 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
         "vegetarian_preference": _safe_bool(preferences.get("vegetarian")),
         "vegan_preference": _safe_bool(preferences.get("vegan")),
         "dairy_free_preference": _safe_bool(preferences.get("dairy_free")),
+        "materially_different_from_best_heuristic": 0,
+        "nutritionally_competitive_with_best_heuristic": 1,
+        "cost_competitive_with_best_heuristic": 1,
+        "diversity_improved_vs_best_heuristic": 0,
         "goal_profile": str(recommendation.get("goal_profile") or request_context.get("goal_profile") or "generic_balanced"),
         "shopping_mode": str(recommendation.get("shopping_mode") or request_context.get("shopping_mode") or "balanced"),
         "meal_style": str(preferences.get("meal_style") or "any"),
@@ -244,29 +411,181 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
 
 
 def heuristic_candidate_label(feature_row: Mapping[str, object]) -> float:
+    profile = _goal_tradeoff_profile(feature_row)
     score = 0.0
-    score += 4.0 * max(0.0, 1.0 - _safe_float(feature_row.get("protein_gap_ratio")))
-    score += 3.4 * max(0.0, 1.0 - _safe_float(feature_row.get("calorie_gap_ratio")))
-    score += 1.8 * max(0.0, 1.0 - (_safe_float(feature_row.get("macro_gap_ratio_sum")) / 6.0))
+    score += 4.0 * max(0.0, 1.0 - (_safe_float(feature_row.get("protein_gap_ratio")) * profile["protein_gap_scale"]))
+    score += 3.4 * max(0.0, 1.0 - (_safe_float(feature_row.get("calorie_gap_ratio")) * profile["calorie_gap_scale"]))
+    score += 1.8 * max(0.0, 1.0 - ((_safe_float(feature_row.get("macro_gap_ratio_sum")) * profile["macro_gap_scale"]) / 6.0))
     score += 0.3 * _safe_float(feature_row.get("unique_ingredient_count"))
-    score += 0.25 * _safe_float(feature_row.get("food_family_diversity_count"))
-    score += 0.18 * _safe_float(feature_row.get("preference_match_score"))
-    score += 0.06 * _safe_float(feature_row.get("heuristic_selection_score"))
-    score -= 0.38 * _safe_float(feature_row.get("repetition_penalty"))
+    score += 0.25 * _safe_float(feature_row.get("food_family_diversity_count")) * profile["diversity_reward_scale"]
+    score += 0.18 * _safe_float(feature_row.get("preference_match_score")) * profile["preference_reward_scale"]
+    score += 0.02 * _safe_float(feature_row.get("heuristic_selection_score"))
+    score -= 0.38 * _safe_float(feature_row.get("repetition_penalty")) * profile["repetition_penalty_scale"]
     score -= 0.65 * _safe_float(feature_row.get("unrealistic_basket_penalty"))
     score -= 0.15 * _safe_float(feature_row.get("warning_count"))
 
     estimated_cost = _safe_float(feature_row.get("estimated_basket_cost"))
     if estimated_cost > 0:
-        score -= 0.05 * estimated_cost
-        score -= 0.03 * _safe_float(feature_row.get("price_per_1000_kcal"))
-        score -= 0.025 * _safe_float(feature_row.get("price_per_100g_protein"))
-    if _safe_bool(feature_row.get("budget_friendly_preference")):
-        score -= 0.03 * estimated_cost
-        score -= 0.05 * _safe_float(feature_row.get("price_per_1000_kcal"))
+        score -= 0.05 * estimated_cost * profile["cost_penalty_scale"]
+        score -= 0.03 * _safe_float(feature_row.get("price_per_1000_kcal")) * profile["price_penalty_scale"]
+        score -= 0.025 * _safe_float(feature_row.get("price_per_100g_protein")) * profile["price_penalty_scale"]
     if _safe_bool(feature_row.get("low_prep_preference")):
         score -= 0.12 * _safe_float(feature_row.get("unrealistic_basket_penalty"))
     return round(score, 6)
+
+
+def alternative_quality_score(feature_row: Mapping[str, object]) -> float:
+    if not _safe_bool(feature_row.get("materially_different_from_best_heuristic")):
+        return 0.0
+
+    profile = _goal_tradeoff_profile(feature_row)
+    protein_delta = _safe_float(feature_row.get("protein_gap_delta_vs_best_heuristic"))
+    calorie_delta = _safe_float(feature_row.get("calorie_gap_delta_vs_best_heuristic"))
+    macro_delta = _safe_float(feature_row.get("macro_gap_ratio_delta_vs_best_heuristic"))
+    cost_delta = _safe_float(feature_row.get("cost_delta_vs_best_heuristic"))
+    diversity_gain = _safe_float(feature_row.get("diversity_gain_vs_best_heuristic"))
+    role_diversity_delta = _safe_float(feature_row.get("role_diversity_delta_vs_best_heuristic"))
+    repetition_delta = _safe_float(feature_row.get("repetition_penalty_delta_vs_best_heuristic"))
+    unrealistic_delta = _safe_float(feature_row.get("unrealistic_penalty_delta_vs_best_heuristic"))
+    preference_delta = _safe_float(feature_row.get("preference_match_delta_vs_best_heuristic"))
+
+    protein_competitiveness = max(0.0, 1.0 - (max(protein_delta, 0.0) / max(profile["alternative_protein_tolerance_g"], 1.0)))
+    calorie_competitiveness = max(0.0, 1.0 - (max(calorie_delta, 0.0) / max(profile["alternative_calorie_tolerance_kcal"], 1.0)))
+    macro_competitiveness = max(0.0, 1.0 - (max(macro_delta, 0.0) / max(profile["alternative_macro_tolerance"], 0.01)))
+    cost_competitiveness = 1.0 - min(max(cost_delta, 0.0) / max(profile["alternative_cost_tolerance"], 0.1), 1.5)
+    diversity_bonus = (min(max(diversity_gain, 0.0), 2.0) * 0.16 * profile["diversity_reward_scale"]) + (
+        min(max(role_diversity_delta, 0.0), 1.0) * 0.08
+    )
+    repetition_bonus = min(max(-repetition_delta, 0.0), 2.0) * 0.14 * profile["repetition_penalty_scale"]
+    realism_bonus = min(max(-unrealistic_delta, 0.0), 1.0) * 0.1
+    preference_bonus = max(preference_delta, 0.0) * 0.08 * profile["preference_reward_scale"]
+
+    score = 0.18
+    score += 0.42 * protein_competitiveness
+    score += 0.34 * calorie_competitiveness
+    score += 0.16 * macro_competitiveness
+    score += 0.14 * cost_competitiveness
+    score += diversity_bonus + repetition_bonus + realism_bonus + preference_bonus
+    score -= max(0.0, cost_delta - profile["soft_cost_delta"]) * 0.12 * profile["cost_penalty_scale"]
+    score -= max(0.0, protein_delta - profile["soft_protein_delta"]) * 0.02 * profile["protein_gap_scale"]
+    score -= max(0.0, calorie_delta - profile["soft_calorie_delta"]) * 0.0015 * profile["calorie_gap_scale"]
+    if not _safe_bool(feature_row.get("nutritionally_competitive_with_best_heuristic")):
+        score -= 0.18
+    if not _safe_bool(feature_row.get("cost_competitive_with_best_heuristic")):
+        score -= 0.1 * profile["cost_penalty_scale"]
+    return round(score, 6)
+
+
+def training_candidate_label(feature_row: Mapping[str, object]) -> float:
+    label = heuristic_candidate_label(feature_row)
+    label += alternative_quality_score(feature_row)
+    if _safe_bool(feature_row.get("materially_different_from_best_heuristic")):
+        if _safe_bool(feature_row.get("nutritionally_competitive_with_best_heuristic")) and _safe_bool(
+            feature_row.get("cost_competitive_with_best_heuristic")
+        ):
+            label += 0.14
+        if _safe_bool(feature_row.get("diversity_improved_vs_best_heuristic")):
+            label += 0.06
+    return round(label, 6)
+
+
+def enrich_request_feature_rows(
+    candidates: Sequence[Mapping[str, object]],
+    feature_rows: Sequence[dict[str, object]],
+    *,
+    best_heuristic_candidate: Mapping[str, object] | None = None,
+) -> list[dict[str, object]]:
+    if not candidates or not feature_rows:
+        return [dict(feature_row) for feature_row in feature_rows]
+
+    enriched_rows = [dict(feature_row) for feature_row in feature_rows]
+    if best_heuristic_candidate is None:
+        reference_index = _best_heuristic_reference_index(candidates, enriched_rows)
+        best_heuristic_candidate = candidates[reference_index]
+        best_heuristic_feature_row = enriched_rows[reference_index]
+    else:
+        try:
+            reference_index = next(
+                index for index, candidate in enumerate(candidates)
+                if str(candidate.get("candidate_id") or "") == str(best_heuristic_candidate.get("candidate_id") or "")
+            )
+        except StopIteration:
+            best_heuristic_feature_row = extract_candidate_features(best_heuristic_candidate)
+        else:
+            best_heuristic_feature_row = enriched_rows[reference_index]
+
+    profile = _goal_tradeoff_profile(best_heuristic_feature_row)
+    for candidate, feature_row in zip(candidates, enriched_rows, strict=True):
+        similarity = candidate_debug.compare_candidates(best_heuristic_candidate, candidate)
+        feature_row["overlap_with_best_heuristic_jaccard"] = round(float(similarity["jaccard_overlap"]), 6)
+        feature_row["changed_food_count_vs_best_heuristic"] = int(similarity["changed_food_count"])
+        feature_row["role_assignment_changes_vs_best_heuristic"] = int(similarity["role_assignment_changes"])
+        feature_row["cost_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("estimated_basket_cost")) - _safe_float(best_heuristic_feature_row.get("estimated_basket_cost")),
+            6,
+        )
+        feature_row["protein_gap_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("protein_abs_gap_g")) - _safe_float(best_heuristic_feature_row.get("protein_abs_gap_g")),
+            6,
+        )
+        feature_row["calorie_gap_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("calorie_abs_gap_kcal")) - _safe_float(best_heuristic_feature_row.get("calorie_abs_gap_kcal")),
+            6,
+        )
+        feature_row["macro_gap_ratio_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("macro_gap_ratio_sum")) - _safe_float(best_heuristic_feature_row.get("macro_gap_ratio_sum")),
+            6,
+        )
+        feature_row["diversity_gain_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("food_family_diversity_count")) - _safe_float(best_heuristic_feature_row.get("food_family_diversity_count")),
+            6,
+        )
+        feature_row["role_diversity_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("role_diversity_count")) - _safe_float(best_heuristic_feature_row.get("role_diversity_count")),
+            6,
+        )
+        feature_row["repetition_penalty_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("repetition_penalty")) - _safe_float(best_heuristic_feature_row.get("repetition_penalty")),
+            6,
+        )
+        feature_row["unrealistic_penalty_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("unrealistic_basket_penalty")) - _safe_float(best_heuristic_feature_row.get("unrealistic_basket_penalty")),
+            6,
+        )
+        feature_row["preference_match_delta_vs_best_heuristic"] = round(
+            _safe_float(feature_row.get("preference_match_score")) - _safe_float(best_heuristic_feature_row.get("preference_match_score")),
+            6,
+        )
+        materially_different = int(bool(similarity["materially_different"]))
+        feature_row["materially_different_from_best_heuristic"] = materially_different
+        feature_row["nutritionally_competitive_with_best_heuristic"] = int(
+            _safe_float(feature_row["protein_gap_delta_vs_best_heuristic"]) <= profile["alternative_protein_tolerance_g"]
+            and _safe_float(feature_row["calorie_gap_delta_vs_best_heuristic"]) <= profile["alternative_calorie_tolerance_kcal"]
+            and _safe_float(feature_row["macro_gap_ratio_delta_vs_best_heuristic"]) <= profile["alternative_macro_tolerance"]
+        )
+        feature_row["cost_competitive_with_best_heuristic"] = int(
+            _safe_float(feature_row["cost_delta_vs_best_heuristic"]) <= profile["alternative_cost_tolerance"]
+        )
+        feature_row["diversity_improved_vs_best_heuristic"] = int(
+            _safe_float(feature_row["diversity_gain_vs_best_heuristic"]) > 0
+            or _safe_float(feature_row["role_diversity_delta_vs_best_heuristic"]) > 0
+            or _safe_float(feature_row["repetition_penalty_delta_vs_best_heuristic"]) < 0
+        )
+        feature_row["alternative_quality_score"] = alternative_quality_score(feature_row)
+    return enriched_rows
+
+
+def build_request_feature_rows(
+    candidates: Sequence[Mapping[str, object]],
+    *,
+    best_heuristic_candidate: Mapping[str, object] | None = None,
+) -> list[dict[str, object]]:
+    base_rows = [extract_candidate_features(candidate) for candidate in candidates]
+    return enrich_request_feature_rows(
+        candidates,
+        base_rows,
+        best_heuristic_candidate=best_heuristic_candidate,
+    )
 
 
 def available_backends() -> list[str]:
@@ -442,6 +761,9 @@ def train_model(
         "request_count": len(set(groups)),
         "train_row_count": len(X_train),
         "validation_row_count": len(X_valid),
+        "materially_different_row_count": sum(_safe_bool(row.get("materially_different_from_best_heuristic")) for row in rows),
+        "model_candidate_row_count": sum(1 for row in rows if str(row.get("candidate_source") or "") in {"model", "repaired_model", "hybrid"}),
+        "label_strategy": "fair_alternative_v1",
         "validation_mae": round(float(mean_absolute_error(y_valid, validation_predictions)), 6),
         "validation_rmse": round(float(mean_squared_error(y_valid, validation_predictions) ** 0.5), 6),
         "validation_r2": round(float(r2_score(y_valid, validation_predictions)), 6),
@@ -469,6 +791,7 @@ def train_model(
         "training_metadata_fields": list(TRAINING_METADATA_FIELDS),
         "metrics": metrics,
         "created_at": datetime.now(UTC).isoformat(),
+        "label_strategy": "fair_alternative_v1",
     }
     return bundle, metrics
 

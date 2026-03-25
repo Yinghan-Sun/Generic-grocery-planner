@@ -214,6 +214,45 @@ Runtime environment variables:
 See [Plan Scorer Runtime](docs/plan-scorer.md) for the training-data strategy, feature set,
 artifact layout, and runtime behavior.
 
+## Hybrid Learned Candidate Generator
+
+The planner now supports an additive Route B upgrade:
+
+1. keep the deterministic heuristic planner
+2. add a trainable local candidate generator
+3. fuse heuristic and learned candidates
+4. rank the fused pool with the existing local scorer
+
+Runtime stays local-only. The learned path is optional and disabled by default.
+
+New runtime request flags:
+
+- `enable_model_candidates`
+- `model_candidate_count`
+- `candidate_generator_model_path`
+- `candidate_generator_backend`
+- `debug_candidate_generation`
+
+Offline pipeline commands:
+
+```bash
+make build-candidate-generator-dataset
+make tune-candidate-generator
+make train-candidate-generator
+make evaluate-hybrid-planner
+```
+
+Generated artifacts land in:
+
+```text
+artifacts/candidate_generator/
+```
+
+Presentation-oriented docs:
+
+- [Hybrid Learned Candidate Generator](docs/hybrid-candidate-generator.md)
+- [Module 2 Model Summary](docs/module2-model-summary.md)
+
 ## Trainable Model Component
 
 This repo now also includes an additive, offline trainable model component for course-project

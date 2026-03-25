@@ -1,0 +1,68 @@
+{
+  "backend_winners": {
+    "hist_gradient_boosting": {
+      "backend": "hist_gradient_boosting",
+      "fit_seconds": 5.318218,
+      "hyperparameters": {
+        "l2_regularization": 0.1,
+        "learning_rate": 0.1,
+        "max_depth": 5,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 20
+      },
+      "validation_average_precision": 0.989718,
+      "validation_log_loss": 0.033975,
+      "validation_role_recall_at_budget": 0.955568,
+      "validation_scenario_exact_seed_rate": 0.752066
+    },
+    "logistic_regression": {
+      "backend": "logistic_regression",
+      "fit_seconds": 6.155792,
+      "hyperparameters": {
+        "C": 0.25,
+        "class_weight": null,
+        "max_iter": 4000
+      },
+      "validation_average_precision": 0.843594,
+      "validation_log_loss": 0.134004,
+      "validation_role_recall_at_budget": 0.84878,
+      "validation_scenario_exact_seed_rate": 0.272727
+    },
+    "random_forest": {
+      "backend": "random_forest",
+      "fit_seconds": 11.823111,
+      "hyperparameters": {
+        "max_depth": null,
+        "max_features": 0.5,
+        "min_samples_leaf": 2,
+        "n_estimators": 200
+      },
+      "validation_average_precision": 0.99641,
+      "validation_log_loss": 0.009764,
+      "validation_role_recall_at_budget": 0.970252,
+      "validation_scenario_exact_seed_rate": 0.884298
+    }
+  },
+  "dataset_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_training_dataset.csv",
+  "primary_metric": "validation_role_recall_at_budget",
+  "random_seed": 42,
+  "search_space_sizes": {
+    "hist_gradient_boosting": 48,
+    "logistic_regression": 6,
+    "random_forest": 24
+  },
+  "selected_model": {
+    "backend": "random_forest",
+    "hyperparameters": {
+      "max_depth": null,
+      "max_features": 0.5,
+      "min_samples_leaf": 2,
+      "n_estimators": 200
+    },
+    "validation_average_precision": 0.99641,
+    "validation_log_loss": 0.009764,
+    "validation_role_recall_at_budget": 0.970252,
+    "validation_scenario_exact_seed_rate": 0.884298
+  },
+  "trial_count": 78
+}

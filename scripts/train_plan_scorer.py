@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from dietdashboard import model_candidate_generator
 from dietdashboard import plan_scorer
 from dietdashboard import plan_scorer_training
 
@@ -31,6 +32,23 @@ def parse_args() -> argparse.Namespace:
         help="Number of heuristic candidate plans to generate per training request.",
     )
     parser.add_argument(
+        "--model-candidate-count",
+        type=int,
+        default=4,
+        help="Maximum number of learned candidates to add to each scorer-training request.",
+    )
+    parser.add_argument(
+        "--disable-model-candidates",
+        action="store_true",
+        help="Build the scorer dataset from heuristic-only candidate pools.",
+    )
+    parser.add_argument(
+        "--candidate-generator-model-path",
+        type=Path,
+        default=model_candidate_generator.default_model_path(),
+        help="Path to the candidate-generator artifact used when building scorer-training pools.",
+    )
+    parser.add_argument(
         "--backend",
         default="auto",
         help="Model backend to train: auto, xgboost, lightgbm, sklearn_gradient_boosting, sklearn_random_forest, or sklearn_ridge.",
@@ -49,6 +67,9 @@ def main() -> int:
         db_path=args.db_path,
         output_dir=args.output_dir,
         candidate_count=args.candidate_count,
+        model_candidate_count=args.model_candidate_count,
+        enable_model_candidates=not args.disable_model_candidates,
+        candidate_generator_model_path=args.candidate_generator_model_path,
         backend=args.backend,
         learning_rate=args.learning_rate,
         max_depth=args.max_depth,
@@ -65,6 +86,8 @@ def main() -> int:
     print(f"row_count={summary['row_count']}")
     print(f"request_count={summary['request_count']}")
     print(f"backend={metrics['backend']}")
+    print(f"model_candidates_in_dataset={not args.disable_model_candidates}")
+    print(f"candidate_generator_model_path={args.candidate_generator_model_path}")
     print(f"validation_mae={metrics['validation_mae']}")
     print(f"validation_rmse={metrics['validation_rmse']}")
     print(f"validation_r2={metrics['validation_r2']}")

@@ -30,6 +30,71 @@ function roleLabel(role) {
   return labels[role] || "Recommended item";
 }
 
+function normalizeCandidateSource(source) {
+  const normalized = String(source || "heuristic").trim().toLowerCase();
+  if (normalized === "model" || normalized === "hybrid" || normalized === "repaired_model") {
+    return normalized;
+  }
+  return "heuristic";
+}
+
+function candidateSourceDisplay(source) {
+  const labels = {
+    heuristic: "Heuristic",
+    model: "Model",
+    hybrid: "Hybrid",
+    repaired_model: "Repaired model"
+  };
+  return labels[normalizeCandidateSource(source)] || "Heuristic";
+}
+
+function candidateSourceBadgeLabel(source) {
+  return `${candidateSourceDisplay(source)} result`;
+}
+
+function candidateSourceBadgeClass(source) {
+  return `generic-badge-source-${normalizeCandidateSource(source)}`;
+}
+
+function normalizeSourceList(values, fallbackSource) {
+  const items = Array.isArray(values) ? values : [];
+  const normalized = [...new Set(items.map(value => normalizeCandidateSource(value)).filter(Boolean))];
+  return normalized.length ? normalized : [normalizeCandidateSource(fallbackSource)];
+}
+
+function plannerSelectionOutcome(modelCandidatesEnabled, selectedSource) {
+  const normalizedSource = normalizeCandidateSource(selectedSource);
+  if (!modelCandidatesEnabled) {
+    return "Model path disabled; the heuristic-only baseline produced this result.";
+  }
+  if (normalizedSource === "heuristic") {
+    return "Model path was enabled, but the highest-ranked basket still came from the heuristic pool.";
+  }
+  if (normalizedSource === "model") {
+    return "A model-generated candidate won the final ranking.";
+  }
+  if (normalizedSource === "repaired_model") {
+    return "A model-generated basket needed repair and still won the final ranking.";
+  }
+  return "A fused hybrid candidate won the final ranking.";
+}
+
+function formatFoodIdList(values) {
+  const items = Array.isArray(values) ? values.filter(Boolean) : [];
+  return items.length ? items.join(", ") : "Not available";
+}
+
+function formatMetricValue(value, digits = 3) {
+  if (value === null || value === undefined || value === "") {
+    return "Not available";
+  }
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return String(value);
+  }
+  return numeric.toFixed(digits);
+}
+
 const ROLE_SECTIONS = [
   { role: "protein_anchor", title: "Protein picks" },
   { role: "carb_base", title: "Carb base" },
@@ -256,6 +321,155 @@ export function GenericResults(parent, state, actions = {}) {
   const summary = recommendation.nutrition_summary;
   const days = Number(recommendation.days || state.days || 1);
   const shoppingMode = String(recommendation.shopping_mode || state.shopping_mode || "balanced");
+  const selectedCandidateSource = normalizeCandidateSource(recommendation.selected_candidate_source);
+  const selectedCandidateSources = normalizeSourceList(recommendation.selected_candidate_sources, selectedCandidateSource);
+  const candidateGenerationDebug = recommendation.candidate_generation_debug || {};
+  const scoringDebug = recommendation.scoring_debug || {};
+  const candidateComparisonDebug = recommendation.candidate_comparison_debug || {};
+  const modelCandidatesEnabled = candidateGenerationDebug.model_candidates_enabled ?? Boolean(state.enable_model_candidates);
+  const heuristicCandidateCount = candidateGenerationDebug.heuristic_candidate_count;
+  const modelCandidateCount = candidateGenerationDebug.model_candidate_count;
+  const fusedCandidateCount = candidateGenerationDebug.fused_candidate_count ?? recommendation.candidate_count_considered;
+  const candidateGeneratorBackend = candidateGenerationDebug.candidate_generator_backend || state.candidate_generator_backend || "auto";
+  const scorerBackend = recommendation.scorer_backend || "unknown";
+  const selectedCandidateId = recommendation.selected_candidate_id || "unknown";
+  const candidateCountConsidered = recommendation.candidate_count_considered ?? fusedCandidateCount;
+  const hasPlannerDebug = Boolean(
+    recommendation.candidate_generation_debug || recommendation.scoring_debug || recommendation.candidate_comparison_debug || recommendation.selected_candidate_source
+  );
+  const diagnosisText = candidateComparisonDebug.diagnosis_text || plannerSelectionOutcome(modelCandidatesEnabled, selectedCandidateSource);
+  const selectedVsBestHeuristic = candidateComparisonDebug.selected_vs_best_heuristic || null;
+  const selectedContrast = candidateComparisonDebug.selected_candidate_contrast || {};
+  const bestHeuristicFoodIds = selectedContrast.best_heuristic_candidate_shopping_food_ids
+    || candidateComparisonDebug.best_heuristic_candidate_shopping_food_ids
+    || [];
+  const bestModelFoodIds = selectedContrast.best_model_candidate_shopping_food_ids
+    || candidateComparisonDebug.best_model_candidate_shopping_food_ids
+    || [];
+  const topCandidateRows = Array.isArray(scoringDebug.candidates)
+    ? scoringDebug.candidates.slice(0, 5).map(candidate => `
+        <tr>
+          <td class="generic-debug-code">${escapeHtml(candidate.candidate_id)}</td>
+          <td>${escapeHtml(candidateSourceDisplay(candidate.source))}</td>
+          <td>${escapeHtml(formatMetricValue(candidate.model_score))}</td>
+          <td>${escapeHtml(candidate.generator_score ?? "n/a")}</td>
+          <td class="generic-debug-code">${escapeHtml(formatFoodIdList(candidate.shopping_food_ids))}</td>
+          <td>${candidate.selected ? "Yes" : "No"}</td>
+          <td>${escapeHtml(candidate.selection_reason_summary || "")}</td>
+        </tr>
+      `).join("")
+    : "";
+  const candidatePoolLine = heuristicCandidateCount !== undefined && modelCandidateCount !== undefined && fusedCandidateCount !== undefined
+    ? `${heuristicCandidateCount} heuristic + ${modelCandidateCount} model -> ${fusedCandidateCount} fused`
+    : candidateCountConsidered !== undefined
+      ? `${candidateCountConsidered} total candidates ranked`
+      : "Not available";
+  const plannerDebugBlock = hasPlannerDebug
+    ? `
+      <div class="generic-list-item" style="margin-top: 1rem">
+        <div class="generic-inline-group">
+          <h3>Planner Debug / Model Participation</h3>
+          <span class="generic-badge">Debug summary</span>
+        </div>
+        <div class="generic-debug-list">
+          <div><strong>Selected candidate source:</strong> ${escapeHtml(candidateSourceDisplay(selectedCandidateSource))}</div>
+          <div><strong>Selected candidate sources:</strong> ${escapeHtml(selectedCandidateSources.map(candidateSourceDisplay).join(" + "))}</div>
+          <div><strong>Candidate pool:</strong> ${escapeHtml(candidatePoolLine)}</div>
+          <div><strong>Candidates ranked:</strong> ${escapeHtml(candidateCountConsidered ?? "Not available")}</div>
+          <div><strong>Model candidates enabled:</strong> ${escapeHtml(modelCandidatesEnabled ? "Yes" : "No")}</div>
+          <div><strong>Candidate generator backend:</strong> ${escapeHtml(candidateGeneratorBackend || "Not used")}</div>
+          <div><strong>Scorer backend:</strong> ${escapeHtml(scorerBackend)}</div>
+          <div><strong>Selected candidate ID:</strong> ${escapeHtml(selectedCandidateId)}</div>
+          <div><strong>Best heuristic candidate:</strong> ${escapeHtml(candidateComparisonDebug.best_heuristic_candidate_id || "Not available")} ${
+            candidateComparisonDebug.best_heuristic_candidate_score !== null && candidateComparisonDebug.best_heuristic_candidate_score !== undefined
+              ? `<span>(score ${escapeHtml(formatMetricValue(candidateComparisonDebug.best_heuristic_candidate_score))})</span>`
+              : ""
+          }</div>
+          <div><strong>Best model candidate:</strong> ${escapeHtml(candidateComparisonDebug.best_model_candidate_id || "Not available")} ${
+            candidateComparisonDebug.best_model_candidate_score !== null && candidateComparisonDebug.best_model_candidate_score !== undefined
+              ? `<span>(score ${escapeHtml(formatMetricValue(candidateComparisonDebug.best_model_candidate_score))})</span>`
+              : ""
+          }</div>
+          <div><strong>Model vs heuristic score gap:</strong> ${escapeHtml(
+            candidateComparisonDebug.best_model_vs_best_heuristic_score_gap !== null && candidateComparisonDebug.best_model_vs_best_heuristic_score_gap !== undefined
+              ? formatMetricValue(candidateComparisonDebug.best_model_vs_best_heuristic_score_gap)
+              : "Not available"
+          )}</div>
+          <div><strong>Model candidates merged:</strong> ${escapeHtml(
+            candidateComparisonDebug.model_candidates_merged_count !== null && candidateComparisonDebug.model_candidates_merged_count !== undefined
+              ? `${candidateComparisonDebug.model_candidates_merged_count}`
+              : "Not available"
+          )}</div>
+          <div><strong>Materially different model candidates surviving fusion:</strong> ${escapeHtml(
+            candidateComparisonDebug.materially_different_model_candidates_surviving_after_fusion !== null
+            && candidateComparisonDebug.materially_different_model_candidates_surviving_after_fusion !== undefined
+              ? `${candidateComparisonDebug.materially_different_model_candidates_surviving_after_fusion}`
+              : "Not available"
+          )}</div>
+          <div><strong>Average heuristic/model overlap:</strong> ${escapeHtml(
+            candidateComparisonDebug.average_heuristic_model_overlap_jaccard !== null && candidateComparisonDebug.average_heuristic_model_overlap_jaccard !== undefined
+              ? formatMetricValue(candidateComparisonDebug.average_heuristic_model_overlap_jaccard)
+              : "Not available"
+          )}</div>
+          <div><strong>Best materially different model candidate:</strong> ${escapeHtml(
+            candidateComparisonDebug.best_materially_different_model_candidate_id || "Not available"
+          )} ${
+            candidateComparisonDebug.best_materially_different_model_candidate_score !== null
+            && candidateComparisonDebug.best_materially_different_model_candidate_score !== undefined
+              ? `<span>(score ${escapeHtml(formatMetricValue(candidateComparisonDebug.best_materially_different_model_candidate_score))})</span>`
+              : ""
+          }</div>
+          <div><strong>Winner vs best materially different model gap:</strong> ${escapeHtml(
+            candidateComparisonDebug.best_materially_different_model_candidate_score_gap_to_selected !== null
+            && candidateComparisonDebug.best_materially_different_model_candidate_score_gap_to_selected !== undefined
+              ? formatMetricValue(candidateComparisonDebug.best_materially_different_model_candidate_score_gap_to_selected)
+              : "Not available"
+          )}</div>
+          <div><strong>Why that model alternative lost:</strong> ${escapeHtml(
+            candidateComparisonDebug.best_materially_different_model_candidate_loss_reason || "Not available"
+          )}</div>
+          <div><strong>Similarity diagnosis:</strong> ${escapeHtml(
+            candidateComparisonDebug.model_candidates_mostly_near_duplicates
+              ? "Model candidates were mostly near-duplicates."
+              : modelCandidatesEnabled
+                ? "Model candidates introduced materially different baskets."
+                : "Model path disabled."
+          )}</div>
+          <div><strong>Selection outcome:</strong> ${escapeHtml(diagnosisText)}</div>
+        </div>
+        <div class="generic-debug-list" style="margin-top: 1rem">
+          <div><strong>Selected vs heuristic baseline:</strong> ${escapeHtml(selectedContrast.difference_summary_vs_best_heuristic || candidateComparisonDebug.selected_candidate_difference_summary || "Not available")}</div>
+          <div><strong>Materially different from heuristic baseline:</strong> ${escapeHtml(
+            selectedVsBestHeuristic ? (selectedVsBestHeuristic.materially_different ? "Yes" : "No") : "Not available"
+          )}</div>
+          <div><strong>Selected candidate shopping_food_ids:</strong> <span class="generic-debug-code">${escapeHtml(formatFoodIdList(selectedContrast.selected_candidate_shopping_food_ids || candidateComparisonDebug.selected_candidate_shopping_food_ids || []))}</span></div>
+          <div><strong>Best heuristic candidate shopping_food_ids:</strong> <span class="generic-debug-code">${escapeHtml(formatFoodIdList(bestHeuristicFoodIds))}</span></div>
+          <div><strong>Best model candidate shopping_food_ids:</strong> <span class="generic-debug-code">${escapeHtml(formatFoodIdList(bestModelFoodIds))}</span></div>
+        </div>
+        ${
+          topCandidateRows
+            ? `<details class="generic-advanced" style="margin-top: 1rem">
+                <summary>Top candidates</summary>
+                <table class="generic-debug-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Source</th>
+                      <th>Scorer score</th>
+                      <th>Generator score</th>
+                      <th>shopping_food_ids</th>
+                      <th>Selected</th>
+                      <th>Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody>${topCandidateRows}</tbody>
+                </table>
+              </details>`
+            : ""
+        }
+      </div>
+    `
+    : "";
   let itemIndex = 0;
   const renderItem = item => `
         <div class="generic-list-item">
@@ -425,7 +639,12 @@ export function GenericResults(parent, state, actions = {}) {
     <div class="generic-list-item" style="margin-bottom: 1rem">
       <div class="generic-inline-group">
         <h3>Shopping List</h3>
-        <span class="generic-badge">Suggested shopping list for ${days} ${days === 1 ? "day" : "days"}</span>
+        <div class="generic-badge-group">
+          <span class="generic-badge ${escapeHtml(candidateSourceBadgeClass(selectedCandidateSource))}">
+            ${escapeHtml(candidateSourceBadgeLabel(selectedCandidateSource))}
+          </span>
+          <span class="generic-badge">Suggested shopping list for ${days} ${days === 1 ? "day" : "days"}</span>
+        </div>
       </div>
       <p class="generic-muted">Daily nutrition goals stay the same. Quantities below are scaled for the selected shopping window in <strong>${escapeHtml(shoppingMode)}</strong> shopping mode.</p>
       <div class="generic-actions" style="margin-top: 0.75rem">
@@ -442,6 +661,7 @@ export function GenericResults(parent, state, actions = {}) {
     <div class="generic-list">
       ${shoppingList || `<div class="generic-empty">Your pantry already covers the suggested basket for this plan. Review the notes below if you still want a small top-up shop.</div>`}
     </div>
+    ${plannerDebugBlock}
     ${
       groupedStorePicks
         ? `<div class="generic-list-item" style="margin-top: 1rem">

@@ -1,0 +1,11 @@
+{
+  "backend": "logistic_regression",
+  "hyperparameters": {
+    "C": 0.25,
+    "class_weight": null,
+    "max_iter": 4000
+  },
+  "primary_metric": "validation_role_recall_at_budget",
+  "random_seed": 42,
+  "selected_from": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_tuning_results.csv"
+}

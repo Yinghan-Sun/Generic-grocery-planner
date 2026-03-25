@@ -1,0 +1,12 @@
+{
+  "backend": "random_forest",
+  "hyperparameters": {
+    "max_depth": null,
+    "max_features": 0.5,
+    "min_samples_leaf": 2,
+    "n_estimators": 200
+  },
+  "primary_metric": "validation_role_recall_at_budget",
+  "random_seed": 42,
+  "selected_from": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_tuning_results.csv"
+}

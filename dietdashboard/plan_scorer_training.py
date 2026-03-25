@@ -8,8 +8,9 @@ from pathlib import Path
 
 import duckdb
 
-from dietdashboard.generic_recommender import recommend_generic_food_candidates
 from dietdashboard import plan_scorer
+from dietdashboard import model_candidate_generator
+from dietdashboard.generic_recommender import recommend_generic_food_candidates
 
 PRICE_CONTEXTS = (
     {
@@ -131,8 +132,16 @@ def build_training_rows(
     db_path: str | Path | None = None,
     *,
     candidate_count: int = 8,
+    model_candidate_count: int = 4,
+    enable_model_candidates: bool = True,
+    candidate_generator_model_path: str | Path | None = None,
 ) -> list[dict[str, object]]:
     resolved_db_path = Path(db_path) if db_path is not None else default_db_path()
+    resolved_candidate_generator_model_path = (
+        Path(candidate_generator_model_path)
+        if candidate_generator_model_path is not None
+        else model_candidate_generator.default_model_path()
+    )
     rows: list[dict[str, object]] = []
     with duckdb.connect(resolved_db_path, read_only=True) as con:
         for scenario in SCENARIO_TEMPLATES:
@@ -140,7 +149,7 @@ def build_training_rows(
                 for days, shopping_mode in WINDOW_VARIANTS:
                     request_id = f"{scenario['scenario_id']}:{price_context['context_id']}:{days}:{shopping_mode}"
                     stores = _stub_stores(int(price_context["store_count"]), request_id)
-                    candidates = recommend_generic_food_candidates(
+                    heuristic_candidates = recommend_generic_food_candidates(
                         con,
                         protein_target_g=float(scenario["protein_target_g"]),
                         calorie_target_kcal=float(scenario["calorie_target_kcal"]),
@@ -157,15 +166,65 @@ def build_training_rows(
                         },
                         stores=stores,
                         candidate_count=candidate_count,
+                        candidate_generation_config={
+                            "enable_model_candidates": False,
+                        },
                     )
-                    if len(candidates) < 2:
+                    if len(heuristic_candidates) < 2:
                         continue
-                    for candidate in candidates:
-                        features = plan_scorer.extract_candidate_features(candidate)
+
+                    training_candidates = heuristic_candidates
+                    if enable_model_candidates:
+                        training_candidates = recommend_generic_food_candidates(
+                            con,
+                            protein_target_g=float(scenario["protein_target_g"]),
+                            calorie_target_kcal=float(scenario["calorie_target_kcal"]),
+                            preferences=dict(scenario["preferences"]),
+                            nutrition_targets=dict(scenario["nutrition_targets"]),
+                            pantry_items=[],
+                            days=days,
+                            shopping_mode=shopping_mode,
+                            price_context={
+                                "usda_area_code": str(price_context["usda_area_code"]),
+                                "usda_area_name": str(price_context["usda_area_name"]),
+                                "bls_area_code": str(price_context["bls_area_code"]),
+                                "bls_area_name": str(price_context["bls_area_name"]),
+                            },
+                            stores=stores,
+                            candidate_count=candidate_count,
+                            candidate_generation_config={
+                                "enable_model_candidates": True,
+                                "model_candidate_count": model_candidate_count,
+                                "candidate_generator_model_path": str(resolved_candidate_generator_model_path),
+                            },
+                        )
+                    if len(training_candidates) < 2:
+                        continue
+
+                    heuristic_feature_rows = plan_scorer.build_request_feature_rows(heuristic_candidates)
+                    baseline_index = max(
+                        range(len(heuristic_candidates)),
+                        key=lambda index: (
+                            float(plan_scorer.heuristic_candidate_label(heuristic_feature_rows[index])),
+                            float(heuristic_feature_rows[index]["heuristic_selection_score"]),
+                            -float(heuristic_feature_rows[index]["unrealistic_basket_penalty"]),
+                            str(heuristic_candidates[index]["candidate_id"]),
+                        ),
+                    )
+                    baseline_candidate = heuristic_candidates[baseline_index]
+                    feature_rows = plan_scorer.build_request_feature_rows(
+                        training_candidates,
+                        best_heuristic_candidate=baseline_candidate,
+                    )
+                    for candidate, features in zip(training_candidates, feature_rows, strict=True):
+                        candidate_metadata = candidate.get("candidate_metadata")
+                        candidate_metadata = candidate_metadata if isinstance(candidate_metadata, dict) else {}
                         row = {
                             "request_id": request_id,
                             "candidate_id": str(candidate["candidate_id"]),
-                            "label_score": plan_scorer.heuristic_candidate_label(features),
+                            "baseline_candidate_id": str(baseline_candidate["candidate_id"]),
+                            "candidate_source": str(candidate_metadata.get("source") or "heuristic"),
+                            "label_score": plan_scorer.training_candidate_label(features),
                             **features,
                         }
                         rows.append(row)
@@ -175,15 +234,25 @@ def build_training_rows(
 def dataset_schema_summary(rows: list[dict[str, object]]) -> dict[str, object]:
     request_ids = sorted({str(row["request_id"]) for row in rows})
     goal_profiles = sorted({str(row["goal_profile"]) for row in rows})
+    candidate_source_counts: dict[str, int] = {}
+    for row in rows:
+        candidate_source = str(row.get("candidate_source") or "heuristic")
+        candidate_source_counts[candidate_source] = candidate_source_counts.get(candidate_source, 0) + 1
     return {
         "row_count": len(rows),
         "request_count": len(request_ids),
         "goal_profiles": goal_profiles,
+        "candidate_source_counts": candidate_source_counts,
         "numeric_features": list(plan_scorer.NUMERIC_FEATURES),
         "boolean_features": list(plan_scorer.BOOLEAN_FEATURES),
         "categorical_features": list(plan_scorer.CATEGORICAL_FEATURES),
         "metadata_fields": list(plan_scorer.TRAINING_METADATA_FIELDS),
         "label_field": "label_score",
+        "label_description": (
+            "label_score combines the base basket-quality heuristic with an alternative-quality bonus that rewards "
+            "materially different candidates when they stay nutritionally competitive, practical, and goal-appropriate "
+            "relative to the best heuristic baseline for the same request."
+        ),
     }
 
 
@@ -192,8 +261,17 @@ def write_training_dataset(
     *,
     db_path: str | Path | None = None,
     candidate_count: int = 8,
+    model_candidate_count: int = 4,
+    enable_model_candidates: bool = True,
+    candidate_generator_model_path: str | Path | None = None,
 ) -> tuple[Path, Path, list[dict[str, object]]]:
-    rows = build_training_rows(db_path=db_path, candidate_count=candidate_count)
+    rows = build_training_rows(
+        db_path=db_path,
+        candidate_count=candidate_count,
+        model_candidate_count=model_candidate_count,
+        enable_model_candidates=enable_model_candidates,
+        candidate_generator_model_path=candidate_generator_model_path,
+    )
     dataset_path = Path(output_path) if output_path is not None else plan_scorer.default_dataset_path()
     dataset_path.parent.mkdir(parents=True, exist_ok=True)
     schema_path = dataset_path.with_suffix(".schema.json")
@@ -218,6 +296,9 @@ def train_and_save_model(
     db_path: str | Path | None = None,
     output_dir: str | Path | None = None,
     candidate_count: int = 8,
+    model_candidate_count: int = 4,
+    enable_model_candidates: bool = True,
+    candidate_generator_model_path: str | Path | None = None,
     backend: str = "auto",
     learning_rate: float = 0.05,
     max_depth: int = 3,
@@ -232,6 +313,9 @@ def train_and_save_model(
         resolved_output_dir / plan_scorer.default_dataset_path().name,
         db_path=db_path,
         candidate_count=candidate_count,
+        model_candidate_count=model_candidate_count,
+        enable_model_candidates=enable_model_candidates,
+        candidate_generator_model_path=candidate_generator_model_path,
     )
     bundle, metrics = plan_scorer.train_model(
         rows,

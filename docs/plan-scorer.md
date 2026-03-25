@@ -11,6 +11,11 @@ The generic grocery planner runtime is model-ranked:
 The trained scorer artifact is required at runtime. If it is missing or invalid, the request fails
 explicitly instead of falling back to another planner path.
 
+The scorer now ranks both:
+
+- heuristic-only candidate pools
+- fused heuristic + learned candidate pools when the optional candidate-generator model is enabled
+
 ## Training Data
 
 Training examples are generated fully locally from the existing planner:
@@ -91,12 +96,21 @@ API request fields:
 - `candidate_count`
 - `scorer_model_path`
 - `debug_scorer`
+- `enable_model_candidates`
+- `model_candidate_count`
+- `candidate_generator_model_path`
+- `candidate_generator_backend`
+- `debug_candidate_generation`
 
 Environment variables:
 
 - `TRAINED_SCORER_CANDIDATE_COUNT`
 - `TRAINED_SCORER_MODEL_PATH`
 - `TRAINED_SCORER_DEBUG`
+- `ENABLE_MODEL_CANDIDATES`
+- `MODEL_CANDIDATE_COUNT`
+- `CANDIDATE_GENERATOR_MODEL_PATH`
+- `MODEL_CANDIDATE_DEBUG`
 
 ## Debugging
 

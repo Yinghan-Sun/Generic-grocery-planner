@@ -1,0 +1,6 @@
+preset_id,preset_label,heuristic_scorer_score,hybrid_scorer_score,score_delta,heuristic_selected_source,hybrid_selected_source,materially_different,selected_candidate_source_changed
+muscle_gain,Muscle Gain,10.926954,11.081449,0.154495,heuristic,model,1,1
+fat_loss,Fat Loss,9.130643,9.130643,0.0,heuristic,heuristic,0,0
+maintenance,Maintenance,11.463771,11.681174,0.217403,heuristic,model,1,1
+high_protein_vegetarian,High-Protein Vegetarian,9.988748,10.58325,0.594502,heuristic,model,1,1
+budget_friendly_healthy,Budget-Friendly Healthy,11.711402,11.812986,0.101584,heuristic,model,1,1

@@ -3,6 +3,15 @@ import { buildFullPlanExport, buildShoppingListExport, GenericResults } from "./
 import { StoreResults } from "./components/store_results";
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+const DEFAULT_SCORER_CANDIDATE_COUNT = 6;
+const DEFAULT_MODEL_CANDIDATE_COUNT = 4;
+const DEFAULT_CANDIDATE_GENERATOR_BACKEND = "auto";
+const ALLOWED_CANDIDATE_GENERATOR_BACKENDS = new Set([
+  "auto",
+  "logistic_regression",
+  "random_forest",
+  "hist_gradient_boosting"
+]);
 
 const GOAL_PRESETS = [
   {
@@ -147,6 +156,25 @@ const GOAL_PRESETS = [
   }
 ];
 
+function frontendAppConfig() {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  return window.GENERIC_APP_CONFIG || {};
+}
+
+function defaultPlannerState() {
+  const isProduction = Boolean(frontendAppConfig().isProduction);
+  return {
+    enable_model_candidates: !isProduction,
+    model_candidate_count: String(DEFAULT_MODEL_CANDIDATE_COUNT),
+    candidate_generator_backend: DEFAULT_CANDIDATE_GENERATOR_BACKEND,
+    debug_candidate_generation: !isProduction,
+    debug_scorer: !isProduction,
+    candidate_count: String(DEFAULT_SCORER_CANDIDATE_COUNT)
+  };
+}
+
 const state = {
   locationQuery: "Mountain View, CA",
   lat: "",
@@ -169,6 +197,7 @@ const state = {
   low_prep: false,
   budget_friendly: false,
   meal_style: "any",
+  ...defaultPlannerState(),
   pantry_items: [],
   stores: [],
   storesLookupContext: null,
@@ -218,6 +247,14 @@ export function parsePositiveIntParam(value) {
   return parsed;
 }
 
+function parseChoiceParam(value, allowed) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return undefined;
+  }
+  const normalized = String(value).trim().toLowerCase();
+  return allowed.has(normalized) ? normalized : undefined;
+}
+
 function currentLocationSearch() {
   if (typeof window === "undefined" || !window.location || typeof window.location.search !== "string") {
     return "";
@@ -228,6 +265,29 @@ function currentLocationSearch() {
 export function getScorerQueryOverrides(search = currentLocationSearch()) {
   const params = new URLSearchParams(search || "");
   const overrides = {};
+
+  const enableModelCandidates = parseBooleanParam(params.get("enable_model_candidates"));
+  if (enableModelCandidates !== undefined) {
+    overrides.enable_model_candidates = enableModelCandidates;
+  }
+
+  const modelCandidateCount = parsePositiveIntParam(params.get("model_candidate_count"));
+  if (modelCandidateCount !== undefined) {
+    overrides.model_candidate_count = modelCandidateCount;
+  }
+
+  const candidateGeneratorBackend = parseChoiceParam(
+    params.get("candidate_generator_backend"),
+    ALLOWED_CANDIDATE_GENERATOR_BACKENDS
+  );
+  if (candidateGeneratorBackend !== undefined) {
+    overrides.candidate_generator_backend = candidateGeneratorBackend;
+  }
+
+  const debugCandidateGeneration = parseBooleanParam(params.get("debug_candidate_generation"));
+  if (debugCandidateGeneration !== undefined) {
+    overrides.debug_candidate_generation = debugCandidateGeneration;
+  }
 
   const debugScorer = parseBooleanParam(params.get("debug_scorer"));
   if (debugScorer !== undefined) {
@@ -244,8 +304,15 @@ export function getScorerQueryOverrides(search = currentLocationSearch()) {
     overrides.scorer_model_path = scorerModelPath;
   }
 
+  const candidateGeneratorModelPath = String(params.get("candidate_generator_model_path") || "").trim();
+  if (candidateGeneratorModelPath) {
+    overrides.candidate_generator_model_path = candidateGeneratorModelPath;
+  }
+
   return overrides;
 }
+
+Object.assign(state, getScorerQueryOverrides());
 
 function hasValidCoordinates(currentState) {
   const lat = parseNumber(currentState.lat);
@@ -295,7 +362,13 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
     pantry_items: Array.isArray(currentState.pantry_items) ? currentState.pantry_items : [],
     store_limit: Number(currentState.store_limit),
     days: Number(currentState.days || 1),
-    shopping_mode: currentState.shopping_mode || "balanced"
+    shopping_mode: currentState.shopping_mode || "balanced",
+    enable_model_candidates: Boolean(currentState.enable_model_candidates),
+    model_candidate_count: Number(currentState.model_candidate_count || DEFAULT_MODEL_CANDIDATE_COUNT),
+    candidate_generator_backend: currentState.candidate_generator_backend || DEFAULT_CANDIDATE_GENERATOR_BACKEND,
+    debug_candidate_generation: Boolean(currentState.debug_candidate_generation),
+    debug_scorer: Boolean(currentState.debug_scorer),
+    candidate_count: Number(currentState.candidate_count || DEFAULT_SCORER_CANDIDATE_COUNT)
   };
 
   const currentStoreContext = storeLookupContext(currentState);

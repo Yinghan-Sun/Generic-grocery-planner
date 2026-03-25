@@ -1,0 +1,20 @@
+{
+  "backend": "sklearn_gradient_boosting",
+  "label_strategy": "fair_alternative_v1",
+  "learning_rate": 0.05,
+  "materially_different_row_count": 574,
+  "max_depth": 3,
+  "model_candidate_row_count": 248,
+  "n_estimators": 250,
+  "random_seed": 42,
+  "request_count": 72,
+  "row_count": 727,
+  "train_row_count": 531,
+  "validation_mae": 0.410185,
+  "validation_pairwise_accuracy": 0.919913,
+  "validation_r2": 0.986946,
+  "validation_rmse": 0.598306,
+  "validation_row_count": 196,
+  "validation_split": 0.25,
+  "validation_top1_accuracy": 0.722222
+}

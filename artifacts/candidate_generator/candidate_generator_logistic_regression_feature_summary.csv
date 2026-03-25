@@ -1,0 +1,31 @@
+feature_name,value,summary_kind
+heuristic_role_rank,-27.662809,coefficient
+heuristic_role_score,12.322417,coefficient
+role=calorie_booster,-5.168226,coefficient
+carbohydrate,-3.82534,coefficient
+purchase_unit=can pack,-3.663807,coefficient
+energy_fibre_kcal,-3.361104,coefficient
+purchase_unit=can,-3.323158,coefficient
+purchase_unit_size_g,3.250705,coefficient
+default_serving_g,-3.173548,coefficient
+purchase_unit=bottle,3.149022,coefficient
+role=produce,2.741704,coefficient
+vitamin_c_score,-2.3533,coefficient
+role=protein_anchor,2.31363,coefficient
+iron_score,2.186813,coefficient
+calcium,-2.16648,coefficient
+calcium_score,-2.166321,coefficient
+iron,2.102722,coefficient
+purchase_unit=box,1.894573,coefficient
+fat,-1.840402,coefficient
+purchase_unit=bunch,-1.725541,coefficient
+microwave_friendly,-1.638815,coefficient
+purchase_unit=block,1.492186,coefficient
+food_family=legume,-1.386914,coefficient
+food_family=dairy,1.368203,coefficient
+purchase_unit=dozen eggs,-1.354687,coefficient
+commonality_rank,-1.293679,coefficient
+meal_tag_dinner,1.272035,coefficient
+purchase_unit=head,1.183249,coefficient
+purchase_unit=loaf,1.146739,coefficient
+budget_score,-1.131893,coefficient

@@ -1,0 +1,83 @@
+{
+  "algorithm_to_present": "route_b_generalized_v5_main",
+  "label": "Generalized Route B Main",
+  "what_the_system_does": [
+    "Keeps the deterministic grocery planner as the baseline path.",
+    "Adds a learned local candidate generator that proposes extra structured basket seeds.",
+    "Uses one fair scorer to rank heuristic and learned candidates together."
+  ],
+  "baseline_vs_final": {
+    "hybrid_score_improved_preset_count": 4,
+    "model_selected_preset_count": 4,
+    "selected_candidate_source_changed_preset_count": 4,
+    "materially_different_preset_count": 4,
+    "current_model_win_preset_ids": [
+      "muscle_gain",
+      "maintenance",
+      "high_protein_vegetarian",
+      "budget_friendly_healthy"
+    ],
+    "remaining_heuristic_preset_ids": [
+      "fat_loss"
+    ]
+  },
+  "preset_results": [
+    {
+      "preset_id": "muscle_gain",
+      "selected_source": "model",
+      "score_improved": true,
+      "materially_different": true
+    },
+    {
+      "preset_id": "fat_loss",
+      "selected_source": "heuristic",
+      "score_improved": false,
+      "materially_different": false
+    },
+    {
+      "preset_id": "maintenance",
+      "selected_source": "model",
+      "score_improved": true,
+      "materially_different": true
+    },
+    {
+      "preset_id": "high_protein_vegetarian",
+      "selected_source": "model",
+      "score_improved": true,
+      "materially_different": true
+    },
+    {
+      "preset_id": "budget_friendly_healthy",
+      "selected_source": "model",
+      "score_improved": true,
+      "materially_different": true
+    }
+  ],
+  "ablation_highlights": {
+    "no_complementarity_model_wins": 3,
+    "no_materialization_model_wins": 3,
+    "full_generalized_model_wins": 4
+  },
+  "robustness_highlights": {
+    "scenario_count": 30,
+    "score_improved_case_count": 16,
+    "model_selected_case_count": 16,
+    "selected_candidate_source_changed_case_count": 16,
+    "materially_different_case_count": 16,
+    "average_score_delta_vs_heuristic": 0.217027,
+    "average_winner_source_stability_ratio": 0.733334,
+    "brittle_case_count": 0
+  },
+  "remaining_limitation": {
+    "fat_loss_selected_source": "heuristic",
+    "fat_loss_gap_to_best_materially_different_model": 0.441382,
+    "fat_loss_explanation": "Materially-different model candidates survived, but the strongest one still lost due to poor produce choice. It lost mainly on repetition penalty."
+  },
+  "use_this_version": {
+    "algorithm_version": "route_b_generalized_v5_main",
+    "scorer_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib",
+    "candidate_generator_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+    "preset_comparison_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json",
+    "regenerate_preset_comparison_command": "make compare-preset-model-participation-final"
+  }
+}

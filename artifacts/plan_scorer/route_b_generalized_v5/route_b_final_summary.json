@@ -1,0 +1,261 @@
+{
+  "main_algorithm": {
+    "algorithm_version": "route_b_generalized_v5_main",
+    "algorithm_label": "Generalized Route B Main",
+    "algorithm_description": "Generalized Route B hybrid planner with structured complementarity, shared model-seed materialization, and the fair scorer artifact.",
+    "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib",
+    "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+    "structured_complementarity_enabled": true,
+    "structured_materialization_enabled": true,
+    "candidate_count": 6,
+    "model_candidate_count": 4
+  },
+  "official_artifacts": {
+    "main_algorithm_config_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_main_algorithm_config.json",
+    "preset_comparison_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json",
+    "ablation_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/ablation/route_b_ablation_summary.json",
+    "robustness_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/robustness/route_b_robustness_summary.json",
+    "final_summary_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_final_summary.json",
+    "final_summary_md": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_final_summary.md"
+  },
+  "regeneration_commands": {
+    "preset_comparison": "make compare-preset-model-participation-final",
+    "ablation": "make route-b-ablation",
+    "robustness": "make route-b-robustness",
+    "final_summary": "make route-b-final-summary"
+  },
+  "baseline_vs_final": {
+    "hybrid_score_improved_preset_count": 4,
+    "model_selected_preset_count": 4,
+    "selected_candidate_source_changed_preset_count": 4,
+    "materially_different_preset_count": 4,
+    "current_model_win_preset_ids": [
+      "muscle_gain",
+      "maintenance",
+      "high_protein_vegetarian",
+      "budget_friendly_healthy"
+    ],
+    "remaining_heuristic_preset_ids": [
+      "fat_loss"
+    ]
+  },
+  "ablation": {
+    "heuristic_scorer_only": {
+      "system_id": "heuristic_scorer_only",
+      "system_label": "Heuristic + Scorer Only",
+      "system_mode": "heuristic_scorer",
+      "hybrid_score_improved_preset_count": 0,
+      "model_selected_preset_count": 0,
+      "selected_candidate_source_changed_preset_count": 0,
+      "materially_different_preset_count": 0,
+      "average_score_delta_vs_heuristic_scorer": 0.0,
+      "current_full_wins_disappear_count": 4,
+      "current_full_wins_disappear_preset_ids": [
+        "muscle_gain",
+        "maintenance",
+        "high_protein_vegetarian",
+        "budget_friendly_healthy"
+      ],
+      "preset_outcomes": [
+        {
+          "preset_id": "muscle_gain",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "fat_loss",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "maintenance",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "high_protein_vegetarian",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "budget_friendly_healthy",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        }
+      ]
+    },
+    "route_b_no_complementarity": {
+      "system_id": "route_b_no_complementarity",
+      "system_label": "Route B Without Structured Complementarity",
+      "system_mode": "hybrid",
+      "hybrid_score_improved_preset_count": 3,
+      "model_selected_preset_count": 3,
+      "selected_candidate_source_changed_preset_count": 3,
+      "materially_different_preset_count": 3,
+      "average_score_delta_vs_heuristic_scorer": 0.182698,
+      "current_full_wins_disappear_count": 1,
+      "current_full_wins_disappear_preset_ids": [
+        "muscle_gain"
+      ],
+      "preset_outcomes": [
+        {
+          "preset_id": "muscle_gain",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "fat_loss",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "maintenance",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.217403,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "high_protein_vegetarian",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.594502,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "budget_friendly_healthy",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.101584,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        }
+      ]
+    },
+    "route_b_no_structured_materialization": {
+      "system_id": "route_b_no_structured_materialization",
+      "system_label": "Route B Without Structured Materialization",
+      "system_mode": "hybrid",
+      "hybrid_score_improved_preset_count": 3,
+      "model_selected_preset_count": 3,
+      "selected_candidate_source_changed_preset_count": 3,
+      "materially_different_preset_count": 3,
+      "average_score_delta_vs_heuristic_scorer": 0.034601,
+      "current_full_wins_disappear_count": 1,
+      "current_full_wins_disappear_preset_ids": [
+        "muscle_gain"
+      ],
+      "preset_outcomes": [
+        {
+          "preset_id": "muscle_gain",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "fat_loss",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "maintenance",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.042426,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "high_protein_vegetarian",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.013514,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "budget_friendly_healthy",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.117064,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        }
+      ]
+    },
+    "route_b_generalized_main": {
+      "system_id": "route_b_generalized_main",
+      "system_label": "Generalized Route B Main",
+      "system_mode": "hybrid",
+      "hybrid_score_improved_preset_count": 4,
+      "model_selected_preset_count": 4,
+      "selected_candidate_source_changed_preset_count": 4,
+      "materially_different_preset_count": 4,
+      "average_score_delta_vs_heuristic_scorer": 0.213597,
+      "current_full_wins_disappear_count": 0,
+      "current_full_wins_disappear_preset_ids": [],
+      "preset_outcomes": [
+        {
+          "preset_id": "muscle_gain",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.154495,
+          "difference_summary_vs_heuristic_scorer": "Large basket change"
+        },
+        {
+          "preset_id": "fat_loss",
+          "selected_source": "heuristic",
+          "score_delta_vs_heuristic_scorer": 0.0,
+          "difference_summary_vs_heuristic_scorer": "Same basket"
+        },
+        {
+          "preset_id": "maintenance",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.217403,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "high_protein_vegetarian",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.594502,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        },
+        {
+          "preset_id": "budget_friendly_healthy",
+          "selected_source": "model",
+          "score_delta_vs_heuristic_scorer": 0.101584,
+          "difference_summary_vs_heuristic_scorer": "Same basket structure, different produce"
+        }
+      ]
+    }
+  },
+  "robustness": {
+    "scenario_count": 30,
+    "score_improved_case_count": 16,
+    "model_selected_case_count": 16,
+    "selected_candidate_source_changed_case_count": 16,
+    "materially_different_case_count": 16,
+    "average_score_delta_vs_heuristic": 0.217027,
+    "average_winner_source_stability_ratio": 0.733334,
+    "brittle_case_count": 0
+  },
+  "remaining_limitation": {
+    "fat_loss": {
+      "selected_source": "heuristic",
+      "score_gap_to_best_materially_different_model": 0.441382,
+      "remaining_primary_reason": "lost mainly on repetition penalty",
+      "diagnosis_text": "Model candidates were generated but heuristic still won by 0.441 scorer points. Lower scorer score by 0.441. More repetitive basket structure.",
+      "why_no_model_win_yet": "Materially-different model candidates survived, but the strongest one still lost due to poor produce choice. It lost mainly on repetition penalty.",
+      "produce_difference_summary": "Produce mix shifted, but the overall role pattern stayed similar.",
+      "seed_to_final_drift_summary": "model seed preserved"
+    },
+    "future_principled_work": [
+      "Richer learned pair and set proposals for low-calorie, high-satiety basket alternatives.",
+      "Additional training scenarios that better cover strong fat-loss produce and carb-complementarity patterns.",
+      "Potentially learning seed-level complementarity directly instead of inferring it from food-role marginals."
+    ]
+  },
+  "why_this_is_the_final_algorithm": [
+    "The runtime now uses one frozen generalized Route B configuration rather than accumulating more preset-specific fixes.",
+    "Candidate generation is driven by shared structured terms such as complementarity, novelty, practicality, and nutrient support.",
+    "Model materialization uses shared seed-preservation and allocation rules instead of preset-only correction layers.",
+    "The fair scorer artifact remains in place, so materially different but valid alternatives are still rankable."
+  ]
+}

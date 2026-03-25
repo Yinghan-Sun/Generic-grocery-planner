@@ -46,7 +46,12 @@ def main() -> int:
         "targets": {"protein": 130, "energy_fibre_kcal": 2100},
         "preferences": {"vegetarian": False, "dairy_free": False},
         "store_limit": 5,
+        "enable_model_candidates": True,
+        "model_candidate_count": 4,
+        "candidate_generator_backend": "auto",
+        "debug_candidate_generation": True,
         "debug_scorer": True,
+        "candidate_count": 6,
     }
     balanced = client.post("/api/recommendations/generic", json=balanced_payload)
     assert_equal(balanced.status_code, 200, "balanced recommendation status")
@@ -55,6 +60,10 @@ def main() -> int:
     assert_true(len(balanced_json["stores"]) >= 1, "balanced recommendation stores")
     assert_true(bool(balanced_json.get("scorer_used")), "balanced scorer used")
     assert_true(isinstance(balanced_json.get("scoring_debug"), dict), "balanced scorer debug")
+    assert_true(isinstance(balanced_json.get("candidate_generation_debug"), dict), "balanced candidate-generation debug")
+    assert_true(isinstance(balanced_json.get("candidate_comparison_debug"), dict), "balanced candidate comparison debug")
+    assert_true("selected_candidate_source" in balanced_json, "balanced selected candidate source")
+    assert_true(int(balanced_json.get("candidate_count_considered") or 0) >= 1, "balanced candidate count considered")
 
     vegetarian_payload = {
         "location": {"lat": 37.401, "lon": -122.09},

@@ -1,5 +1,10 @@
 {% extends "base.html" %} {% block head %}
 <title>Generic Food Recommendations</title>
+<script>
+  window.GENERIC_APP_CONFIG = {
+    isProduction: {{ "true" if is_production else "false" }}
+  };
+</script>
 <script type="module" src="{{ static_asset_url('generic_bundle.js') }}"></script>
 <link rel="stylesheet" href="{{ static_asset_url('bundle.css') }}" />
 <style>
@@ -57,14 +62,17 @@
     grid-column: 1 / -1;
   }
 
-  .generic-form-grid input {
+  .generic-form-grid input,
+  .generic-form-grid select {
     border: 1px solid var(--grey);
     border-radius: 4px;
     padding: 0.55rem 0.65rem;
     font: inherit;
+    background: white;
   }
 
-  .generic-form-grid input[aria-invalid="true"] {
+  .generic-form-grid input[aria-invalid="true"],
+  .generic-form-grid select[aria-invalid="true"] {
     border-color: var(--generic-error);
     background: var(--generic-error-bg);
   }
@@ -219,6 +227,36 @@
     background: white;
   }
 
+  .generic-badge-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .generic-badge-source-heuristic {
+    background: #f3f7f4;
+    color: #29543b;
+  }
+
+  .generic-badge-source-model {
+    background: #eef5ff;
+    color: #23527c;
+    border-color: #c4d7ea;
+  }
+
+  .generic-badge-source-hybrid {
+    background: #fff5e7;
+    color: #8b5a16;
+    border-color: #ead5ab;
+  }
+
+  .generic-badge-source-repaired_model {
+    background: #f8eefb;
+    color: #6f2d78;
+    border-color: #dec6e6;
+  }
+
   .generic-list-meta {
     display: flex;
     flex-wrap: wrap;
@@ -247,6 +285,37 @@
 
   .generic-muted {
     color: #556b57;
+  }
+
+  .generic-debug-list {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+  }
+
+  .generic-debug-code {
+    font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.88rem;
+  }
+
+  .generic-debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.92rem;
+  }
+
+  .generic-debug-table th,
+  .generic-debug-table td {
+    border: 1px solid var(--generic-border-strong);
+    padding: 0.45rem 0.55rem;
+    text-align: left;
+    vertical-align: top;
+    background: white;
+  }
+
+  .generic-debug-table th {
+    background: #f3f7f4;
   }
 
   .generic-assumptions {

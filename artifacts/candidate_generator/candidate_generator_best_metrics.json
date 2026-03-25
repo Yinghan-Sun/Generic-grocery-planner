@@ -1,0 +1,24 @@
+{
+  "backend": "random_forest",
+  "evaluation_split": "test",
+  "hyperparameters": {
+    "max_depth": null,
+    "max_features": 0.5,
+    "min_samples_leaf": 2,
+    "n_estimators": 200
+  },
+  "random_seed": 42,
+  "test_average_precision": 0.996959,
+  "test_brier_score": 0.002112,
+  "test_log_loss": 0.008003,
+  "test_positive_rate": 0.056872,
+  "test_roc_auc": 0.999821,
+  "test_role_exact_match_rate": 0.973039,
+  "test_role_hit_rate_at_budget": 0.990196,
+  "test_role_mean_jaccard": 0.978758,
+  "test_role_recall_at_budget": 0.981618,
+  "test_row_count": 12783,
+  "test_scenario_exact_seed_rate": 0.902655,
+  "test_scenario_mean_jaccard": 0.977876,
+  "train_validation_row_count": 55137
+}

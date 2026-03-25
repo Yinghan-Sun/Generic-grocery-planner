@@ -35,7 +35,7 @@ API routes:
 3. The frontend can geocode the address to coordinates.
 4. The frontend calls `GET /api/stores/nearby`.
 5. The frontend submits targets, preferences, pantry items, and nearby stores to `POST /api/recommendations/generic`.
-6. The backend builds multiple deterministic candidate baskets, ranks them with a local trained scorer, and returns the highest-scoring result.
+6. The backend builds multiple deterministic heuristic candidates, can optionally add learned candidates from a local trained model, ranks the fused set with a local trained scorer, and returns the highest-scoring result.
 7. The backend adds representative regional price guidance and store-fit metadata.
 8. The frontend renders the shopping list, basket summary, store picks, and export actions.
 
@@ -45,6 +45,8 @@ Primary modules:
 - [`dietdashboard/app.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/app.py)
 - [`dietdashboard/generic_recommender.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/generic_recommender.py)
 - [`dietdashboard/hybrid_planner.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/hybrid_planner.py)
+- [`dietdashboard/model_candidate_generator.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/model_candidate_generator.py)
+- [`dietdashboard/model_candidate_training.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/model_candidate_training.py)
 - [`dietdashboard/plan_scorer.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/plan_scorer.py)
 - [`dietdashboard/store_discovery.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/store_discovery.py)
 - [`dietdashboard/store_fit.py`](/Users/yinghansun/Desktop/diet-optimization-main/dietdashboard/store_fit.py)
@@ -132,6 +134,10 @@ Primary checks:
 make test-generic
 make qa-generic
 make test-plan-scorer
+make build-candidate-generator-dataset
+make tune-candidate-generator
+make train-candidate-generator
+make evaluate-hybrid-planner
 ```
 
 ## Local Start
