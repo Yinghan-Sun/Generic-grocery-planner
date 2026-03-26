@@ -1,5 +1,5 @@
 #!/usr/bin/env -S uv run --extra ml python
-"""Run a small robustness sweep for the frozen generalized Route B algorithm."""
+"""Run a small robustness sweep for the frozen generalized hybrid planner pipeline."""
 
 from __future__ import annotations
 
@@ -12,25 +12,25 @@ from pathlib import Path
 import duckdb
 
 from dietdashboard import candidate_debug
-from dietdashboard import route_b_evaluation
-from dietdashboard import route_b_final
+from dietdashboard import hybrid_pipeline_evaluation
+from dietdashboard import hybrid_pipeline_final
 from dietdashboard.store_discovery import DEFAULT_LIMIT as DEFAULT_STORE_LIMIT
 from dietdashboard.store_discovery import DEFAULT_RADIUS_M
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--db-path", type=Path, default=route_b_evaluation.default_db_path(), help="Path to the local DuckDB database.")
-    parser.add_argument("--lat", type=float, default=route_b_final.DEFAULT_LOCATION["lat"], help="Latitude for the main robustness location.")
-    parser.add_argument("--lon", type=float, default=route_b_final.DEFAULT_LOCATION["lon"], help="Longitude for the main robustness location.")
+    parser.add_argument("--db-path", type=Path, default=hybrid_pipeline_evaluation.default_db_path(), help="Path to the local DuckDB database.")
+    parser.add_argument("--lat", type=float, default=hybrid_pipeline_final.DEFAULT_LOCATION["lat"], help="Latitude for the main robustness location.")
+    parser.add_argument("--lon", type=float, default=hybrid_pipeline_final.DEFAULT_LOCATION["lon"], help="Longitude for the main robustness location.")
     parser.add_argument("--radius-m", type=float, default=DEFAULT_RADIUS_M, help="Nearby-store search radius in meters.")
     parser.add_argument("--store-limit", type=int, default=DEFAULT_STORE_LIMIT, help="Nearby-store limit.")
     parser.add_argument("--candidate-count", type=int, default=6, help="Total candidates ranked by the scorer.")
-    parser.add_argument("--scorer-model-path", type=Path, default=route_b_final.FINAL_SCORER_MODEL_PATH, help="Path to the frozen fair scorer artifact.")
+    parser.add_argument("--scorer-model-path", type=Path, default=hybrid_pipeline_final.FINAL_SCORER_MODEL_PATH, help="Path to the frozen fair scorer artifact.")
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=route_b_final.FINAL_OUTPUT_DIR / "robustness",
+        default=hybrid_pipeline_final.FINAL_OUTPUT_DIR / "robustness",
         help="Directory for the robustness CSV and JSON outputs.",
     )
     return parser.parse_args()
@@ -78,7 +78,7 @@ def _scenario_variants() -> list[dict[str, object]]:
         {
             "variant_id": "alternate_location",
             "label": "Alternate location",
-            "location": route_b_final.ALTERNATE_LOCATION,
+            "location": hybrid_pipeline_final.ALTERNATE_LOCATION,
         },
     ]
 
@@ -127,21 +127,24 @@ def main() -> int:
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    csv_path = args.output_dir / "route_b_robustness_summary.csv"
-    json_path = args.output_dir / "route_b_robustness_summary.json"
+    csv_path = args.output_dir / "hybrid_planner_robustness_summary.csv"
+    json_path = args.output_dir / "hybrid_planner_robustness_summary.json"
 
     variants = _scenario_variants()
     rows: list[dict[str, object]] = []
     store_context_cache: dict[tuple[float, float], tuple[list[dict[str, object]], dict[str, str]]] = {}
 
     with duckdb.connect(args.db_path, read_only=True) as con:
-        for preset in route_b_final.MAIN_PRESETS:
+        for preset in hybrid_pipeline_final.MAIN_PRESETS:
             for variant in variants:
                 scenario_preset = _apply_variant(preset, variant)
-                location = dict(variant.get("location") or {"lat": args.lat, "lon": args.lon, "label": route_b_final.DEFAULT_LOCATION["label"]})
+                location = dict(
+                    variant.get("location")
+                    or {"lat": args.lat, "lon": args.lon, "label": hybrid_pipeline_final.DEFAULT_LOCATION["label"]}
+                )
                 location_key = (float(location["lat"]), float(location["lon"]))
                 if location_key not in store_context_cache:
-                    store_context_cache[location_key] = route_b_evaluation.load_store_context(
+                    store_context_cache[location_key] = hybrid_pipeline_evaluation.load_store_context(
                         con,
                         lat=float(location["lat"]),
                         lon=float(location["lon"]),
@@ -150,45 +153,45 @@ def main() -> int:
                     )
                 stores, price_context = store_context_cache[location_key]
 
-                heuristic_response = route_b_evaluation.run_scored_system(
+                heuristic_response = hybrid_pipeline_evaluation.run_scored_system(
                     con,
                     preset=scenario_preset,
                     stores=stores,
                     price_context=price_context,
                     scorer_model_path=args.scorer_model_path,
                     candidate_count=args.candidate_count,
-                    candidate_generation_config=route_b_final.final_candidate_generation_config(
+                    candidate_generation_config=hybrid_pipeline_final.final_candidate_generation_config(
                         enable_model_candidates=False,
                         debug=True,
                     ),
                 )
-                final_response = route_b_evaluation.run_scored_system(
+                final_response = hybrid_pipeline_evaluation.run_scored_system(
                     con,
                     preset=scenario_preset,
                     stores=stores,
                     price_context=price_context,
                     scorer_model_path=args.scorer_model_path,
                     candidate_count=args.candidate_count,
-                    candidate_generation_config=route_b_final.final_candidate_generation_config(debug=True),
+                    candidate_generation_config=hybrid_pipeline_final.final_candidate_generation_config(debug=True),
                 )
 
                 difference = candidate_debug.compare_candidates(heuristic_response, final_response)
                 score_delta = round(
-                    route_b_evaluation.selected_scorer_score(final_response)
-                    - route_b_evaluation.selected_scorer_score(heuristic_response),
+                    hybrid_pipeline_evaluation.selected_scorer_score(final_response)
+                    - hybrid_pipeline_evaluation.selected_scorer_score(heuristic_response),
                     6,
                 )
                 protein_gap_delta = round(
-                    route_b_evaluation.protein_gap(final_response) - route_b_evaluation.protein_gap(heuristic_response),
+                    hybrid_pipeline_evaluation.protein_gap(final_response) - hybrid_pipeline_evaluation.protein_gap(heuristic_response),
                     6,
                 )
                 calorie_gap_delta = round(
-                    route_b_evaluation.calorie_gap(final_response) - route_b_evaluation.calorie_gap(heuristic_response),
+                    hybrid_pipeline_evaluation.calorie_gap(final_response) - hybrid_pipeline_evaluation.calorie_gap(heuristic_response),
                     6,
                 )
                 cost_delta = round(
-                    route_b_evaluation.estimated_basket_cost(final_response)
-                    - route_b_evaluation.estimated_basket_cost(heuristic_response),
+                    hybrid_pipeline_evaluation.estimated_basket_cost(final_response)
+                    - hybrid_pipeline_evaluation.estimated_basket_cost(heuristic_response),
                     6,
                 )
                 rows.append(
@@ -199,23 +202,23 @@ def main() -> int:
                         "variant_id": str(variant["variant_id"]),
                         "variant_label": str(variant["label"]),
                         "location_label": str(location["label"]),
-                        "heuristic_selected_source": route_b_evaluation.selected_source(heuristic_response),
-                        "final_selected_source": route_b_evaluation.selected_source(final_response),
+                        "heuristic_selected_source": hybrid_pipeline_evaluation.selected_source(heuristic_response),
+                        "final_selected_source": hybrid_pipeline_evaluation.selected_source(final_response),
                         "selected_candidate_source_changed": int(
-                            route_b_evaluation.selected_source(heuristic_response)
-                            != route_b_evaluation.selected_source(final_response)
+                            hybrid_pipeline_evaluation.selected_source(heuristic_response)
+                            != hybrid_pipeline_evaluation.selected_source(final_response)
                         ),
-                        "heuristic_scorer_score": route_b_evaluation.selected_scorer_score(heuristic_response),
-                        "final_scorer_score": route_b_evaluation.selected_scorer_score(final_response),
+                        "heuristic_scorer_score": hybrid_pipeline_evaluation.selected_scorer_score(heuristic_response),
+                        "final_scorer_score": hybrid_pipeline_evaluation.selected_scorer_score(final_response),
                         "score_delta_vs_heuristic": score_delta,
-                        "heuristic_protein_gap_g": route_b_evaluation.protein_gap(heuristic_response),
-                        "final_protein_gap_g": route_b_evaluation.protein_gap(final_response),
+                        "heuristic_protein_gap_g": hybrid_pipeline_evaluation.protein_gap(heuristic_response),
+                        "final_protein_gap_g": hybrid_pipeline_evaluation.protein_gap(final_response),
                         "protein_gap_delta_vs_heuristic": protein_gap_delta,
-                        "heuristic_calorie_gap_kcal": route_b_evaluation.calorie_gap(heuristic_response),
-                        "final_calorie_gap_kcal": route_b_evaluation.calorie_gap(final_response),
+                        "heuristic_calorie_gap_kcal": hybrid_pipeline_evaluation.calorie_gap(heuristic_response),
+                        "final_calorie_gap_kcal": hybrid_pipeline_evaluation.calorie_gap(final_response),
                         "calorie_gap_delta_vs_heuristic": calorie_gap_delta,
-                        "heuristic_estimated_basket_cost": route_b_evaluation.estimated_basket_cost(heuristic_response),
-                        "final_estimated_basket_cost": route_b_evaluation.estimated_basket_cost(final_response),
+                        "heuristic_estimated_basket_cost": hybrid_pipeline_evaluation.estimated_basket_cost(heuristic_response),
+                        "final_estimated_basket_cost": hybrid_pipeline_evaluation.estimated_basket_cost(final_response),
                         "cost_delta_vs_heuristic": cost_delta,
                         "materially_different": int(bool(difference["materially_different"])),
                         "difference_summary": str(difference["difference_summary"]),
@@ -241,7 +244,7 @@ def main() -> int:
         per_preset_rows[str(row["preset_id"])].append(row)
 
     preset_stability: list[dict[str, object]] = []
-    for preset in route_b_final.MAIN_PRESETS:
+    for preset in hybrid_pipeline_final.MAIN_PRESETS:
         preset_id = str(preset["preset_id"])
         preset_rows = per_preset_rows[preset_id]
         source_counts = Counter(str(row["final_selected_source"]) for row in preset_rows)
@@ -270,7 +273,7 @@ def main() -> int:
     ]
 
     summary_payload = {
-        "main_algorithm": route_b_final.final_runtime_metadata(),
+        "main_algorithm": hybrid_pipeline_final.final_runtime_metadata(),
         "scenario_count": len(rows),
         "variant_count": len(variants),
         "score_improved_case_count": sum(1 for row in rows if float(row["score_delta_vs_heuristic"]) > 0.0),

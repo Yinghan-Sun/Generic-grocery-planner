@@ -11,8 +11,9 @@ SHELL := /bin/sh
 	build-food-role-dataset train-food-role-model \
 	build-candidate-generator-dataset tune-candidate-generator train-candidate-generator evaluate-hybrid-planner \
 	compare-preset-model-participation compare-preset-model-participation-final compare-plan-scorers \
+	preset-differentiation-report \
 	build-plan-scorer-dataset train-plan-scorer test-plan-scorer \
-	route-b-ablation route-b-robustness route-b-final-summary route-b-final-evidence route-b-presentation-assets \
+	hybrid-planner-ablation hybrid-planner-robustness hybrid-planner-final-summary hybrid-planner-final-evidence hybrid-planner-presentation-assets \
 	run-app run-dev \
 	frontend-bundle frontend-watch frontend-copy \
 	build-container run-container
@@ -146,19 +147,22 @@ compare-preset-model-participation-final: compare-preset-model-participation
 compare-plan-scorers:
 	uv run --extra ml python ./scripts/compare_plan_scorers.py
 
-route-b-ablation:
-	uv run --extra ml python ./scripts/run_route_b_ablation.py
+preset-differentiation-report:
+	uv run --extra ml python ./scripts/preset_differentiation_report.py
 
-route-b-robustness:
-	uv run --extra ml python ./scripts/run_route_b_robustness.py
+hybrid-planner-ablation:
+	uv run --extra ml python ./scripts/run_hybrid_planner_ablation.py
 
-route-b-final-summary:
-	uv run --extra ml python ./scripts/generate_route_b_final_summary.py
+hybrid-planner-robustness:
+	uv run --extra ml python ./scripts/run_hybrid_planner_robustness.py
 
-route-b-final-evidence: compare-preset-model-participation-final route-b-ablation route-b-robustness route-b-final-summary
+hybrid-planner-final-summary:
+	uv run --extra ml python ./scripts/generate_hybrid_planner_final_summary.py
 
-route-b-presentation-assets: route-b-final-evidence
-	uv run --extra ml python ./scripts/generate_route_b_presentation_assets.py
+hybrid-planner-final-evidence: compare-preset-model-participation-final hybrid-planner-ablation hybrid-planner-robustness hybrid-planner-final-summary
+
+hybrid-planner-presentation-assets: hybrid-planner-final-evidence
+	uv run --extra ml python ./scripts/generate_hybrid_planner_presentation_assets.py
 
 build-plan-scorer-dataset:
 	uv run --extra ml python ./scripts/train_plan_scorer.py --candidate-count 3 --backend sklearn_ridge --n-estimators 40 --max-depth 2

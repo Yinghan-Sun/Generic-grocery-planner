@@ -1,11 +1,12 @@
-# Route B Presentation Summary
+# Hybrid Planner Presentation Summary
 
-Algorithm to present: `route_b_generalized_v5_main`
+Algorithm to present: `hybrid_planner_generalized_v5_main`
 
 ## What It Does
 - Preserves the deterministic grocery planner as the baseline and fallback.
 - Adds a learned local candidate generator that proposes extra structured basket seeds.
 - Uses the fair plan scorer to rank heuristic and model candidates together.
+- Runs automatically as a one-click flow in the standard UI, without exposing model backends or debug toggles to normal users.
 
 ## Baseline vs Final
 - Hybrid score improved on `4` of 5 main presets.
@@ -20,11 +21,11 @@ Algorithm to present: `route_b_generalized_v5_main`
 ## Ablation Highlights
 - Removing structured complementarity reduced model wins from 4 to 3.
 - Removing structured materialization reduced model wins from 4 to 3.
-- The full generalized Route B kept all 4 current model wins.
+- The full generalized hybrid planner kept all 4 current model wins.
 
 ## Robustness Highlights
 - Evaluated `30` local scenario variants.
-- Route B improved scorer score on `16` cases.
+- The hybrid planner pipeline improved scorer score on `16` cases.
 - Model or hybrid candidates won on `16` cases.
 - No brittle cases were detected: `0`.
 
@@ -34,8 +35,8 @@ Algorithm to present: `route_b_generalized_v5_main`
 - Current explanation: Materially-different model candidates survived, but the strongest one still lost due to poor produce choice. It lost mainly on repetition penalty.
 
 ## Use This Version
-- Cite version: `route_b_generalized_v5_main`
-- Frozen scorer artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib`
+- Cite version: `hybrid_planner_generalized_v5_main`
+- Frozen scorer artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib`
 - Frozen candidate-generator artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib`
-- Final preset comparison artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json`
+- Final preset comparison artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/preset_comparison_summary.json`
 - Regenerate preset comparison with: `make compare-preset-model-participation-final`

@@ -1,4 +1,4 @@
-"""Frozen configuration for the final generalized Route B algorithm."""
+"""Frozen configuration for the final generalized hybrid planner pipeline."""
 
 from __future__ import annotations
 
@@ -6,16 +6,17 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-FINAL_ALGORITHM_VERSION = "route_b_generalized_v5_main"
-FINAL_ALGORITHM_LABEL = "Generalized Route B Main"
+FINAL_ALGORITHM_VERSION = "hybrid_planner_generalized_v5_main"
+FINAL_ALGORITHM_LABEL = "Generalized Hybrid Planner Main"
 FINAL_ALGORITHM_DESCRIPTION = (
-    "Generalized Route B hybrid planner with structured complementarity, "
-    "shared model-seed materialization, and the fair scorer artifact."
+    "Generalized hybrid planner pipeline with structured complementarity, "
+    "shared learned-seed materialization, and the fair scorer artifact."
 )
 
-FINAL_SCORER_MODEL_PATH = REPO_ROOT / "artifacts" / "plan_scorer" / "route_b_fair_v1" / "plan_candidate_scorer.joblib"
+FINAL_SCORER_MODEL_PATH = REPO_ROOT / "artifacts" / "plan_scorer" / "hybrid_planner_fair_v1" / "plan_candidate_scorer.joblib"
 FINAL_CANDIDATE_GENERATOR_MODEL_PATH = REPO_ROOT / "artifacts" / "candidate_generator" / "candidate_generator_best.joblib"
-FINAL_OUTPUT_DIR = REPO_ROOT / "artifacts" / "plan_scorer" / "route_b_generalized_v5"
+FINAL_CANDIDATE_GENERATOR_BACKEND = "random_forest"
+FINAL_OUTPUT_DIR = REPO_ROOT / "artifacts" / "plan_scorer" / "hybrid_planner_generalized_v5"
 
 DEFAULT_LOCATION = {"label": "Mountain View, CA", "lat": 37.401, "lon": -122.09}
 ALTERNATE_LOCATION = {"label": "Sacramento, CA", "lat": 38.5816, "lon": -121.4944}
@@ -78,6 +79,8 @@ def final_runtime_metadata() -> dict[str, object]:
         "algorithm_description": FINAL_ALGORITHM_DESCRIPTION,
         "scorer_model_path": str(FINAL_SCORER_MODEL_PATH),
         "candidate_generator_model_path": str(FINAL_CANDIDATE_GENERATOR_MODEL_PATH),
+        "candidate_generator_backend": FINAL_CANDIDATE_GENERATOR_BACKEND,
+        "model_candidates_enabled": True,
         "structured_complementarity_enabled": True,
         "structured_materialization_enabled": True,
         "candidate_count": 6,
@@ -99,7 +102,7 @@ def final_candidate_generation_config(
     enable_model_candidates: bool = True,
     model_candidate_count: int = 4,
     candidate_generator_model_path: Path | None = None,
-    candidate_generator_backend: str = "auto",
+    candidate_generator_backend: str = FINAL_CANDIDATE_GENERATOR_BACKEND,
     algorithm_version: str = FINAL_ALGORITHM_VERSION,
     structured_complementarity_enabled: bool = True,
     structured_materialization_enabled: bool = True,
@@ -133,8 +136,8 @@ def ablation_specs() -> list[dict[str, object]]:
             ),
         },
         {
-            "system_id": "route_b_no_complementarity",
-            "label": "Route B Without Structured Complementarity",
+            "system_id": "hybrid_planner_no_structured_complementarity",
+            "label": "Hybrid Planner Without Structured Complementarity",
             "mode": "hybrid",
             "candidate_generation_config": final_candidate_generation_config(
                 algorithm_version=f"{FINAL_ALGORITHM_VERSION}__no_complementarity",
@@ -143,8 +146,8 @@ def ablation_specs() -> list[dict[str, object]]:
             ),
         },
         {
-            "system_id": "route_b_no_structured_materialization",
-            "label": "Route B Without Structured Materialization",
+            "system_id": "hybrid_planner_no_structured_materialization",
+            "label": "Hybrid Planner Without Structured Materialization",
             "mode": "hybrid",
             "candidate_generation_config": final_candidate_generation_config(
                 algorithm_version=f"{FINAL_ALGORITHM_VERSION}__no_structured_materialization",
@@ -153,10 +156,9 @@ def ablation_specs() -> list[dict[str, object]]:
             ),
         },
         {
-            "system_id": "route_b_generalized_main",
+            "system_id": "hybrid_planner_generalized_main",
             "label": FINAL_ALGORITHM_LABEL,
             "mode": "hybrid",
             "candidate_generation_config": final_candidate_generation_config(),
         },
     ]
-

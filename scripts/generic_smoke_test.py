@@ -33,6 +33,12 @@ def main() -> int:
     assert_equal(generic_page.status_code, 200, "/generic status")
     generic_html = generic_page.get_data(as_text=True)
     assert_true("/static/generic_bundle.js" in generic_html, "/generic bundle reference")
+    assert_true('"developerMode": false' in generic_html, "/generic developer mode disabled by default")
+
+    developer_page = client.get("/generic?developer=1")
+    assert_equal(developer_page.status_code, 200, "/generic developer page status")
+    developer_html = developer_page.get_data(as_text=True)
+    assert_true('"developerMode": true' in developer_html, "/generic developer mode opt-in")
 
     nearby = client.get("/api/stores/nearby?lat=37.401&lon=-122.09&radius_m=8000&limit=5")
     assert_equal(nearby.status_code, 200, "/api/stores/nearby status")
@@ -46,12 +52,6 @@ def main() -> int:
         "targets": {"protein": 130, "energy_fibre_kcal": 2100},
         "preferences": {"vegetarian": False, "dairy_free": False},
         "store_limit": 5,
-        "enable_model_candidates": True,
-        "model_candidate_count": 4,
-        "candidate_generator_backend": "auto",
-        "debug_candidate_generation": True,
-        "debug_scorer": True,
-        "candidate_count": 6,
     }
     balanced = client.post("/api/recommendations/generic", json=balanced_payload)
     assert_equal(balanced.status_code, 200, "balanced recommendation status")
@@ -59,11 +59,21 @@ def main() -> int:
     assert_true(len(balanced_json["shopping_list"]) >= 1, "balanced recommendation items")
     assert_true(len(balanced_json["stores"]) >= 1, "balanced recommendation stores")
     assert_true(bool(balanced_json.get("scorer_used")), "balanced scorer used")
-    assert_true(isinstance(balanced_json.get("scoring_debug"), dict), "balanced scorer debug")
-    assert_true(isinstance(balanced_json.get("candidate_generation_debug"), dict), "balanced candidate-generation debug")
-    assert_true(isinstance(balanced_json.get("candidate_comparison_debug"), dict), "balanced candidate comparison debug")
     assert_true("selected_candidate_source" in balanced_json, "balanced selected candidate source")
     assert_true(int(balanced_json.get("candidate_count_considered") or 0) >= 1, "balanced candidate count considered")
+    assert_true("scoring_debug" not in balanced_json, "balanced scorer debug hidden by default")
+    assert_true("candidate_generation_debug" not in balanced_json, "balanced candidate-generation debug hidden by default")
+    assert_true("candidate_comparison_debug" not in balanced_json, "balanced candidate comparison debug hidden by default")
+    hybrid_execution = balanced_json.get("hybrid_planner_execution")
+    assert_true(isinstance(hybrid_execution, dict), "balanced hybrid execution summary")
+    assert_equal(hybrid_execution.get("pipeline_mode"), "full_hybrid", "balanced pipeline mode")
+    assert_true(bool(hybrid_execution.get("heuristic_candidate_generation_ran")), "balanced heuristic generation ran")
+    assert_true(bool(hybrid_execution.get("learned_candidate_generation_ran")), "balanced learned generation ran")
+    assert_true(bool(hybrid_execution.get("candidate_fusion_ran")), "balanced candidate fusion ran")
+    assert_true(bool(hybrid_execution.get("scorer_reranking_used")), "balanced scorer reranking ran")
+    assert_true(bool(hybrid_execution.get("store_fit_ranking_ran")), "balanced store fit ran")
+    assert_true(bool(hybrid_execution.get("full_pipeline_completed")), "balanced full pipeline completed")
+    assert_equal(hybrid_execution.get("candidate_generator_backend"), "random_forest", "balanced default candidate backend")
 
     vegetarian_payload = {
         "location": {"lat": 37.401, "lon": -122.09},
@@ -75,6 +85,18 @@ def main() -> int:
     assert_equal(vegetarian.status_code, 200, "vegetarian recommendation status")
     vegetarian_json = vegetarian.get_json()
     assert_true(len(vegetarian_json["shopping_list"]) >= 1, "vegetarian recommendation items")
+
+    developer_debug_payload = {
+        **balanced_payload,
+        "debug_candidate_generation": True,
+        "debug_scorer": True,
+    }
+    developer_debug = client.post("/api/recommendations/generic", json=developer_debug_payload)
+    assert_equal(developer_debug.status_code, 200, "developer debug recommendation status")
+    developer_debug_json = developer_debug.get_json()
+    assert_true(isinstance(developer_debug_json.get("scoring_debug"), dict), "developer scorer debug")
+    assert_true(isinstance(developer_debug_json.get("candidate_generation_debug"), dict), "developer candidate-generation debug")
+    assert_true(isinstance(developer_debug_json.get("candidate_comparison_debug"), dict), "developer candidate comparison debug")
 
     missing_model_payload = {
         **balanced_payload,
@@ -96,6 +118,11 @@ def main() -> int:
     print("generic_page=ok")
     print(f"nearby_store_count={len(stores)}")
     print(f"balanced_item_count={len(balanced_json['shopping_list'])}")
+    print(f"balanced_pipeline_mode={hybrid_execution['pipeline_mode']}")
+    print(f"balanced_heuristic_candidates={hybrid_execution['heuristic_candidate_count']}")
+    print(f"balanced_learned_candidates={hybrid_execution['learned_candidate_count']}")
+    print(f"balanced_fused_candidates={hybrid_execution['fused_candidate_count']}")
+    print(f"balanced_candidate_backend={hybrid_execution['candidate_generator_backend']}")
     print(f"vegetarian_item_count={len(vegetarian_json['shopping_list'])}")
     print("invalid_input_check=ok")
     return 0

@@ -1,28 +1,97 @@
-function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe(e,t){return[...e.querySelectorAll(`[name="${t}"]:checked`)].map(i=>i.value)}var De=[{id:"eggs",label:"Eggs"},{id:"milk",label:"Milk"},{id:"greek_yogurt",label:"Greek yogurt"},{id:"oats",label:"Oats"},{id:"rice",label:"Rice"},{id:"beans",label:"Beans"},{id:"lentils",label:"Lentils"},{id:"bananas",label:"Bananas"},{id:"broccoli",label:"Broccoli"},{id:"potatoes",label:"Potatoes"},{id:"olive_oil",label:"Olive oil"},{id:"peanut_butter",label:"Peanut butter"},{id:"tofu",label:"Tofu"},{id:"chicken_breast",label:"Chicken breast"}];function u(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function g(e,t){return e.errors?.[t]||""}function Ge(e){return e.formNotice?.message?`
+function $(e,n){let t=e.querySelector(`[name="${n}"]`);return t?t.type==="hidden"?String(t.value||"").trim().toLowerCase()==="true":t.checked||!1:!1}function Ue(e,n){return[...e.querySelectorAll(`[name="${n}"]:checked`)].map(t=>t.value)}var Oe=[{id:"eggs",label:"Eggs"},{id:"milk",label:"Milk"},{id:"greek_yogurt",label:"Greek yogurt"},{id:"oats",label:"Oats"},{id:"rice",label:"Rice"},{id:"beans",label:"Beans"},{id:"lentils",label:"Lentils"},{id:"bananas",label:"Bananas"},{id:"broccoli",label:"Broccoli"},{id:"potatoes",label:"Potatoes"},{id:"olive_oil",label:"Olive oil"},{id:"peanut_butter",label:"Peanut butter"},{id:"tofu",label:"Tofu"},{id:"chicken_breast",label:"Chicken breast"}];function u(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function m(e,n){return e.errors?.[n]||""}function Ie(e){return e.formNotice?.message?`
     <div class="generic-notice ${u(e.formNotice.kind||"info")}" role="status">
       ${u(e.formNotice.message)}
     </div>
-  `:""}function te(e,t,i){let n=(t.presets||[]).map(p=>`
-        <button type="button" class="generic-preset-button" data-preset-id="${u(p.id)}">
-          ${u(p.label)}
+  `:""}function ae(e,n,t){let i=(n.presets||[]).map(g=>`
+        <button type="button" class="generic-preset-button" data-preset-id="${u(g.id)}">
+          ${u(g.label)}
         </button>
-      `).join(""),l=t.isLocating||t.isResolvingAddress||t.isLookingUpStores||t.isGeneratingRecommendations,d=De.map(p=>`
+      `).join(""),s=n.isLocating||n.isResolvingAddress||n.isLookingUpStores||n.isGeneratingRecommendations,l=!!n.developerMode,p=Oe.map(g=>`
         <label>
           <input
             name="pantry_items"
             type="checkbox"
-            value="${u(p.id)}"
-            ${(t.pantry_items||[]).includes(p.id)?"checked":""}
+            value="${u(g.id)}"
+            ${(n.pantry_items||[]).includes(g.id)?"checked":""}
           />
-          ${u(p.label)}
+          ${u(g.label)}
         </label>
-      `).join("");e.innerHTML=`
+      `).join(""),f=l?`
+      <details class="generic-advanced">
+        <summary>Developer planner overrides</summary>
+        <p class="generic-help">These controls are hidden from the normal one-click flow. Use them only when you need to inspect or compare internal hybrid-planner behavior.</p>
+        <div class="generic-form-grid">
+          <label>
+            Learned candidates to add
+            <input
+              name="model_candidate_count"
+              type="number"
+              min="1"
+              max="8"
+              step="1"
+              value="${u(n.model_candidate_count)}"
+            />
+            <span class="generic-help">How many learned candidate baskets to add before fusion and reranking.</span>
+          </label>
+          <label>
+            Total candidates reranked
+            <input
+              name="candidate_count"
+              type="number"
+              min="1"
+              max="12"
+              step="1"
+              value="${u(n.candidate_count)}"
+            />
+            <span class="generic-help">How many fused candidates the trained scorer reranks before choosing the final basket.</span>
+          </label>
+          <label>
+            Candidate generator backend
+            <select name="candidate_generator_backend">
+              <option value="auto" ${n.candidate_generator_backend==="auto"?"selected":""}>Auto</option>
+              <option value="logistic_regression" ${n.candidate_generator_backend==="logistic_regression"?"selected":""}>Logistic regression</option>
+              <option value="random_forest" ${n.candidate_generator_backend==="random_forest"?"selected":""}>Random forest</option>
+              <option value="hist_gradient_boosting" ${n.candidate_generator_backend==="hist_gradient_boosting"?"selected":""}>HistGradientBoosting</option>
+            </select>
+            <span class="generic-help">Choose a backend only when comparing internal candidate-generator artifacts.</span>
+          </label>
+        </div>
+        <div class="generic-checkboxes" style="margin-top: 0.75rem">
+          <label>
+            <input name="enable_model_candidates" type="checkbox" ${n.enable_model_candidates?"checked":""} />
+            Enable learned candidates
+          </label>
+          <label>
+            <input name="debug_candidate_generation" type="checkbox" ${n.debug_candidate_generation?"checked":""} />
+            Show candidate-generation debug
+          </label>
+          <label>
+            <input name="debug_scorer" type="checkbox" ${n.debug_scorer?"checked":""} />
+            Show scorer debug
+          </label>
+        </div>
+      </details>
+    `:`
+      <div class="generic-list-item" style="margin-top: 1rem">
+        <div class="generic-inline-group">
+          <h3>How recommendations run</h3>
+          <span class="generic-badge">Automatic hybrid pipeline</span>
+        </div>
+        <p class="generic-help">Click Recommend once and the app automatically runs heuristic candidate generation, learned candidate generation, candidate fusion, trained scorer reranking, and nearby store-fit ranking.</p>
+        <input name="enable_model_candidates" type="hidden" value="true" />
+        <input name="model_candidate_count" type="hidden" value="${u(n.model_candidate_count)}" />
+        <input name="candidate_generator_backend" type="hidden" value="${u(n.candidate_generator_backend)}" />
+        <input name="debug_candidate_generation" type="hidden" value="false" />
+        <input name="debug_scorer" type="hidden" value="false" />
+        <input name="candidate_count" type="hidden" value="${u(n.candidate_count)}" />
+      </div>
+    `;e.innerHTML=`
     <form id="generic-input-form" novalidate>
-      ${Ge(t)}
+      ${Ie(n)}
       <div>
         <h3>Goal Presets</h3>
         <p class="generic-help">Start from a common goal, then fine-tune the location targets or preferences if needed.</p>
-        <div class="generic-presets">${n}</div>
+        <div class="generic-presets">${i}</div>
       </div>
 
       <div class="generic-form-grid">
@@ -32,10 +101,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             name="locationQuery"
             type="text"
             placeholder="Mountain View, CA"
-            value="${u(t.locationQuery)}"
-            aria-invalid="${g(t,"locationQuery")?"true":"false"}"
+            value="${u(n.locationQuery)}"
+            aria-invalid="${m(n,"locationQuery")?"true":"false"}"
           />
-          <span class="generic-field-error">${u(g(t,"locationQuery"))}</span>
+          <span class="generic-field-error">${u(m(n,"locationQuery"))}</span>
           <span class="generic-help">The app will geocode this into coordinates before store lookup or shopping-list generation.</span>
         </label>
       </div>
@@ -48,19 +117,19 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
         <label>
           Days
           <select name="days">
-            <option value="1" ${t.days==="1"?"selected":""}>1 day</option>
-            <option value="3" ${t.days==="3"?"selected":""}>3 days</option>
-            <option value="5" ${t.days==="5"?"selected":""}>5 days</option>
-            <option value="7" ${t.days==="7"?"selected":""}>7 days</option>
+            <option value="1" ${n.days==="1"?"selected":""}>1 day</option>
+            <option value="3" ${n.days==="3"?"selected":""}>3 days</option>
+            <option value="5" ${n.days==="5"?"selected":""}>5 days</option>
+            <option value="7" ${n.days==="7"?"selected":""}>7 days</option>
           </select>
           <span class="generic-help">Daily targets stay the same. Quantities are scaled for the selected shopping window.</span>
         </label>
         <label>
           Shopping mode
           <select name="shopping_mode">
-            <option value="balanced" ${t.shopping_mode==="balanced"?"selected":""}>Balanced</option>
-            <option value="fresh" ${t.shopping_mode==="fresh"?"selected":""}>Fresh</option>
-            <option value="bulk" ${t.shopping_mode==="bulk"?"selected":""}>Bulk</option>
+            <option value="balanced" ${n.shopping_mode==="balanced"?"selected":""}>Balanced</option>
+            <option value="fresh" ${n.shopping_mode==="fresh"?"selected":""}>Fresh</option>
+            <option value="bulk" ${n.shopping_mode==="bulk"?"selected":""}>Bulk</option>
           </select>
           <span class="generic-help">Fresh keeps perishables tighter. Bulk leans harder into pantry-friendly buys.</span>
         </label>
@@ -71,11 +140,11 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             type="number"
             min="1"
             step="1"
-            value="${u(t.calories)}"
-            aria-invalid="${g(t,"calories")?"true":"false"}"
+            value="${u(n.calories)}"
+            aria-invalid="${m(n,"calories")?"true":"false"}"
             required
           />
-          <span class="generic-field-error">${u(g(t,"calories"))}</span>
+          <span class="generic-field-error">${u(m(n,"calories"))}</span>
         </label>
         <label>
           Protein (g)
@@ -84,11 +153,11 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             type="number"
             min="1"
             step="1"
-            value="${u(t.protein)}"
-            aria-invalid="${g(t,"protein")?"true":"false"}"
+            value="${u(n.protein)}"
+            aria-invalid="${m(n,"protein")?"true":"false"}"
             required
           />
-          <span class="generic-field-error">${u(g(t,"protein"))}</span>
+          <span class="generic-field-error">${u(m(n,"protein"))}</span>
         </label>
         <label>
           Carbs (g)
@@ -97,10 +166,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             type="number"
             min="1"
             step="1"
-            value="${u(t.carbohydrate)}"
-            aria-invalid="${g(t,"carbohydrate")?"true":"false"}"
+            value="${u(n.carbohydrate)}"
+            aria-invalid="${m(n,"carbohydrate")?"true":"false"}"
           />
-          <span class="generic-field-error">${u(g(t,"carbohydrate"))}</span>
+          <span class="generic-field-error">${u(m(n,"carbohydrate"))}</span>
         </label>
         <label>
           Fat (g)
@@ -109,10 +178,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             type="number"
             min="1"
             step="1"
-            value="${u(t.fat)}"
-            aria-invalid="${g(t,"fat")?"true":"false"}"
+            value="${u(n.fat)}"
+            aria-invalid="${m(n,"fat")?"true":"false"}"
           />
-          <span class="generic-field-error">${u(g(t,"fat"))}</span>
+          <span class="generic-field-error">${u(m(n,"fat"))}</span>
         </label>
         <label>
           Fiber (g)
@@ -121,10 +190,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
             type="number"
             min="1"
             step="1"
-            value="${u(t.fiber)}"
-            aria-invalid="${g(t,"fiber")?"true":"false"}"
+            value="${u(n.fiber)}"
+            aria-invalid="${m(n,"fiber")?"true":"false"}"
           />
-          <span class="generic-field-error">${u(g(t,"fiber"))}</span>
+          <span class="generic-field-error">${u(m(n,"fiber"))}</span>
         </label>
       </div>
 
@@ -134,21 +203,21 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
           <label style="display: block; margin-bottom: 0.75rem">
             Meal or use case
             <select name="meal_style">
-              <option value="any" ${t.meal_style==="any"?"selected":""}>Any</option>
-              <option value="breakfast" ${t.meal_style==="breakfast"?"selected":""}>Breakfast</option>
-              <option value="lunch_dinner" ${t.meal_style==="lunch_dinner"?"selected":""}>Lunch / dinner</option>
-              <option value="snack" ${t.meal_style==="snack"?"selected":""}>Snack</option>
+              <option value="any" ${n.meal_style==="any"?"selected":""}>Any</option>
+              <option value="breakfast" ${n.meal_style==="breakfast"?"selected":""}>Breakfast</option>
+              <option value="lunch_dinner" ${n.meal_style==="lunch_dinner"?"selected":""}>Lunch / dinner</option>
+              <option value="snack" ${n.meal_style==="snack"?"selected":""}>Snack</option>
             </select>
           </label>
           <div class="generic-checkboxes">
             <label>
-              <input name="vegetarian" type="checkbox" ${t.vegetarian?"checked":""} />
+              <input name="vegetarian" type="checkbox" ${n.vegetarian?"checked":""} />
               Vegetarian (includes eggs and dairy)
             </label>
-            <label><input name="vegan" type="checkbox" ${t.vegan?"checked":""} /> Vegan</label>
-            <label><input name="dairy_free" type="checkbox" ${t.dairy_free?"checked":""} /> Dairy-free</label>
-            <label><input name="low_prep" type="checkbox" ${t.low_prep?"checked":""} /> Low prep</label>
-            <label><input name="budget_friendly" type="checkbox" ${t.budget_friendly?"checked":""} /> Budget friendly</label>
+            <label><input name="vegan" type="checkbox" ${n.vegan?"checked":""} /> Vegan</label>
+            <label><input name="dairy_free" type="checkbox" ${n.dairy_free?"checked":""} /> Dairy-free</label>
+            <label><input name="low_prep" type="checkbox" ${n.low_prep?"checked":""} /> Low prep</label>
+            <label><input name="budget_friendly" type="checkbox" ${n.budget_friendly?"checked":""} /> Budget friendly</label>
           </div>
           <p class="generic-help">Recommendations stay generic. They do not depend on exact store inventory or branded products.</p>
         </div>
@@ -159,7 +228,7 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
           <h3>Already have</h3>
           <p class="generic-help">Mark common items already in your pantry or fridge. The shopping list will reduce or omit them where the basket still works.</p>
           <div class="generic-checkboxes">
-            ${d}
+            ${p}
           </div>
         </div>
       </div>
@@ -174,10 +243,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
               type="number"
               min="1"
               step="1"
-              value="${u(t.calcium)}"
-              aria-invalid="${g(t,"calcium")?"true":"false"}"
+              value="${u(n.calcium)}"
+              aria-invalid="${m(n,"calcium")?"true":"false"}"
             />
-            <span class="generic-field-error">${u(g(t,"calcium"))}</span>
+            <span class="generic-field-error">${u(m(n,"calcium"))}</span>
           </label>
           <label>
             Iron (mg)
@@ -186,10 +255,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
               type="number"
               min="1"
               step="0.1"
-              value="${u(t.iron)}"
-              aria-invalid="${g(t,"iron")?"true":"false"}"
+              value="${u(n.iron)}"
+              aria-invalid="${m(n,"iron")?"true":"false"}"
             />
-            <span class="generic-field-error">${u(g(t,"iron"))}</span>
+            <span class="generic-field-error">${u(m(n,"iron"))}</span>
           </label>
           <label>
             Vitamin C (mg)
@@ -198,78 +267,25 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
               type="number"
               min="1"
               step="1"
-              value="${u(t.vitamin_c)}"
-              aria-invalid="${g(t,"vitamin_c")?"true":"false"}"
+              value="${u(n.vitamin_c)}"
+              aria-invalid="${m(n,"vitamin_c")?"true":"false"}"
             />
-            <span class="generic-field-error">${u(g(t,"vitamin_c"))}</span>
+            <span class="generic-field-error">${u(m(n,"vitamin_c"))}</span>
           </label>
         </div>
       </details>
 
-      <details class="generic-advanced">
-        <summary>Advanced planner settings</summary>
-        <p class="generic-help">Local demo mode keeps Route B enabled by default so learned candidates join the heuristic pool. Turn it off here only when you want a clean heuristic-only baseline comparison.</p>
-        <div class="generic-form-grid">
-          <label>
-            Model candidates to add
-            <input
-              name="model_candidate_count"
-              type="number"
-              min="1"
-              max="8"
-              step="1"
-              value="${u(t.model_candidate_count)}"
-            />
-            <span class="generic-help">How many learned candidate baskets to add before fusion and ranking.</span>
-          </label>
-          <label>
-            Total candidates ranked
-            <input
-              name="candidate_count"
-              type="number"
-              min="1"
-              max="12"
-              step="1"
-              value="${u(t.candidate_count)}"
-            />
-            <span class="generic-help">How many fused candidates the scorer ranks before choosing the final basket.</span>
-          </label>
-          <label>
-            Candidate generator backend
-            <select name="candidate_generator_backend">
-              <option value="auto" ${t.candidate_generator_backend==="auto"?"selected":""}>Auto</option>
-              <option value="logistic_regression" ${t.candidate_generator_backend==="logistic_regression"?"selected":""}>Logistic regression</option>
-              <option value="random_forest" ${t.candidate_generator_backend==="random_forest"?"selected":""}>Random forest</option>
-              <option value="hist_gradient_boosting" ${t.candidate_generator_backend==="hist_gradient_boosting"?"selected":""}>HistGradientBoosting</option>
-            </select>
-            <span class="generic-help">Auto uses the selected local artifact backend. Pick one explicitly if you want to compare backends.</span>
-          </label>
-        </div>
-        <div class="generic-checkboxes" style="margin-top: 0.75rem">
-          <label>
-            <input name="enable_model_candidates" type="checkbox" ${t.enable_model_candidates?"checked":""} />
-            Enable learned candidates
-          </label>
-          <label>
-            <input name="debug_candidate_generation" type="checkbox" ${t.debug_candidate_generation?"checked":""} />
-            Show candidate-generation debug
-          </label>
-          <label>
-            <input name="debug_scorer" type="checkbox" ${t.debug_scorer?"checked":""} />
-            Show scorer debug
-          </label>
-        </div>
-      </details>
+      ${f}
 
       <div class="generic-actions">
-        <button type="button" id="use-location-button" ${l?"disabled":""}>
-          ${t.isLocating?"Locating...":"Use My Location"}
+        <button type="button" id="use-location-button" ${s?"disabled":""}>
+          ${n.isLocating?"Locating...":"Use My Location"}
         </button>
-        <button type="button" id="lookup-stores-button" ${l?"disabled":""}>
-          ${t.isResolvingAddress||t.isLookingUpStores?"Looking Up...":"Find Nearby Supermarkets"}
+        <button type="button" id="lookup-stores-button" ${s?"disabled":""}>
+          ${n.isResolvingAddress||n.isLookingUpStores?"Looking Up...":"Find Nearby Supermarkets"}
         </button>
-        <button type="submit" ${l?"disabled":""}>
-          ${t.isResolvingAddress||t.isGeneratingRecommendations?"Generating...":"Build Shopping List"}
+        <button type="submit" ${s?"disabled":""}>
+          ${n.isResolvingAddress||n.isGeneratingRecommendations?"Generating...":"Recommend"}
         </button>
       </div>
 
@@ -282,10 +298,10 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
               name="lat"
               type="number"
               step="any"
-              value="${u(t.lat)}"
-              aria-invalid="${g(t,"lat")?"true":"false"}"
+              value="${u(n.lat)}"
+              aria-invalid="${m(n,"lat")?"true":"false"}"
             />
-            <span class="generic-field-error">${u(g(t,"lat"))}</span>
+            <span class="generic-field-error">${u(m(n,"lat"))}</span>
           </label>
           <label>
             Longitude
@@ -293,69 +309,69 @@ function k(e,t){return e.querySelector(`[name="${t}"]`)?.checked||!1}function Fe
               name="lon"
               type="number"
               step="any"
-              value="${u(t.lon)}"
-              aria-invalid="${g(t,"lon")?"true":"false"}"
+              value="${u(n.lon)}"
+              aria-invalid="${m(n,"lon")?"true":"false"}"
             />
-            <span class="generic-field-error">${u(g(t,"lon"))}</span>
+            <span class="generic-field-error">${u(m(n,"lon"))}</span>
           </label>
           <label>
             Search radius (m)
-            <input name="radius_m" type="number" min="1" step="100" value="${u(t.radius_m)}" required />
+            <input name="radius_m" type="number" min="1" step="100" value="${u(n.radius_m)}" required />
             <span class="generic-help">How far to search for supermarkets around the selected point.</span>
           </label>
           <label>
             Nearby stores to show
-            <input name="store_limit" type="number" min="1" max="25" step="1" value="${u(t.store_limit)}" required />
+            <input name="store_limit" type="number" min="1" max="25" step="1" value="${u(n.store_limit)}" required />
             <span class="generic-help">The list is always sorted by distance.</span>
           </label>
         </div>
       </details>
     </form>
-  `;let s=e.querySelector("#generic-input-form"),m=()=>i.onChange({locationQuery:s.locationQuery.value,lat:s.lat.value,lon:s.lon.value,radius_m:s.radius_m.value,store_limit:s.store_limit.value,days:s.days.value,shopping_mode:s.shopping_mode.value,protein:s.protein.value,calories:s.calories.value,carbohydrate:s.carbohydrate.value,fat:s.fat.value,fiber:s.fiber.value,calcium:s.calcium.value,iron:s.iron.value,vitamin_c:s.vitamin_c.value,vegetarian:k(s,"vegetarian"),dairy_free:k(s,"dairy_free"),vegan:k(s,"vegan"),low_prep:k(s,"low_prep"),budget_friendly:k(s,"budget_friendly"),meal_style:s.meal_style.value,enable_model_candidates:k(s,"enable_model_candidates"),model_candidate_count:s.model_candidate_count.value,candidate_generator_backend:s.candidate_generator_backend.value,debug_candidate_generation:k(s,"debug_candidate_generation"),debug_scorer:k(s,"debug_scorer"),candidate_count:s.candidate_count.value,pantry_items:Fe(s,"pantry_items")});s.addEventListener("change",m),s.addEventListener("input",m),s.addEventListener("submit",p=>{p.preventDefault(),m(),i.onRecommend()}),e.querySelector("#lookup-stores-button").addEventListener("click",()=>{m(),i.onLookupStores()}),e.querySelector("#use-location-button").addEventListener("click",()=>{m(),i.onUseMyLocation()}),e.querySelectorAll("[data-preset-id]").forEach(p=>{p.addEventListener("click",()=>{i.onApplyPreset(p.dataset.presetId)})})}function o(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function A(e,t){return e?`<div class="generic-notice ${o(t||"info")}">${o(e)}</div>`:""}function Oe(e,t,i){let n=Math.round((e-t)*10)/10;return`${n>0?"+":""}${n} ${i}`}function Ue(e){return{protein_anchor:"Protein anchor",carb_base:"Carb base",produce:"Produce",calorie_booster:"Calorie booster"}[e]||"Recommended item"}function L(e){let t=String(e||"heuristic").trim().toLowerCase();return t==="model"||t==="hybrid"||t==="repaired_model"?t:"heuristic"}function R(e){return{heuristic:"Heuristic",model:"Model",hybrid:"Hybrid",repaired_model:"Repaired model"}[L(e)]||"Heuristic"}function Ie(e){return`${R(e)} result`}function Ke(e){return`generic-badge-source-${L(e)}`}function qe(e,t){let i=Array.isArray(e)?e:[],n=[...new Set(i.map(l=>L(l)).filter(Boolean))];return n.length?n:[L(t)]}function He(e,t){let i=L(t);return e?i==="heuristic"?"Model path was enabled, but the highest-ranked basket still came from the heuristic pool.":i==="model"?"A model-generated candidate won the final ranking.":i==="repaired_model"?"A model-generated basket needed repair and still won the final ranking.":"A fused hybrid candidate won the final ranking.":"Model path disabled; the heuristic-only baseline produced this result."}function E(e){let t=Array.isArray(e)?e.filter(Boolean):[];return t.length?t.join(", "):"Not available"}function w(e,t=3){if(e==null||e==="")return"Not available";let i=Number(e);return Number.isFinite(i)?i.toFixed(t):String(e)}var ie=[{role:"protein_anchor",title:"Protein picks"},{role:"carb_base",title:"Carb base"},{role:"produce",title:"Produce"},{role:"calorie_booster",title:"Extras / boosters"}],I=[{key:"one_stop_pick",title:"One-stop pick"},{key:"budget_pick",title:"Budget pick"},{key:"produce_pick",title:"Produce pick"},{key:"bulk_pick",title:"Bulk pick"}],ae=[{label:"Protein",targetKey:"protein_target_g",estimatedKey:"protein_estimated_g",unit:"g"},{label:"Calories",targetKey:"calorie_target_kcal",estimatedKey:"calorie_estimated_kcal",unit:"kcal"},{label:"Carbs",targetKey:"carbohydrate_target_g",estimatedKey:"carbohydrate_estimated_g",unit:"g"},{label:"Fat",targetKey:"fat_target_g",estimatedKey:"fat_estimated_g",unit:"g"},{label:"Fiber",targetKey:"fiber_target_g",estimatedKey:"fiber_estimated_g",unit:"g"},{label:"Calcium",targetKey:"calcium_target_mg",estimatedKey:"calcium_estimated_mg",unit:"mg"},{label:"Iron",targetKey:"iron_target_mg",estimatedKey:"iron_estimated_mg",unit:"mg"},{label:"Vitamin C",targetKey:"vitamin_c_target_mg",estimatedKey:"vitamin_c_estimated_mg",unit:"mg"}];function Qe(e,t){return!e||e[t.targetKey]===void 0||e[t.estimatedKey]===void 0?null:`${t.label}: ${e[t.estimatedKey]} ${t.unit} (target ${e[t.targetKey]} ${t.unit})`}function ne(e){let t=String(e?.substitution_reason||"").trim(),i=String(e?.substitution||"").trim();return t?i&&t.toLowerCase().startsWith(i.toLowerCase())?t.slice(i.length).trim():t:""}function oe(e,t=!0){return ie.map(i=>{let n=(e.shopping_list||[]).filter(d=>d.role===i.role);if(!n.length)return"";let l=n.map(d=>{let s=[`- ${d.name}: ${d.quantity_display}`];if(t&&d.reason_short&&s.push(`  ${d.reason_short}`),t&&d.typical_item_cost!==null&&d.typical_item_cost!==void 0){let m=d.estimated_price_low!==null&&d.estimated_price_low!==void 0&&d.estimated_price_high!==null&&d.estimated_price_high!==void 0?` (range $${d.estimated_price_low}-$${d.estimated_price_high})`:"";s.push(`  Typical cost: $${d.typical_item_cost}${m}`)}return s.join(`
-`)});return`${i.title}
-${l.join(`
+  `;let d=e.querySelector("#generic-input-form"),_=()=>t.onChange({locationQuery:d.locationQuery.value,lat:d.lat.value,lon:d.lon.value,radius_m:d.radius_m.value,store_limit:d.store_limit.value,days:d.days.value,shopping_mode:d.shopping_mode.value,protein:d.protein.value,calories:d.calories.value,carbohydrate:d.carbohydrate.value,fat:d.fat.value,fiber:d.fiber.value,calcium:d.calcium.value,iron:d.iron.value,vitamin_c:d.vitamin_c.value,vegetarian:$(d,"vegetarian"),dairy_free:$(d,"dairy_free"),vegan:$(d,"vegan"),low_prep:$(d,"low_prep"),budget_friendly:$(d,"budget_friendly"),meal_style:d.meal_style.value,enable_model_candidates:$(d,"enable_model_candidates"),model_candidate_count:d.model_candidate_count.value,candidate_generator_backend:d.candidate_generator_backend.value,debug_candidate_generation:$(d,"debug_candidate_generation"),debug_scorer:$(d,"debug_scorer"),candidate_count:d.candidate_count.value,pantry_items:Ue(d,"pantry_items")});d.addEventListener("change",_),d.addEventListener("input",_),d.addEventListener("submit",g=>{g.preventDefault(),_(),t.onRecommend()}),e.querySelector("#lookup-stores-button").addEventListener("click",()=>{_(),t.onLookupStores()}),e.querySelector("#use-location-button").addEventListener("click",()=>{_(),t.onUseMyLocation()}),e.querySelectorAll("[data-preset-id]").forEach(g=>{g.addEventListener("click",()=>{t.onApplyPreset(g.dataset.presetId)})})}function o(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function x(e,n){return e?`<div class="generic-notice ${o(n||"info")}">${o(e)}</div>`:""}function Ke(e,n,t){let i=Math.round((e-n)*10)/10;return`${i>0?"+":""}${i} ${t}`}function qe(e){return{protein_anchor:"Protein anchor",carb_base:"Carb base",produce:"Produce",calorie_booster:"Calorie booster"}[e]||"Recommended item"}function L(e){let n=String(e||"heuristic").trim().toLowerCase();return n==="model"||n==="hybrid"||n==="repaired_model"?n:"heuristic"}function T(e){return{heuristic:"Heuristic",model:"Model",hybrid:"Hybrid",repaired_model:"Repaired model"}[L(e)]||"Heuristic"}function He(e){return`${T(e)} result`}function Qe(e){return`generic-badge-source-${L(e)}`}function Ve(e,n){let t=Array.isArray(e)?e:[],i=[...new Set(t.map(s=>L(s)).filter(Boolean))];return i.length?i:[L(n)]}function ze(e,n){let t=L(n);return e?t==="heuristic"?"Model path was enabled, but the highest-ranked basket still came from the heuristic pool.":t==="model"?"A model-generated candidate won the final ranking.":t==="repaired_model"?"A model-generated basket needed repair and still won the final ranking.":"A fused hybrid candidate won the final ranking.":"Model path disabled; the heuristic-only baseline produced this result."}function R(e){let n=Array.isArray(e)?e.filter(Boolean):[];return n.length?n.join(", "):"Not available"}function w(e,n=3){if(e==null||e==="")return"Not available";let t=Number(e);return Number.isFinite(t)?t.toFixed(n):String(e)}var re=[{role:"protein_anchor",title:"Protein picks"},{role:"carb_base",title:"Carb base"},{role:"produce",title:"Produce"},{role:"calorie_booster",title:"Extras / boosters"}],Q=[{key:"one_stop_pick",title:"One-stop pick"},{key:"budget_pick",title:"Budget pick"},{key:"produce_pick",title:"Produce pick"},{key:"bulk_pick",title:"Bulk pick"}],se=[{label:"Protein",targetKey:"protein_target_g",estimatedKey:"protein_estimated_g",unit:"g"},{label:"Calories",targetKey:"calorie_target_kcal",estimatedKey:"calorie_estimated_kcal",unit:"kcal"},{label:"Carbs",targetKey:"carbohydrate_target_g",estimatedKey:"carbohydrate_estimated_g",unit:"g"},{label:"Fat",targetKey:"fat_target_g",estimatedKey:"fat_estimated_g",unit:"g"},{label:"Fiber",targetKey:"fiber_target_g",estimatedKey:"fiber_estimated_g",unit:"g"},{label:"Calcium",targetKey:"calcium_target_mg",estimatedKey:"calcium_estimated_mg",unit:"mg"},{label:"Iron",targetKey:"iron_target_mg",estimatedKey:"iron_estimated_mg",unit:"mg"},{label:"Vitamin C",targetKey:"vitamin_c_target_mg",estimatedKey:"vitamin_c_estimated_mg",unit:"mg"}];function Ye(e,n){return!e||e[n.targetKey]===void 0||e[n.estimatedKey]===void 0?null:`${n.label}: ${e[n.estimatedKey]} ${n.unit} (target ${e[n.targetKey]} ${n.unit})`}function oe(e){let n=String(e?.substitution_reason||"").trim(),t=String(e?.substitution||"").trim();return n?t&&n.toLowerCase().startsWith(t.toLowerCase())?n.slice(t.length).trim():n:""}function de(e,n=!0){return re.map(t=>{let i=(e.shopping_list||[]).filter(l=>l.role===t.role);if(!i.length)return"";let s=i.map(l=>{let p=[`- ${l.name}: ${l.quantity_display}`];if(n&&l.reason_short&&p.push(`  ${l.reason_short}`),n&&l.typical_item_cost!==null&&l.typical_item_cost!==void 0){let f=l.estimated_price_low!==null&&l.estimated_price_low!==void 0&&l.estimated_price_high!==null&&l.estimated_price_high!==void 0?` (range $${l.estimated_price_low}-$${l.estimated_price_high})`:"";p.push(`  Typical cost: $${l.typical_item_cost}${f}`)}return p.join(`
+`)});return`${t.title}
+${s.join(`
 `)}`}).filter(Boolean).join(`
 
-`)}function re(e){return I.map(t=>{let i=e?.[t.key];if(!i?.store_id)return null;let n=i.distance_m!==void 0&&i.distance_m!==null?`, about ${Math.round(Number(i.distance_m))} m away`:"";return`- ${t.title}: ${i.store_name} (${i.category||"store"}${n})${i.note?` - ${i.note}`:""}`}).filter(Boolean)}function se(e){if(!e?.shopping_list?.length)return"";let t=Number(e.days||1),i=String(e.shopping_mode||"balanced"),n=["Generic Grocery Plan",`Shopping window: ${t} ${t===1?"day":"days"}`,`Shopping mode: ${i}`,"",oe(e,!1)];e.estimated_basket_cost!==void 0&&(n.push("",`Estimated typical basket cost: $${e.estimated_basket_cost}`),e.estimated_basket_cost_low!==void 0&&e.estimated_basket_cost_high!==void 0&&n.push(`Typical basket range: $${e.estimated_basket_cost_low}-$${e.estimated_basket_cost_high}`),e.price_adjustment_note&&n.push(e.price_adjustment_note),e.price_coverage_note&&n.push(e.price_coverage_note));let l=re(e);return l.length&&n.push("","Recommended store picks",...l),n.filter(Boolean).join(`
-`)}function K(e){if(!e?.shopping_list?.length)return"";let t=Number(e.days||1),i=String(e.shopping_mode||"balanced"),n=e.nutrition_summary||{},l=ae.map(m=>Qe(n,m)).filter(Boolean),d=re(e),s=["Generic Grocery Plan",`Shopping window: ${t} ${t===1?"day":"days"}`,`Shopping mode: ${i}`];return l.length&&s.push("","Key nutrition targets",...l),e.estimated_basket_cost!==void 0&&(s.push("",`Estimated typical basket cost: $${e.estimated_basket_cost}`),e.estimated_basket_cost_low!==void 0&&e.estimated_basket_cost_high!==void 0&&s.push(`Typical basket range: $${e.estimated_basket_cost_low}-$${e.estimated_basket_cost_high}`),e.price_adjustment_note&&s.push(e.price_adjustment_note),e.price_coverage_note&&s.push(e.price_coverage_note),e.basket_cost_note&&s.push(e.basket_cost_note),e.price_confidence_note&&s.push(e.price_confidence_note)),d.length&&s.push("","Recommended store picks",...d),s.push("","Shopping list",oe(e,!0)),Array.isArray(e.assumptions)&&e.assumptions.length&&s.push("","Approximate guidance",...e.assumptions.map(m=>`- ${m}`)),s.filter(Boolean).join(`
-`)}function le(e,t,i={}){let{recommendation:n,recommendationStatus:l,recommendationError:d,isGeneratingRecommendations:s,hasRequestedRecommendation:m,exportNotice:p}=t;if(s){e.innerHTML=`
-      ${A(l||"Generating recommendations...","info")}
+`)}function le(e){return Q.map(n=>{let t=e?.[n.key];if(!t?.store_id)return null;let i=t.distance_m!==void 0&&t.distance_m!==null?`, about ${Math.round(Number(t.distance_m))} m away`:"";return`- ${n.title}: ${t.store_name} (${t.category||"store"}${i})${t.note?` - ${t.note}`:""}`}).filter(Boolean)}function ce(e){if(!e?.shopping_list?.length)return"";let n=Number(e.days||1),t=String(e.shopping_mode||"balanced"),i=["Generic Grocery Plan",`Shopping window: ${n} ${n===1?"day":"days"}`,`Shopping mode: ${t}`,"",de(e,!1)];e.estimated_basket_cost!==void 0&&(i.push("",`Estimated typical basket cost: $${e.estimated_basket_cost}`),e.estimated_basket_cost_low!==void 0&&e.estimated_basket_cost_high!==void 0&&i.push(`Typical basket range: $${e.estimated_basket_cost_low}-$${e.estimated_basket_cost_high}`),e.price_adjustment_note&&i.push(e.price_adjustment_note),e.price_coverage_note&&i.push(e.price_coverage_note));let s=le(e);return s.length&&i.push("","Recommended store picks",...s),i.filter(Boolean).join(`
+`)}function V(e){if(!e?.shopping_list?.length)return"";let n=Number(e.days||1),t=String(e.shopping_mode||"balanced"),i=e.nutrition_summary||{},s=se.map(f=>Ye(i,f)).filter(Boolean),l=le(e),p=["Generic Grocery Plan",`Shopping window: ${n} ${n===1?"day":"days"}`,`Shopping mode: ${t}`];return s.length&&p.push("","Key nutrition targets",...s),e.estimated_basket_cost!==void 0&&(p.push("",`Estimated typical basket cost: $${e.estimated_basket_cost}`),e.estimated_basket_cost_low!==void 0&&e.estimated_basket_cost_high!==void 0&&p.push(`Typical basket range: $${e.estimated_basket_cost_low}-$${e.estimated_basket_cost_high}`),e.price_adjustment_note&&p.push(e.price_adjustment_note),e.price_coverage_note&&p.push(e.price_coverage_note),e.basket_cost_note&&p.push(e.basket_cost_note),e.price_confidence_note&&p.push(e.price_confidence_note)),l.length&&p.push("","Recommended store picks",...l),p.push("","Shopping list",de(e,!0)),Array.isArray(e.assumptions)&&e.assumptions.length&&p.push("","Approximate guidance",...e.assumptions.map(f=>`- ${f}`)),p.filter(Boolean).join(`
+`)}function ue(e,n,t={}){let{recommendation:i,recommendationStatus:s,recommendationError:l,isGeneratingRecommendations:p,hasRequestedRecommendation:f,exportNotice:d}=n;if(p){e.innerHTML=`
+      ${x(s||"Generating recommendations...","info")}
       <div class="generic-empty">Building a generic shopping list from the nutrition targets and food preferences.</div>
-    `;return}if(d){e.innerHTML=`
-      ${A(d,"error")}
+    `;return}if(l){e.innerHTML=`
+      ${x(l,"error")}
       <div class="generic-empty">The app could not build a shopping list for the current inputs. Adjust the targets or preferences and try again.</div>
-    `;return}if(!m){e.innerHTML=`
+    `;return}if(!f){e.innerHTML=`
       <div class="generic-empty">
         Build a shopping list to see recommended food categories, rough quantities, and a simple nutrition summary.
       </div>
-    `;return}if(!n){e.innerHTML=`
-      ${A(l||"No recommendations available.","info")}
+    `;return}if(!i){e.innerHTML=`
+      ${x(s||"No recommendations available.","info")}
       <div class="generic-empty">No shopping list could be generated from the current targets and preferences. Try lowering the targets or relaxing the filters.</div>
-    `;return}let b=n.nutrition_summary,h=Number(n.days||t.days||1),T=String(n.shopping_mode||t.shopping_mode||"balanced"),$=L(n.selected_candidate_source),$e=qe(n.selected_candidate_sources,$),N=n.candidate_generation_debug||{},Q=n.scoring_debug||{},c=n.candidate_comparison_debug||{},P=N.model_candidates_enabled??!!t.enable_model_candidates,V=N.heuristic_candidate_count,z=N.model_candidate_count,j=N.fused_candidate_count??n.candidate_count_considered,ke=N.candidate_generator_backend||t.candidate_generator_backend||"auto",we=n.scorer_backend||"unknown",Ce=n.selected_candidate_id||"unknown",B=n.candidate_count_considered??j,Le=!!(n.candidate_generation_debug||n.scoring_debug||n.candidate_comparison_debug||n.selected_candidate_source),Se=c.diagnosis_text||He(P,$),Y=c.selected_vs_best_heuristic||null,x=c.selected_candidate_contrast||{},Ne=x.best_heuristic_candidate_shopping_food_ids||c.best_heuristic_candidate_shopping_food_ids||[],Ae=x.best_model_candidate_shopping_food_ids||c.best_model_candidate_shopping_food_ids||[],W=Array.isArray(Q.candidates)?Q.candidates.slice(0,5).map(r=>`
+    `;return}let _=i.nutrition_summary,g=Number(i.days||n.days||1),B=String(i.shopping_mode||n.shopping_mode||"balanced"),E=!!n.developerMode,N=L(i.selected_candidate_source),we=Ve(i.selected_candidate_sources,N),k=i.hybrid_planner_execution||{},A=i.candidate_generation_debug||{},J=i.scoring_debug||{},c=i.candidate_comparison_debug||{},j=A.model_candidates_enabled??k.learned_candidate_generation_ran??!!n.enable_model_candidates,D=A.heuristic_candidate_count??k.heuristic_candidate_count,F=A.model_candidate_count??k.learned_candidate_count,G=A.fused_candidate_count??k.fused_candidate_count??i.candidate_count_considered,Ce=A.candidate_generator_backend||k.candidate_generator_backend||n.candidate_generator_backend||"auto",Le=i.scorer_backend||"unknown",Se=i.selected_candidate_id||"unknown",U=i.candidate_count_considered??k.candidates_ranked_count??G,Ne=E&&!!(i.candidate_generation_debug||i.scoring_debug||i.candidate_comparison_debug),Ae=c.diagnosis_text||ze(j,N),X=c.selected_vs_best_heuristic||null,M=c.selected_candidate_contrast||{},xe=M.best_heuristic_candidate_shopping_food_ids||c.best_heuristic_candidate_shopping_food_ids||[],Ee=M.best_model_candidate_shopping_food_ids||c.best_model_candidate_shopping_food_ids||[],Z=Array.isArray(J.candidates)?J.candidates.slice(0,5).map(r=>`
         <tr>
           <td class="generic-debug-code">${o(r.candidate_id)}</td>
-          <td>${o(R(r.source))}</td>
+          <td>${o(T(r.source))}</td>
           <td>${o(w(r.model_score))}</td>
           <td>${o(r.generator_score??"n/a")}</td>
-          <td class="generic-debug-code">${o(E(r.shopping_food_ids))}</td>
+          <td class="generic-debug-code">${o(R(r.shopping_food_ids))}</td>
           <td>${r.selected?"Yes":"No"}</td>
           <td>${o(r.selection_reason_summary||"")}</td>
         </tr>
-      `).join(""):"",xe=V!==void 0&&z!==void 0&&j!==void 0?`${V} heuristic + ${z} model -> ${j} fused`:B!==void 0?`${B} total candidates ranked`:"Not available",Ee=Le?`
+      `).join(""):"",Me=D!==void 0&&F!==void 0&&G!==void 0?`${D} heuristic + ${F} model -> ${G} fused`:U!==void 0?`${U} total candidates ranked`:"Not available",Re=k.pipeline_mode==="full_hybrid"?`${D??"?"} heuristic candidates + ${F??"?"} learned candidates were fused, reranked by the trained scorer, and matched against nearby store fits automatically.`:"This request used the heuristic-only planner path.",Te=Ne?`
       <div class="generic-list-item" style="margin-top: 1rem">
         <div class="generic-inline-group">
           <h3>Planner Debug / Model Participation</h3>
           <span class="generic-badge">Debug summary</span>
         </div>
         <div class="generic-debug-list">
-          <div><strong>Selected candidate source:</strong> ${o(R($))}</div>
-          <div><strong>Selected candidate sources:</strong> ${o($e.map(R).join(" + "))}</div>
-          <div><strong>Candidate pool:</strong> ${o(xe)}</div>
-          <div><strong>Candidates ranked:</strong> ${o(B??"Not available")}</div>
-          <div><strong>Model candidates enabled:</strong> ${o(P?"Yes":"No")}</div>
-          <div><strong>Candidate generator backend:</strong> ${o(ke||"Not used")}</div>
-          <div><strong>Scorer backend:</strong> ${o(we)}</div>
-          <div><strong>Selected candidate ID:</strong> ${o(Ce)}</div>
+          <div><strong>Selected candidate source:</strong> ${o(T(N))}</div>
+          <div><strong>Selected candidate sources:</strong> ${o(we.map(T).join(" + "))}</div>
+          <div><strong>Candidate pool:</strong> ${o(Me)}</div>
+          <div><strong>Candidates ranked:</strong> ${o(U??"Not available")}</div>
+          <div><strong>Model candidates enabled:</strong> ${o(j?"Yes":"No")}</div>
+          <div><strong>Candidate generator backend:</strong> ${o(Ce||"Not used")}</div>
+          <div><strong>Scorer backend:</strong> ${o(Le)}</div>
+          <div><strong>Selected candidate ID:</strong> ${o(Se)}</div>
           <div><strong>Best heuristic candidate:</strong> ${o(c.best_heuristic_candidate_id||"Not available")} ${c.best_heuristic_candidate_score!==null&&c.best_heuristic_candidate_score!==void 0?`<span>(score ${o(w(c.best_heuristic_candidate_score))})</span>`:""}</div>
           <div><strong>Best model candidate:</strong> ${o(c.best_model_candidate_id||"Not available")} ${c.best_model_candidate_score!==null&&c.best_model_candidate_score!==void 0?`<span>(score ${o(w(c.best_model_candidate_score))})</span>`:""}</div>
           <div><strong>Model vs heuristic score gap:</strong> ${o(c.best_model_vs_best_heuristic_score_gap!==null&&c.best_model_vs_best_heuristic_score_gap!==void 0?w(c.best_model_vs_best_heuristic_score_gap):"Not available")}</div>
@@ -365,17 +381,17 @@ ${l.join(`
           <div><strong>Best materially different model candidate:</strong> ${o(c.best_materially_different_model_candidate_id||"Not available")} ${c.best_materially_different_model_candidate_score!==null&&c.best_materially_different_model_candidate_score!==void 0?`<span>(score ${o(w(c.best_materially_different_model_candidate_score))})</span>`:""}</div>
           <div><strong>Winner vs best materially different model gap:</strong> ${o(c.best_materially_different_model_candidate_score_gap_to_selected!==null&&c.best_materially_different_model_candidate_score_gap_to_selected!==void 0?w(c.best_materially_different_model_candidate_score_gap_to_selected):"Not available")}</div>
           <div><strong>Why that model alternative lost:</strong> ${o(c.best_materially_different_model_candidate_loss_reason||"Not available")}</div>
-          <div><strong>Similarity diagnosis:</strong> ${o(c.model_candidates_mostly_near_duplicates?"Model candidates were mostly near-duplicates.":P?"Model candidates introduced materially different baskets.":"Model path disabled.")}</div>
-          <div><strong>Selection outcome:</strong> ${o(Se)}</div>
+          <div><strong>Similarity diagnosis:</strong> ${o(c.model_candidates_mostly_near_duplicates?"Model candidates were mostly near-duplicates.":j?"Model candidates introduced materially different baskets.":"Model path disabled.")}</div>
+          <div><strong>Selection outcome:</strong> ${o(Ae)}</div>
         </div>
         <div class="generic-debug-list" style="margin-top: 1rem">
-          <div><strong>Selected vs heuristic baseline:</strong> ${o(x.difference_summary_vs_best_heuristic||c.selected_candidate_difference_summary||"Not available")}</div>
-          <div><strong>Materially different from heuristic baseline:</strong> ${o(Y?Y.materially_different?"Yes":"No":"Not available")}</div>
-          <div><strong>Selected candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(E(x.selected_candidate_shopping_food_ids||c.selected_candidate_shopping_food_ids||[]))}</span></div>
-          <div><strong>Best heuristic candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(E(Ne))}</span></div>
-          <div><strong>Best model candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(E(Ae))}</span></div>
+          <div><strong>Selected vs heuristic baseline:</strong> ${o(M.difference_summary_vs_best_heuristic||c.selected_candidate_difference_summary||"Not available")}</div>
+          <div><strong>Materially different from heuristic baseline:</strong> ${o(X?X.materially_different?"Yes":"No":"Not available")}</div>
+          <div><strong>Selected candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(R(M.selected_candidate_shopping_food_ids||c.selected_candidate_shopping_food_ids||[]))}</span></div>
+          <div><strong>Best heuristic candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(R(xe))}</span></div>
+          <div><strong>Best model candidate shopping_food_ids:</strong> <span class="generic-debug-code">${o(R(Ee))}</span></div>
         </div>
-        ${W?`<details class="generic-advanced" style="margin-top: 1rem">
+        ${Z?`<details class="generic-advanced" style="margin-top: 1rem">
                 <summary>Top candidates</summary>
                 <table class="generic-debug-table">
                   <thead>
@@ -389,41 +405,41 @@ ${l.join(`
                       <th>Reason</th>
                     </tr>
                   </thead>
-                  <tbody>${W}</tbody>
+                  <tbody>${Z}</tbody>
                 </table>
               </details>`:""}
       </div>
-    `:"",Re=0,Me=r=>`
+    `:"",Pe=0,Be=r=>`
         <div class="generic-list-item">
           <div class="generic-list-header">
             <div>
-              <strong>${Re+=1}. ${o(r.name)}</strong>
+              <strong>${Pe+=1}. ${o(r.name)}</strong>
               <div class="generic-muted">Suggested buy: ${o(r.quantity_display)}</div>
             </div>
-            <span class="generic-badge">${o(Ue(r.role))}</span>
+            <span class="generic-badge">${o(qe(r.role))}</span>
           </div>
           <div class="generic-muted" style="margin-top: 0.5rem"><strong>${o(r.reason_short||"")}</strong></div>
           <div class="generic-muted" style="margin-top: 0.25rem">${o(r.why_selected||r.reason)}</div>
           ${r.value_reason_short?`<div class="generic-muted" style="margin-top: 0.25rem"><strong>Value note:</strong> ${o(r.value_reason_short)}${r.price_efficiency_note?` <span>${o(r.price_efficiency_note)}</span>`:""}</div>`:""}
           <div class="generic-muted" style="margin-top: 0.25rem">${o(r.reason)}</div>
-          ${r.substitution?`<div class="generic-muted" style="margin-top: 0.35rem"><strong>Swap option:</strong> ${o(r.substitution)}${ne(r)?` <span>${o(ne(r))}</span>`:""}</div>`:""}
+          ${r.substitution?`<div class="generic-muted" style="margin-top: 0.35rem"><strong>Swap option:</strong> ${o(r.substitution)}${oe(r)?` <span>${o(oe(r))}</span>`:""}</div>`:""}
           <div class="generic-list-meta">
             <span><strong>Protein:</strong> ${o(r.estimated_protein_g)} g</span>
             <span><strong>Calories:</strong> ${o(r.estimated_calories_kcal)} kcal</span>
           </div>
           ${r.estimated_item_cost!==null&&r.estimated_item_cost!==void 0?`<div class="generic-muted" style="margin-top: 0.35rem"><strong>Typical regional price:</strong> $${o(r.typical_unit_price??r.estimated_unit_price)} ${o(r.price_unit_display||"")}; typical item cost about <strong>$${o(r.typical_item_cost??r.estimated_item_cost)}</strong>${r.estimated_price_low!==null&&r.estimated_price_low!==void 0&&r.estimated_price_high!==null&&r.estimated_price_high!==void 0?` <span>(regional range $${o(r.estimated_price_low)}-$${o(r.estimated_price_high)})</span>`:""}.</div>`:""}
         </div>
-      `,Te=ie.map(r=>{let y=n.shopping_list.filter(Be=>Be.role===r.role);return y.length?`
+      `,je=re.map(r=>{let h=i.shopping_list.filter(Ge=>Ge.role===r.role);return h.length?`
       <div class="generic-list-item" style="margin-top: 1rem">
         <div class="generic-inline-group">
           <h3>${o(r.title)}</h3>
-          <span class="generic-badge">${y.length} ${y.length===1?"item":"items"}</span>
+          <span class="generic-badge">${h.length} ${h.length===1?"item":"items"}</span>
         </div>
         <div class="generic-list">
-          ${y.map(Me).join("")}
+          ${h.map(Be).join("")}
         </div>
       </div>
-    `:""}).join(""),Pe=(n.assumptions||[]).map(r=>`<li>${o(r)}</li>`).join(""),F=(n.pantry_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),D=(n.scaling_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),G=(n.warnings||[]).map(r=>`<li>${o(r)}</li>`).join(""),O=(n.split_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),U=(n.realism_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),J=[n.estimated_basket_cost_low!==void 0&&n.estimated_basket_cost_high!==void 0?`<p class="generic-muted"><strong>Typical basket range:</strong> about $${o(n.estimated_basket_cost_low)}-$${o(n.estimated_basket_cost_high)}</p>`:"",n.price_area_name?`<p class="generic-muted" style="margin-top: 0.5rem"><strong>Regional price area:</strong> ${o(n.price_area_name)} (${o(n.price_area_code||"")})</p>`:"",n.price_source_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(n.price_source_note)}</p>`:"",n.price_adjustment_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(n.price_adjustment_note)}</p>`:"",n.basket_cost_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(n.basket_cost_note)}</p>`:"",n.price_confidence_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(n.price_confidence_note)}</p>`:""].filter(Boolean).join(""),X=(n.store_fit_notes||[]).map(r=>`
+    `:""}).join(""),De=(i.assumptions||[]).map(r=>`<li>${o(r)}</li>`).join(""),O=(i.pantry_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),I=(i.scaling_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),K=(i.warnings||[]).map(r=>`<li>${o(r)}</li>`).join(""),q=(i.split_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),H=(i.realism_notes||[]).map(r=>`<li>${o(r)}</li>`).join(""),ee=[i.estimated_basket_cost_low!==void 0&&i.estimated_basket_cost_high!==void 0?`<p class="generic-muted"><strong>Typical basket range:</strong> about $${o(i.estimated_basket_cost_low)}-$${o(i.estimated_basket_cost_high)}</p>`:"",i.price_area_name?`<p class="generic-muted" style="margin-top: 0.5rem"><strong>Regional price area:</strong> ${o(i.price_area_name)} (${o(i.price_area_code||"")})</p>`:"",i.price_source_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(i.price_source_note)}</p>`:"",i.price_adjustment_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(i.price_adjustment_note)}</p>`:"",i.basket_cost_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(i.basket_cost_note)}</p>`:"",i.price_confidence_note?`<p class="generic-muted" style="margin-top: 0.5rem">${o(i.price_confidence_note)}</p>`:""].filter(Boolean).join(""),ne=(i.store_fit_notes||[]).map(r=>`
         <div class="generic-list-item" style="margin-top: 0.75rem">
           <div class="generic-inline-group">
             <h3>${o(r.store_name||"Nearby store")}</h3>
@@ -432,16 +448,16 @@ ${l.join(`
           <div class="generic-muted"><strong>${o(r.category||"store")}</strong>${r.distance_m!==void 0&&r.distance_m!==null?` \u2022 about ${o(Number(r.distance_m).toFixed(0))} m away`:""}</div>
           <div class="generic-muted" style="margin-top: 0.25rem">${o(r.note||"")}</div>
         </div>
-      `).join(""),Z=I.map(r=>{let y=n[r.key];return y?.store_id?`
+      `).join(""),te=Q.map(r=>{let h=i[r.key];return h?.store_id?`
         <div class="generic-list-item" style="margin-top: 0.75rem">
           <div class="generic-inline-group">
             <h3>${o(r.title)}</h3>
-            <span class="generic-badge">${o(y.store_name||"Nearby store")}</span>
+            <span class="generic-badge">${o(h.store_name||"Nearby store")}</span>
           </div>
-          <div class="generic-muted"><strong>${o(y.category||"store")}</strong>${y.distance_m!==void 0&&y.distance_m!==null?` \u2022 about ${o(Number(y.distance_m).toFixed(0))} m away`:""}</div>
-          <div class="generic-muted" style="margin-top: 0.25rem">${o(y.note||"")}</div>
+          <div class="generic-muted"><strong>${o(h.category||"store")}</strong>${h.distance_m!==void 0&&h.distance_m!==null?` \u2022 about ${o(Number(h.distance_m).toFixed(0))} m away`:""}</div>
+          <div class="generic-muted" style="margin-top: 0.25rem">${o(h.note||"")}</div>
         </div>
-      `:""}).join(""),ee=(n.meal_suggestions||[]).map(r=>`
+      `:""}).join(""),ie=(i.meal_suggestions||[]).map(r=>`
         <div class="generic-list-item" style="margin-top: 0.75rem">
           <div class="generic-inline-group">
             <h3>${o(r.title||"Meal idea")}</h3>
@@ -450,80 +466,81 @@ ${l.join(`
           <div class="generic-muted"><strong>${o((r.items||[]).join(", "))}</strong></div>
           ${r.description?`<div class="generic-muted" style="margin-top: 0.25rem">${o(r.description)}</div>`:""}
         </div>
-      `).join(""),je=ae.filter(r=>b?.[r.targetKey]!==void 0&&b?.[r.estimatedKey]!==void 0).map(r=>`
+      `).join(""),Fe=se.filter(r=>_?.[r.targetKey]!==void 0&&_?.[r.estimatedKey]!==void 0).map(r=>`
         <div class="generic-summary-metric">
           <div class="generic-muted">${o(r.label)}</div>
-          <strong>${o(b[r.estimatedKey])} ${o(r.unit)}</strong>
-          <div>Target: ${o(b[r.targetKey])} ${o(r.unit)}</div>
-          <div class="generic-muted">Difference: ${o(Oe(b[r.estimatedKey],b[r.targetKey],r.unit))}</div>
+          <strong>${o(_[r.estimatedKey])} ${o(r.unit)}</strong>
+          <div>Target: ${o(_[r.targetKey])} ${o(r.unit)}</div>
+          <div class="generic-muted">Difference: ${o(Ke(_[r.estimatedKey],_[r.targetKey],r.unit))}</div>
         </div>
       `).join("");e.innerHTML=`
-    ${A(l||"Recommendation ready.","success")}
-    ${A(p?.message,p?.kind)}
+    ${x(s||"Recommendation ready.","success")}
+    ${x(d?.message,d?.kind)}
     <div class="generic-list-item" style="margin-bottom: 1rem">
       <div class="generic-inline-group">
         <h3>Shopping List</h3>
         <div class="generic-badge-group">
-          <span class="generic-badge ${o(Ke($))}">
-            ${o(Ie($))}
+          <span class="generic-badge ${o(Qe(N))}">
+            ${o(He(N))}
           </span>
-          <span class="generic-badge">Suggested shopping list for ${h} ${h===1?"day":"days"}</span>
+          <span class="generic-badge">Suggested shopping list for ${g} ${g===1?"day":"days"}</span>
         </div>
       </div>
-      <p class="generic-muted">Daily nutrition goals stay the same. Quantities below are scaled for the selected shopping window in <strong>${o(T)}</strong> shopping mode.</p>
+      <p class="generic-muted">Daily nutrition goals stay the same. Quantities below are scaled for the selected shopping window in <strong>${o(B)}</strong> shopping mode.</p>
+      <p class="generic-muted" style="margin-top: 0.5rem"><strong>Planning pipeline:</strong> ${o(Re)}</p>
       <div class="generic-actions" style="margin-top: 0.75rem">
         <button type="button" data-export-action="copy-shopping">Copy shopping list</button>
         <button type="button" data-export-action="copy-plan">Copy full plan</button>
         <button type="button" data-export-action="download-plan">Download as text</button>
       </div>
-      ${n.estimated_basket_cost!==void 0?`<p class="generic-muted" style="margin-top: 0.5rem"><strong>Estimated typical basket cost:</strong> about $${o(n.estimated_basket_cost)}.</p>`:""}
+      ${i.estimated_basket_cost!==void 0?`<p class="generic-muted" style="margin-top: 0.5rem"><strong>Estimated typical basket cost:</strong> about $${o(i.estimated_basket_cost)}.</p>`:""}
     </div>
     <div class="generic-list">
-      ${Te||'<div class="generic-empty">Your pantry already covers the suggested basket for this plan. Review the notes below if you still want a small top-up shop.</div>'}
+      ${je||'<div class="generic-empty">Your pantry already covers the suggested basket for this plan. Review the notes below if you still want a small top-up shop.</div>'}
     </div>
-    ${Ee}
-    ${Z?`<div class="generic-list-item" style="margin-top: 1rem">
+    ${Te}
+    ${te?`<div class="generic-list-item" style="margin-top: 1rem">
             <div class="generic-inline-group">
               <h3>Recommended store picks for this list</h3>
-              <span class="generic-badge">${I.filter(r=>n[r.key]?.store_id).length} picks</span>
+              <span class="generic-badge">${Q.filter(r=>i[r.key]?.store_id).length} picks</span>
             </div>
             <p class="generic-muted">These are quick store-type recommendations based on the basket style and nearby store mix. They do not reflect exact inventory.</p>
-            ${Z}
+            ${te}
           </div>`:""}
-    ${X?`<div class="generic-list-item" style="margin-top: 1rem">
+    ${ne?`<div class="generic-list-item" style="margin-top: 1rem">
             <div class="generic-inline-group">
               <h3>Best nearby store fits for this list</h3>
-              <span class="generic-badge">${(n.store_fit_notes||[]).length} suggestions</span>
+              <span class="generic-badge">${(i.store_fit_notes||[]).length} suggestions</span>
             </div>
             <p class="generic-muted">These are coarse store-fit suggestions based on the basket style, shopping mode, and nearby store type. They do not reflect exact inventory.</p>
-            ${X}
+            ${ne}
           </div>`:""}
-    ${ee?`<div class="generic-list-item" style="margin-top: 1rem">
+    ${ie?`<div class="generic-list-item" style="margin-top: 1rem">
             <div class="generic-inline-group">
               <h3>Example ways to use this list</h3>
-              <span class="generic-badge">${(n.meal_suggestions||[]).length} ideas</span>
+              <span class="generic-badge">${(i.meal_suggestions||[]).length} ideas</span>
             </div>
             <p class="generic-muted">These are lightweight examples built from the same recommended items. They are not a full meal plan.</p>
-            ${ee}
+            ${ie}
           </div>`:""}
-    ${D||G||O||U||F?`<div class="generic-list-item" style="margin-top: 1rem">
+    ${I||K||q||H||O?`<div class="generic-list-item" style="margin-top: 1rem">
             <div class="generic-inline-group">
               <h3>Shopping Notes</h3>
-              <span class="generic-badge">${n.adjusted_by_split?"Scaling and realism guidance":"Scaling guidance"}</span>
+              <span class="generic-badge">${i.adjusted_by_split?"Scaling and realism guidance":"Scaling guidance"}</span>
             </div>
-            ${D?`<p class="generic-muted"><strong>Scaling notes</strong></p><ul class="generic-assumptions">${D}</ul>`:""}
-            ${O?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Split notes</strong></p><ul class="generic-assumptions">${O}</ul>`:""}
-            ${U?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Realism notes</strong></p><ul class="generic-assumptions">${U}</ul>`:""}
-            ${F?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Pantry adjustments</strong></p><ul class="generic-assumptions">${F}</ul>`:""}
-            ${G?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Warnings</strong></p><ul class="generic-assumptions">${G}</ul>`:""}
+            ${I?`<p class="generic-muted"><strong>Scaling notes</strong></p><ul class="generic-assumptions">${I}</ul>`:""}
+            ${q?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Split notes</strong></p><ul class="generic-assumptions">${q}</ul>`:""}
+            ${H?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Realism notes</strong></p><ul class="generic-assumptions">${H}</ul>`:""}
+            ${O?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Pantry adjustments</strong></p><ul class="generic-assumptions">${O}</ul>`:""}
+            ${K?`<p class="generic-muted" style="margin-top: 0.75rem"><strong>Warnings</strong></p><ul class="generic-assumptions">${K}</ul>`:""}
           </div>`:""}
     <div class="generic-list-item" style="margin-top: 1rem">
       <div class="generic-inline-group">
         <h3>Nutrition Summary</h3>
-        <span class="generic-badge">${h===1?"Daily total":`${h}-day total`}</span>
+        <span class="generic-badge">${g===1?"Daily total":`${g}-day total`}</span>
       </div>
       <div class="generic-summary-grid">
-        ${je}
+        ${Fe}
       </div>
     </div>
     <div class="generic-list-item" style="margin-top: 1rem">
@@ -532,43 +549,43 @@ ${l.join(`
         <span class="generic-badge">Demo-friendly estimate</span>
       </div>
       <p class="generic-muted">Use this list as a practical starting point, not as exact store inventory or guaranteed product availability.</p>
-      <ul class="generic-assumptions">${Pe}</ul>
+      <ul class="generic-assumptions">${De}</ul>
     </div>
-    ${J?`<div class="generic-list-item" style="margin-top: 1rem">
+    ${ee?`<div class="generic-list-item" style="margin-top: 1rem">
             <div class="generic-inline-group">
               <h3>Pricing notes</h3>
               <span class="generic-badge">Typical regional estimate</span>
             </div>
-            ${J}
+            ${ee}
           </div>`:""}
-  `,e.querySelector('[data-export-action="copy-shopping"]')?.addEventListener("click",()=>{i.onCopyShoppingList?.()}),e.querySelector('[data-export-action="copy-plan"]')?.addEventListener("click",()=>{i.onCopyFullPlan?.()}),e.querySelector('[data-export-action="download-plan"]')?.addEventListener("click",()=>{i.onDownloadPlan?.()})}function C(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function M(e,t){return e?`<div class="generic-notice ${C(t||"info")}">${C(e)}</div>`:""}function de(e,t){let{stores:i,storeStatus:n,storeError:l,isLookingUpStores:d,hasLookedUpStores:s}=t;if(d){e.innerHTML=`
-      ${M(n||"Looking up nearby supermarkets...","info")}
+  `,e.querySelector('[data-export-action="copy-shopping"]')?.addEventListener("click",()=>{t.onCopyShoppingList?.()}),e.querySelector('[data-export-action="copy-plan"]')?.addEventListener("click",()=>{t.onCopyFullPlan?.()}),e.querySelector('[data-export-action="download-plan"]')?.addEventListener("click",()=>{t.onDownloadPlan?.()})}function C(e){return String(e??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}function P(e,n){return e?`<div class="generic-notice ${C(n||"info")}">${C(e)}</div>`:""}function pe(e,n){let{stores:t,storeStatus:i,storeError:s,isLookingUpStores:l,hasLookedUpStores:p}=n;if(l){e.innerHTML=`
+      ${P(i||"Looking up nearby supermarkets...","info")}
       <div class="generic-empty">Searching for nearby supermarkets. This usually takes a moment.</div>
-    `;return}if(l){e.innerHTML=`
-      ${M(l,"error")}
+    `;return}if(s){e.innerHTML=`
+      ${P(s,"error")}
       <div class="generic-empty">Check the location fields and try the store lookup again.</div>
-    `;return}if(!s){e.innerHTML=`
+    `;return}if(!p){e.innerHTML=`
       <div class="generic-empty">
         Start with a location or preset, then use <strong>Find Nearby Supermarkets</strong> to load stores for the area.
       </div>
-    `;return}if(!i.length){e.innerHTML=`
-      ${M(n||"No nearby stores found.","info")}
+    `;return}if(!t.length){e.innerHTML=`
+      ${P(i||"No nearby stores found.","info")}
       <div class="generic-empty">No supermarkets were found within the current search radius. Try increasing the radius or switching to a different location.</div>
-    `;return}let m=i.map((p,b)=>`
+    `;return}let f=t.map((d,_)=>`
         <div class="generic-list-item">
           <div class="generic-list-header">
             <div>
-              <strong>${b+1}. ${C(p.name)}</strong>
-              <div class="generic-muted">${C(p.address)}</div>
+              <strong>${_+1}. ${C(d.name)}</strong>
+              <div class="generic-muted">${C(d.address)}</div>
             </div>
-            <span class="generic-badge">${Math.round(p.distance_m)} m</span>
+            <span class="generic-badge">${Math.round(d.distance_m)} m</span>
           </div>
           <div class="generic-list-meta">
-            <span><strong>Category:</strong> ${C(p.category)}</span>
-            <span><strong>Coordinates:</strong> ${C(p.lat)}, ${C(p.lon)}</span>
+            <span><strong>Category:</strong> ${C(d.category)}</span>
+            <span><strong>Coordinates:</strong> ${C(d.lat)}, ${C(d.lon)}</span>
           </div>
         </div>
       `).join("");e.innerHTML=`
-    ${M(n||`Loaded ${i.length} nearby store${i.length===1?"":"s"}.`,"success")}
-    <div class="generic-list">${m}</div>
-  `}var Ve="https://nominatim.openstreetmap.org/search",ue=6,pe=4,ge="auto",ze=new Set(["auto","logistic_regression","random_forest","hist_gradient_boosting"]),me=[{id:"muscle_gain",label:"Muscle Gain",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"170",calories:"2800",carbohydrate:"330",fat:"85",fiber:"35",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the muscle gain preset for "Mountain View, CA".'},{id:"fat_loss",label:"Fat Loss",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"150",calories:"1800",carbohydrate:"160",fat:"55",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the fat loss preset for "Mountain View, CA".'},{id:"maintenance",label:"Maintenance",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"130",calories:"2200",carbohydrate:"240",fat:"70",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the maintenance preset for "Mountain View, CA".'},{id:"high_protein_vegetarian",label:"High-Protein Vegetarian",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"140",calories:"2100",carbohydrate:"220",fat:"70",fiber:"32",calcium:"",iron:"18",vitamin_c:"",vegetarian:!0,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the high-protein vegetarian preset for "Mountain View, CA".'},{id:"budget_friendly_healthy",label:"Budget-Friendly Healthy",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"120",calories:"2100",carbohydrate:"230",fat:"65",fiber:"35",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!0,meal_style:"any"},notice:'Loaded the budget-friendly healthy preset for "Mountain View, CA".'}];function Ye(){return typeof window>"u"?{}:window.GENERIC_APP_CONFIG||{}}function We(){let e=!!Ye().isProduction;return{enable_model_candidates:!e,model_candidate_count:String(pe),candidate_generator_backend:ge,debug_candidate_generation:!e,debug_scorer:!e,candidate_count:String(ue)}}var a={locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"130",calories:"2200",carbohydrate:"240",fat:"70",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any",...We(),pantry_items:[],stores:[],storesLookupContext:null,recommendation:null,errors:{},formNotice:null,storeStatus:"",storeError:"",recommendationStatus:"",recommendationError:"",exportNotice:null,isLookingUpStores:!1,isGeneratingRecommendations:!1,isLocating:!1,isResolvingAddress:!1,hasLookedUpStores:!1,hasRequestedRecommendation:!1,presets:me};function _(e){if(e==null||String(e).trim()==="")return null;let t=Number(e);return Number.isFinite(t)?t:null}function q(e){if(e==="true")return!0;if(e==="false")return!1}function ce(e){if(e==null||String(e).trim()==="")return;let t=Number.parseInt(String(e),10);if(!(!Number.isFinite(t)||t<=0))return t}function Je(e,t){if(e==null||String(e).trim()==="")return;let i=String(e).trim().toLowerCase();return t.has(i)?i:void 0}function _e(){return typeof window>"u"||!window.location||typeof window.location.search!="string"?"":window.location.search}function fe(e=_e()){let t=new URLSearchParams(e||""),i={},n=q(t.get("enable_model_candidates"));n!==void 0&&(i.enable_model_candidates=n);let l=ce(t.get("model_candidate_count"));l!==void 0&&(i.model_candidate_count=l);let d=Je(t.get("candidate_generator_backend"),ze);d!==void 0&&(i.candidate_generator_backend=d);let s=q(t.get("debug_candidate_generation"));s!==void 0&&(i.debug_candidate_generation=s);let m=q(t.get("debug_scorer"));m!==void 0&&(i.debug_scorer=m);let p=ce(t.get("candidate_count"));p!==void 0&&(i.candidate_count=p);let b=String(t.get("scorer_model_path")||"").trim();b&&(i.scorer_model_path=b);let h=String(t.get("candidate_generator_model_path")||"").trim();return h&&(i.candidate_generator_model_path=h),i}Object.assign(a,fe());function be(e){let t=_(e.lat),i=_(e.lon);return t!==null&&i!==null&&t>=-90&&t<=90&&i>=-180&&i<=180}function H(e){let t=_(e.lat),i=_(e.lon),n=_(e.radius_m);return t===null||i===null||n===null?null:{lat:Number(t.toFixed(6)),lon:Number(i.toFixed(6)),radius_m:Math.round(n)}}function Xe(e,t){return!e||!t?!1:e.lat===t.lat&&e.lon===t.lon&&e.radius_m===t.radius_m}function Ze(e,t=_e()){let i={location:{lat:Number(e.lat),lon:Number(e.lon)},targets:{protein:Number(e.protein),energy_fibre_kcal:Number(e.calories)},preferences:{vegetarian:e.vegetarian,dairy_free:e.dairy_free,vegan:e.vegan,low_prep:e.low_prep,budget_friendly:e.budget_friendly,meal_style:e.meal_style||"any"},pantry_items:Array.isArray(e.pantry_items)?e.pantry_items:[],store_limit:Number(e.store_limit),days:Number(e.days||1),shopping_mode:e.shopping_mode||"balanced",enable_model_candidates:!!e.enable_model_candidates,model_candidate_count:Number(e.model_candidate_count||pe),candidate_generator_backend:e.candidate_generator_backend||ge,debug_candidate_generation:!!e.debug_candidate_generation,debug_scorer:!!e.debug_scorer,candidate_count:Number(e.candidate_count||ue)},n=H(e);e.hasLookedUpStores&&Array.isArray(e.stores)&&e.stores.length&&e.stores.length>=Number(e.store_limit)&&Xe(e.storesLookupContext,n)&&(i.stores=e.stores.slice(0,Number(e.store_limit)));for(let[l,d]of Object.entries({carbohydrate:_(e.carbohydrate),fat:_(e.fat),fiber:_(e.fiber),calcium:_(e.calcium),iron:_(e.iron),vitamin_c:_(e.vitamin_c)}))d!==null&&(i.targets[l]=d);return Object.assign(i,fe(t)),i}function et(e,t="recommend"){let i={},n=String(e.locationQuery||"").trim(),l=_(e.lat),d=_(e.lon),s=_(e.protein),m=_(e.calories),p=[["carbohydrate","carbohydrate"],["fat","fat"],["fiber","fiber"],["calcium","calcium"],["iron","iron"],["vitamin_c","vitamin C"]],b=be(e);if(!n&&!b&&(i.locationQuery="Enter a city or address, or provide coordinates in Advanced location settings."),n||((l===null||l<-90||l>90)&&(i.lat="Enter a latitude between -90 and 90."),(d===null||d<-180||d>180)&&(i.lon="Enter a longitude between -180 and 180.")),t==="recommend"){(s===null||s<=0)&&(i.protein="Enter a protein target greater than 0."),(m===null||m<=0)&&(i.calories="Enter a calorie target greater than 0.");for(let[h,T]of p){let $=_(e[h]);$!==null&&$<=0&&(i[h]=`Enter a ${T} target greater than 0, or leave it blank.`)}}return i}async function tt(e,t=fetch){let i=String(e||"").trim();if(!i)throw new Error("Enter a city or address first.");let n=new URLSearchParams({q:i,format:"jsonv2",limit:"1"}),l=await t(`${Ve}?${n.toString()}`,{headers:{Accept:"application/json"}});if(!l.ok)throw new Error("Location search failed. Please try again.");let d=await l.json();if(!Array.isArray(d)||d.length===0)throw new Error("Could not find that location. Please try a different city or address.");let s=d[0];return{lat:Number(s.lat).toFixed(6),lon:Number(s.lon).toFixed(6),displayName:s.display_name||i}}function v(e,t="info"){a.formNotice=e?{message:e,kind:t}:null}function S(e,t="info"){a.exportNotice=e?{message:e,kind:t}:null}function nt(e){Object.assign(a,e);for(let t of Object.keys(e))a.errors[t]&&delete a.errors[t]}function ye(e){let t=et(a,e);return a.errors=t,Object.keys(t).length?(v("Fix the highlighted fields before continuing.","error"),f(),!1):(a.formNotice?.kind==="error"&&v(null),!0)}function it(){a.stores=[],a.storesLookupContext=null,a.recommendation=null,a.storeStatus="",a.storeError="",a.recommendationStatus="",a.recommendationError="",a.exportNotice=null,a.hasLookedUpStores=!1,a.hasRequestedRecommendation=!1}async function he(){let e=String(a.locationQuery||"").trim();if(!e)return be(a);a.isResolvingAddress=!0,v(`Finding coordinates for "${e}"...`,"info"),f();try{let t=await tt(e);return a.lat=t.lat,a.lon=t.lon,delete a.errors.locationQuery,delete a.errors.lat,delete a.errors.lon,v(`Using coordinates for "${e}". Advanced settings were updated automatically.`,"success"),!0}catch(t){return a.errors.locationQuery=t.message||"Could not find that location. Please try a different city or address.",v(a.errors.locationQuery,"error"),f(),!1}finally{a.isResolvingAddress=!1}}async function at(){if(!ye("stores")||!await he())return;a.hasLookedUpStores=!0,a.storeError="",a.storeStatus="Looking up nearby supermarkets...",a.isLookingUpStores=!0,f();let t=new URLSearchParams({lat:a.lat,lon:a.lon,radius_m:a.radius_m,limit:a.store_limit});try{let i=await fetch(`/api/stores/nearby?${t.toString()}`),n=await i.json();if(!i.ok)throw new Error(n.error||"Store lookup failed.");a.stores=n.stores||[],a.storesLookupContext=H(a),a.storeStatus=a.stores.length?`Loaded ${a.stores.length} nearby supermarket${a.stores.length===1?"":"s"}.`:"No nearby supermarkets found for this location.",a.recommendation&&!a.recommendation.stores?.length&&(a.recommendation.stores=a.stores)}catch(i){a.stores=[],a.storeError=i.message||"Store lookup failed.",a.storeStatus=""}finally{a.isLookingUpStores=!1}f()}async function ot(){if(!ye("recommend")||!await he())return;a.hasRequestedRecommendation=!0,a.recommendation=null,a.recommendationError="",a.recommendationStatus="Generating recommendations...",a.exportNotice=null,a.isGeneratingRecommendations=!0,f();let t=H(a),i=Ze(a);try{let n=await fetch("/api/recommendations/generic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(i)}),l=await n.json();if(!n.ok)throw new Error(l.error||"Recommendation request failed.");a.recommendation=l,a.stores=l.stores||[],a.storesLookupContext=a.stores.length?t:null,a.hasLookedUpStores=!0,a.storeError="",a.storeStatus=a.stores.length?`Loaded ${a.stores.length} nearby supermarket${a.stores.length===1?"":"s"}.`:"No nearby supermarkets found for this location.",a.recommendationStatus=l.shopping_list?.length?"Shopping list ready.":"No shopping list was generated for the current inputs."}catch(n){a.recommendation=null,a.recommendationError=n.message||"Recommendation request failed.",a.recommendationStatus=""}finally{a.isGeneratingRecommendations=!1}f()}function rt(){if(!navigator.geolocation){v("Browser geolocation is not available here. Enter coordinates in Advanced location settings.","error"),f();return}a.isLocating=!0,v("Requesting your current location...","info"),f(),navigator.geolocation.getCurrentPosition(e=>{a.isLocating=!1,a.locationQuery="",a.lat=e.coords.latitude.toFixed(6),a.lon=e.coords.longitude.toFixed(6),delete a.errors.locationQuery,delete a.errors.lat,delete a.errors.lon,v("Location loaded from your browser. Advanced settings were updated automatically.","success"),f()},e=>{a.isLocating=!1,v({1:"Location access was denied. Enter a city, address, or coordinates manually.",2:"Your location could not be determined. Enter a city, address, or coordinates manually.",3:"Location lookup timed out. Enter a city, address, or coordinates manually."}[e.code]||"Location lookup failed. Enter a city, address, or coordinates manually.","error"),f()},{enableHighAccuracy:!1,timeout:1e4,maximumAge:3e5})}function st(e){let t=me.find(i=>i.id===e);t&&(Object.assign(a,t.values),a.pantry_items=Array.isArray(t.values?.pantry_items)?[...t.values.pantry_items]:[],a.errors={},it(),v(t.notice,"success"),f())}async function ve(e){if(!e)throw new Error("There is no recommendation to export yet.");if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(e);return}let t=document.createElement("textarea");t.value=e,t.setAttribute("readonly","readonly"),t.style.position="fixed",t.style.opacity="0",document.body.appendChild(t),t.select();let i=document.execCommand("copy");if(document.body.removeChild(t),!i)throw new Error("Copy is not available in this browser.")}function lt(e,t){if(!t)throw new Error("There is no recommendation to export yet.");let i=new Blob([t],{type:"text/plain;charset=utf-8"}),n=URL.createObjectURL(i),l=document.createElement("a");l.href=n,l.download=e,document.body.appendChild(l),l.click(),document.body.removeChild(l),URL.revokeObjectURL(n)}async function dt(){try{await ve(se(a.recommendation)),S("Copied the grouped shopping list.","success")}catch(e){S(e.message||"Could not copy the shopping list.","error")}f()}async function ct(){try{await ve(K(a.recommendation)),S("Copied the full grocery plan.","success")}catch(e){S(e.message||"Could not copy the full plan.","error")}f()}function ut(){try{lt("generic-grocery-plan.txt",K(a.recommendation)),S("Downloaded the grocery plan as text.","success")}catch(e){S(e.message||"Could not download the grocery plan.","error")}f()}function f(){te(document.getElementById("generic-form"),a,{onChange:nt,onLookupStores:at,onRecommend:ot,onUseMyLocation:rt,onApplyPreset:st}),de(document.getElementById("generic-stores"),a),le(document.getElementById("generic-results"),a,{onCopyShoppingList:dt,onCopyFullPlan:ct,onDownloadPlan:ut})}typeof document<"u"&&f();export{Ze as buildRecommendationPayload,tt as geocodeAddress,fe as getScorerQueryOverrides,q as parseBooleanParam,ce as parsePositiveIntParam,et as validateFormState};
+    ${P(i||`Loaded ${t.length} nearby store${t.length===1?"":"s"}.`,"success")}
+    <div class="generic-list">${f}</div>
+  `}var We="https://nominatim.openstreetmap.org/search",Je=6,Xe=4,Ze="random_forest",en=new Set(["auto","logistic_regression","random_forest","hist_gradient_boosting"]),me=[{id:"muscle_gain",label:"Muscle Gain",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"170",calories:"2800",carbohydrate:"330",fat:"85",fiber:"35",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the muscle gain preset for "Mountain View, CA".'},{id:"fat_loss",label:"Fat Loss",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"150",calories:"1800",carbohydrate:"160",fat:"55",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the fat loss preset for "Mountain View, CA".'},{id:"maintenance",label:"Maintenance",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"130",calories:"2200",carbohydrate:"240",fat:"70",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the maintenance preset for "Mountain View, CA".'},{id:"high_protein_vegetarian",label:"High-Protein Vegetarian",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"140",calories:"2100",carbohydrate:"220",fat:"70",fiber:"32",calcium:"",iron:"18",vitamin_c:"",vegetarian:!0,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any"},notice:'Loaded the high-protein vegetarian preset for "Mountain View, CA".'},{id:"budget_friendly_healthy",label:"Budget-Friendly Healthy",values:{locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"120",calories:"2100",carbohydrate:"230",fat:"65",fiber:"35",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!0,meal_style:"any"},notice:'Loaded the budget-friendly healthy preset for "Mountain View, CA".'}];function _e(){return typeof window>"u"?{}:window.GENERIC_APP_CONFIG||{}}function Y(){return!!_e().developerMode}function fe(){let e=_e().hybridPlannerDefaults||{};return{candidateCount:Number(e.candidateCount||Je),modelCandidateCount:Number(e.modelCandidateCount||Xe),candidateGeneratorBackend:String(e.candidateGeneratorBackend||Ze)}}function nn(){let e=fe();return{developerMode:Y(),enable_model_candidates:!0,model_candidate_count:String(e.modelCandidateCount),candidate_generator_backend:e.candidateGeneratorBackend,debug_candidate_generation:!1,debug_scorer:!1,candidate_count:String(e.candidateCount)}}var a={locationQuery:"Mountain View, CA",lat:"",lon:"",radius_m:"8000",store_limit:"5",days:"1",shopping_mode:"balanced",protein:"130",calories:"2200",carbohydrate:"240",fat:"70",fiber:"30",calcium:"",iron:"",vitamin_c:"",vegetarian:!1,dairy_free:!1,vegan:!1,low_prep:!1,budget_friendly:!1,meal_style:"any",...nn(),pantry_items:[],stores:[],storesLookupContext:null,recommendation:null,errors:{},formNotice:null,storeStatus:"",storeError:"",recommendationStatus:"",recommendationError:"",exportNotice:null,isLookingUpStores:!1,isGeneratingRecommendations:!1,isLocating:!1,isResolvingAddress:!1,hasLookedUpStores:!1,hasRequestedRecommendation:!1,presets:me};function b(e){if(e==null||String(e).trim()==="")return null;let n=Number(e);return Number.isFinite(n)?n:null}function z(e){if(e==="true")return!0;if(e==="false")return!1}function ge(e){if(e==null||String(e).trim()==="")return;let n=Number.parseInt(String(e),10);if(!(!Number.isFinite(n)||n<=0))return n}function tn(e,n){if(e==null||String(e).trim()==="")return;let t=String(e).trim().toLowerCase();return n.has(t)?t:void 0}function be(){return typeof window>"u"||!window.location||typeof window.location.search!="string"?"":window.location.search}function ye(e=be()){if(!Y())return{};let n=new URLSearchParams(e||""),t={},i=z(n.get("enable_model_candidates"));i!==void 0&&(t.enable_model_candidates=i);let s=ge(n.get("model_candidate_count"));s!==void 0&&(t.model_candidate_count=s);let l=tn(n.get("candidate_generator_backend"),en);l!==void 0&&(t.candidate_generator_backend=l);let p=z(n.get("debug_candidate_generation"));p!==void 0&&(t.debug_candidate_generation=p);let f=z(n.get("debug_scorer"));f!==void 0&&(t.debug_scorer=f);let d=ge(n.get("candidate_count"));d!==void 0&&(t.candidate_count=d);let _=String(n.get("scorer_model_path")||"").trim();_&&(t.scorer_model_path=_);let g=String(n.get("candidate_generator_model_path")||"").trim();return g&&(t.candidate_generator_model_path=g),t}Object.assign(a,ye());function he(e){let n=b(e.lat),t=b(e.lon);return n!==null&&t!==null&&n>=-90&&n<=90&&t>=-180&&t<=180}function W(e){let n=b(e.lat),t=b(e.lon),i=b(e.radius_m);return n===null||t===null||i===null?null:{lat:Number(n.toFixed(6)),lon:Number(t.toFixed(6)),radius_m:Math.round(i)}}function an(e,n){return!e||!n?!1:e.lat===n.lat&&e.lon===n.lon&&e.radius_m===n.radius_m}function on(e,n=be()){let t={location:{lat:Number(e.lat),lon:Number(e.lon)},targets:{protein:Number(e.protein),energy_fibre_kcal:Number(e.calories)},preferences:{vegetarian:e.vegetarian,dairy_free:e.dairy_free,vegan:e.vegan,low_prep:e.low_prep,budget_friendly:e.budget_friendly,meal_style:e.meal_style||"any"},pantry_items:Array.isArray(e.pantry_items)?e.pantry_items:[],store_limit:Number(e.store_limit),days:Number(e.days||1),shopping_mode:e.shopping_mode||"balanced"},i=W(e);e.hasLookedUpStores&&Array.isArray(e.stores)&&e.stores.length&&e.stores.length>=Number(e.store_limit)&&an(e.storesLookupContext,i)&&(t.stores=e.stores.slice(0,Number(e.store_limit)));for(let[s,l]of Object.entries({carbohydrate:b(e.carbohydrate),fat:b(e.fat),fiber:b(e.fiber),calcium:b(e.calcium),iron:b(e.iron),vitamin_c:b(e.vitamin_c)}))l!==null&&(t.targets[s]=l);if(Y()){let s=fe();t.enable_model_candidates=!!e.enable_model_candidates,t.model_candidate_count=Number(e.model_candidate_count||s.modelCandidateCount),t.candidate_generator_backend=e.candidate_generator_backend||s.candidateGeneratorBackend,t.debug_candidate_generation=!!e.debug_candidate_generation,t.debug_scorer=!!e.debug_scorer,t.candidate_count=Number(e.candidate_count||s.candidateCount),Object.assign(t,ye(n))}return t}function rn(e,n="recommend"){let t={},i=String(e.locationQuery||"").trim(),s=b(e.lat),l=b(e.lon),p=b(e.protein),f=b(e.calories),d=[["carbohydrate","carbohydrate"],["fat","fat"],["fiber","fiber"],["calcium","calcium"],["iron","iron"],["vitamin_c","vitamin C"]],_=he(e);if(!i&&!_&&(t.locationQuery="Enter a city or address, or provide coordinates in Advanced location settings."),i||((s===null||s<-90||s>90)&&(t.lat="Enter a latitude between -90 and 90."),(l===null||l<-180||l>180)&&(t.lon="Enter a longitude between -180 and 180.")),n==="recommend"){(p===null||p<=0)&&(t.protein="Enter a protein target greater than 0."),(f===null||f<=0)&&(t.calories="Enter a calorie target greater than 0.");for(let[g,B]of d){let E=b(e[g]);E!==null&&E<=0&&(t[g]=`Enter a ${B} target greater than 0, or leave it blank.`)}}return t}async function sn(e,n=fetch){let t=String(e||"").trim();if(!t)throw new Error("Enter a city or address first.");let i=new URLSearchParams({q:t,format:"jsonv2",limit:"1"}),s=await n(`${We}?${i.toString()}`,{headers:{Accept:"application/json"}});if(!s.ok)throw new Error("Location search failed. Please try again.");let l=await s.json();if(!Array.isArray(l)||l.length===0)throw new Error("Could not find that location. Please try a different city or address.");let p=l[0];return{lat:Number(p.lat).toFixed(6),lon:Number(p.lon).toFixed(6),displayName:p.display_name||t}}function v(e,n="info"){a.formNotice=e?{message:e,kind:n}:null}function S(e,n="info"){a.exportNotice=e?{message:e,kind:n}:null}function dn(e){Object.assign(a,e);for(let n of Object.keys(e))a.errors[n]&&delete a.errors[n]}function ve(e){let n=rn(a,e);return a.errors=n,Object.keys(n).length?(v("Fix the highlighted fields before continuing.","error"),y(),!1):(a.formNotice?.kind==="error"&&v(null),!0)}function ln(){a.stores=[],a.storesLookupContext=null,a.recommendation=null,a.storeStatus="",a.storeError="",a.recommendationStatus="",a.recommendationError="",a.exportNotice=null,a.hasLookedUpStores=!1,a.hasRequestedRecommendation=!1}async function $e(){let e=String(a.locationQuery||"").trim();if(!e)return he(a);a.isResolvingAddress=!0,v(`Finding coordinates for "${e}"...`,"info"),y();try{let n=await sn(e);return a.lat=n.lat,a.lon=n.lon,delete a.errors.locationQuery,delete a.errors.lat,delete a.errors.lon,v(`Using coordinates for "${e}". Advanced settings were updated automatically.`,"success"),!0}catch(n){return a.errors.locationQuery=n.message||"Could not find that location. Please try a different city or address.",v(a.errors.locationQuery,"error"),y(),!1}finally{a.isResolvingAddress=!1}}async function cn(){if(!ve("stores")||!await $e())return;a.hasLookedUpStores=!0,a.storeError="",a.storeStatus="Looking up nearby supermarkets...",a.isLookingUpStores=!0,y();let n=new URLSearchParams({lat:a.lat,lon:a.lon,radius_m:a.radius_m,limit:a.store_limit});try{let t=await fetch(`/api/stores/nearby?${n.toString()}`),i=await t.json();if(!t.ok)throw new Error(i.error||"Store lookup failed.");a.stores=i.stores||[],a.storesLookupContext=W(a),a.storeStatus=a.stores.length?`Loaded ${a.stores.length} nearby supermarket${a.stores.length===1?"":"s"}.`:"No nearby supermarkets found for this location.",a.recommendation&&!a.recommendation.stores?.length&&(a.recommendation.stores=a.stores)}catch(t){a.stores=[],a.storeError=t.message||"Store lookup failed.",a.storeStatus=""}finally{a.isLookingUpStores=!1}y()}async function un(){if(!ve("recommend")||!await $e())return;a.hasRequestedRecommendation=!0,a.recommendation=null,a.recommendationError="",a.recommendationStatus="Generating recommendations...",a.exportNotice=null,a.isGeneratingRecommendations=!0,y();let n=W(a),t=on(a);try{let i=await fetch("/api/recommendations/generic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)}),s=await i.json();if(!i.ok)throw new Error(s.error||"Recommendation request failed.");a.recommendation=s,a.stores=s.stores||[],a.storesLookupContext=a.stores.length?n:null,a.hasLookedUpStores=!0,a.storeError="",a.storeStatus=a.stores.length?`Loaded ${a.stores.length} nearby supermarket${a.stores.length===1?"":"s"}.`:"No nearby supermarkets found for this location.",a.recommendationStatus=s.shopping_list?.length?"Shopping list ready.":"No shopping list was generated for the current inputs."}catch(i){a.recommendation=null,a.recommendationError=i.message||"Recommendation request failed.",a.recommendationStatus=""}finally{a.isGeneratingRecommendations=!1}y()}function pn(){if(!navigator.geolocation){v("Browser geolocation is not available here. Enter coordinates in Advanced location settings.","error"),y();return}a.isLocating=!0,v("Requesting your current location...","info"),y(),navigator.geolocation.getCurrentPosition(e=>{a.isLocating=!1,a.locationQuery="",a.lat=e.coords.latitude.toFixed(6),a.lon=e.coords.longitude.toFixed(6),delete a.errors.locationQuery,delete a.errors.lat,delete a.errors.lon,v("Location loaded from your browser. Advanced settings were updated automatically.","success"),y()},e=>{a.isLocating=!1,v({1:"Location access was denied. Enter a city, address, or coordinates manually.",2:"Your location could not be determined. Enter a city, address, or coordinates manually.",3:"Location lookup timed out. Enter a city, address, or coordinates manually."}[e.code]||"Location lookup failed. Enter a city, address, or coordinates manually.","error"),y()},{enableHighAccuracy:!1,timeout:1e4,maximumAge:3e5})}function gn(e){let n=me.find(t=>t.id===e);n&&(Object.assign(a,n.values),a.pantry_items=Array.isArray(n.values?.pantry_items)?[...n.values.pantry_items]:[],a.errors={},ln(),v(n.notice,"success"),y())}async function ke(e){if(!e)throw new Error("There is no recommendation to export yet.");if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(e);return}let n=document.createElement("textarea");n.value=e,n.setAttribute("readonly","readonly"),n.style.position="fixed",n.style.opacity="0",document.body.appendChild(n),n.select();let t=document.execCommand("copy");if(document.body.removeChild(n),!t)throw new Error("Copy is not available in this browser.")}function mn(e,n){if(!n)throw new Error("There is no recommendation to export yet.");let t=new Blob([n],{type:"text/plain;charset=utf-8"}),i=URL.createObjectURL(t),s=document.createElement("a");s.href=i,s.download=e,document.body.appendChild(s),s.click(),document.body.removeChild(s),URL.revokeObjectURL(i)}async function _n(){try{await ke(ce(a.recommendation)),S("Copied the grouped shopping list.","success")}catch(e){S(e.message||"Could not copy the shopping list.","error")}y()}async function fn(){try{await ke(V(a.recommendation)),S("Copied the full grocery plan.","success")}catch(e){S(e.message||"Could not copy the full plan.","error")}y()}function bn(){try{mn("generic-grocery-plan.txt",V(a.recommendation)),S("Downloaded the grocery plan as text.","success")}catch(e){S(e.message||"Could not download the grocery plan.","error")}y()}function y(){ae(document.getElementById("generic-form"),a,{onChange:dn,onLookupStores:cn,onRecommend:un,onUseMyLocation:pn,onApplyPreset:gn}),pe(document.getElementById("generic-stores"),a),ue(document.getElementById("generic-results"),a,{onCopyShoppingList:_n,onCopyFullPlan:fn,onDownloadPlan:bn})}typeof document<"u"&&y();export{on as buildRecommendationPayload,sn as geocodeAddress,ye as getScorerQueryOverrides,z as parseBooleanParam,ge as parsePositiveIntParam,rn as validateFormState};

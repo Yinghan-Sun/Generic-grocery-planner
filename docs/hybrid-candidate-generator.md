@@ -2,7 +2,7 @@
 
 ## Runtime Architecture
 
-The generic grocery planner now supports an additive Route B candidate-generation upgrade:
+The generic grocery planner now supports an additive hybrid candidate-generation path:
 
 1. `dietdashboard/hybrid_planner.py` still builds the original deterministic heuristic candidates.
 2. A new local learned candidate generator scores food-role pairs for the current scenario and proposes additional basket seeds.
@@ -10,7 +10,7 @@ The generic grocery planner now supports an additive Route B candidate-generatio
 4. `dietdashboard/plan_scorer.py` ranks the fused candidate pool with the existing trained local scorer.
 5. The highest-ranked basket is returned.
 
-The deterministic planner remains intact and is still the default path unless model candidates are explicitly enabled.
+The deterministic planner remains intact, but the normal app path now runs the full hybrid pipeline automatically. A standard click on `Recommend` triggers heuristic candidate generation, learned candidate generation, candidate fusion, and trained-scorer reranking without exposing model-selection controls in the normal UI.
 
 ## Where The New Pieces Live
 
@@ -146,7 +146,7 @@ Saved tuning outputs:
 
 ## Runtime Controls
 
-The new runtime flags are optional and backward compatible:
+The normal web app does not require any of these fields. They remain available as developer-only overrides when you need to inspect or compare internal hybrid-planner behavior:
 
 - `enable_model_candidates`
 - `model_candidate_count`
@@ -156,9 +156,9 @@ The new runtime flags are optional and backward compatible:
 
 Behavior:
 
-- default: model candidates disabled
-- if enabled and the artifact is missing or invalid, the request fails clearly with a local artifact error
-- heuristic candidate generation remains available and unchanged
+- default app path: learned candidates enabled with the frozen hybrid-planner defaults
+- if the candidate-generator artifact is missing or invalid, the request fails clearly with a local artifact error
+- heuristic candidate generation remains in the pipeline and unchanged
 
 ## Debug Payload
 

@@ -321,21 +321,30 @@ export function GenericResults(parent, state, actions = {}) {
   const summary = recommendation.nutrition_summary;
   const days = Number(recommendation.days || state.days || 1);
   const shoppingMode = String(recommendation.shopping_mode || state.shopping_mode || "balanced");
+  const developerMode = Boolean(state.developerMode);
   const selectedCandidateSource = normalizeCandidateSource(recommendation.selected_candidate_source);
   const selectedCandidateSources = normalizeSourceList(recommendation.selected_candidate_sources, selectedCandidateSource);
+  const plannerExecution = recommendation.hybrid_planner_execution || {};
   const candidateGenerationDebug = recommendation.candidate_generation_debug || {};
   const scoringDebug = recommendation.scoring_debug || {};
   const candidateComparisonDebug = recommendation.candidate_comparison_debug || {};
-  const modelCandidatesEnabled = candidateGenerationDebug.model_candidates_enabled ?? Boolean(state.enable_model_candidates);
-  const heuristicCandidateCount = candidateGenerationDebug.heuristic_candidate_count;
-  const modelCandidateCount = candidateGenerationDebug.model_candidate_count;
-  const fusedCandidateCount = candidateGenerationDebug.fused_candidate_count ?? recommendation.candidate_count_considered;
-  const candidateGeneratorBackend = candidateGenerationDebug.candidate_generator_backend || state.candidate_generator_backend || "auto";
+  const modelCandidatesEnabled = candidateGenerationDebug.model_candidates_enabled
+    ?? plannerExecution.learned_candidate_generation_ran
+    ?? Boolean(state.enable_model_candidates);
+  const heuristicCandidateCount = candidateGenerationDebug.heuristic_candidate_count ?? plannerExecution.heuristic_candidate_count;
+  const modelCandidateCount = candidateGenerationDebug.model_candidate_count ?? plannerExecution.learned_candidate_count;
+  const fusedCandidateCount = candidateGenerationDebug.fused_candidate_count
+    ?? plannerExecution.fused_candidate_count
+    ?? recommendation.candidate_count_considered;
+  const candidateGeneratorBackend = candidateGenerationDebug.candidate_generator_backend
+    || plannerExecution.candidate_generator_backend
+    || state.candidate_generator_backend
+    || "auto";
   const scorerBackend = recommendation.scorer_backend || "unknown";
   const selectedCandidateId = recommendation.selected_candidate_id || "unknown";
-  const candidateCountConsidered = recommendation.candidate_count_considered ?? fusedCandidateCount;
-  const hasPlannerDebug = Boolean(
-    recommendation.candidate_generation_debug || recommendation.scoring_debug || recommendation.candidate_comparison_debug || recommendation.selected_candidate_source
+  const candidateCountConsidered = recommendation.candidate_count_considered ?? plannerExecution.candidates_ranked_count ?? fusedCandidateCount;
+  const hasPlannerDebug = developerMode && Boolean(
+    recommendation.candidate_generation_debug || recommendation.scoring_debug || recommendation.candidate_comparison_debug
   );
   const diagnosisText = candidateComparisonDebug.diagnosis_text || plannerSelectionOutcome(modelCandidatesEnabled, selectedCandidateSource);
   const selectedVsBestHeuristic = candidateComparisonDebug.selected_vs_best_heuristic || null;
@@ -364,6 +373,9 @@ export function GenericResults(parent, state, actions = {}) {
     : candidateCountConsidered !== undefined
       ? `${candidateCountConsidered} total candidates ranked`
       : "Not available";
+  const automaticPipelineLine = plannerExecution.pipeline_mode === "full_hybrid"
+    ? `${heuristicCandidateCount ?? "?"} heuristic candidates + ${modelCandidateCount ?? "?"} learned candidates were fused, reranked by the trained scorer, and matched against nearby store fits automatically.`
+    : "This request used the heuristic-only planner path.";
   const plannerDebugBlock = hasPlannerDebug
     ? `
       <div class="generic-list-item" style="margin-top: 1rem">
@@ -647,6 +659,7 @@ export function GenericResults(parent, state, actions = {}) {
         </div>
       </div>
       <p class="generic-muted">Daily nutrition goals stay the same. Quantities below are scaled for the selected shopping window in <strong>${escapeHtml(shoppingMode)}</strong> shopping mode.</p>
+      <p class="generic-muted" style="margin-top: 0.5rem"><strong>Planning pipeline:</strong> ${escapeHtml(automaticPipelineLine)}</p>
       <div class="generic-actions" style="margin-top: 0.75rem">
         <button type="button" data-export-action="copy-shopping">Copy shopping list</button>
         <button type="button" data-export-action="copy-plan">Copy full plan</button>

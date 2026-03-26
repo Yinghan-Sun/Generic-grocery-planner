@@ -14,7 +14,7 @@ from dietdashboard import generic_recommender as gr
 from dietdashboard import model_candidate_features
 from dietdashboard import model_candidate_generator
 from dietdashboard import plan_scorer
-from dietdashboard import route_b_final
+from dietdashboard import hybrid_pipeline_final
 
 DEFAULT_CANDIDATE_COUNT = 6
 MAX_CANDIDATE_COUNT = 12
@@ -95,7 +95,7 @@ def normalize_candidate_generation_config(config: dict[str, object] | None) -> d
         "model_candidate_count": model_candidate_count_value,
         "candidate_generator_model_path": model_path,
         "candidate_generator_backend": backend,
-        "algorithm_version": str(raw.get("algorithm_version") or route_b_final.FINAL_ALGORITHM_VERSION),
+        "algorithm_version": str(raw.get("algorithm_version") or hybrid_pipeline_final.FINAL_ALGORITHM_VERSION),
         "structured_complementarity_enabled": bool(raw.get("structured_complementarity_enabled", True)),
         "structured_materialization_enabled": bool(raw.get("structured_materialization_enabled", True)),
         "debug": bool(raw.get("debug")),
@@ -199,7 +199,13 @@ def _selection_score_for_food(
 ) -> float:
     base_score = context.role_scores[role][food_id]
     diversity_penalty = gr._role_diversity_penalty(food_id, role, context.available, chosen)  # noqa: SLF001
-    return base_score - diversity_penalty
+    goal_structure_bonus = _goal_structure_selection_bonus(
+        context,
+        role=role,
+        food_id=food_id,
+        chosen=chosen,
+    )
+    return base_score - diversity_penalty + goal_structure_bonus
 
 
 def _algorithm_flag(
@@ -525,6 +531,209 @@ def _commonality_bonus(food: Mapping[str, object]) -> float:
     return 0.0
 
 
+def _protein_anchor_category(food: Mapping[str, object]) -> str:
+    food_id = str(food.get("generic_food_id") or "")
+    family = str(food.get("food_family") or "")
+    if food_id == "eggs":
+        return "egg"
+    if family == "dairy":
+        return "dairy"
+    if food_id in {"tofu", "edamame", "veggie_burger"}:
+        return "soy"
+    if family == "legume" or food_id in {"lentils", "beans", "black_beans", "chickpeas", "hummus"}:
+        return "legume"
+    if food_id in {"peanut_butter", "almond_butter"}:
+        return "nut_butter"
+    if food_id in {"chicken_breast", "turkey", "tuna", "shrimp"}:
+        return "lean_animal"
+    if food_id in {"rotisserie_chicken", "salmon", "sardines", "ground_beef"}:
+        return "rich_animal"
+    if family == "protein":
+        return "animal"
+    return family or "other"
+
+
+def _goal_structure_selection_bonus(
+    context: PlannerContext,
+    *,
+    role: str,
+    food_id: str,
+    chosen: Sequence[tuple[str, str]],
+) -> float:
+    if food_id not in context.available:
+        return 0.0
+
+    food = context.available[food_id]
+    food_family = str(food.get("food_family") or "")
+    food_id_value = str(food.get("generic_food_id") or "")
+    chosen_same_role = [
+        chosen_food_id
+        for chosen_food_id, chosen_role in chosen
+        if chosen_role == role and chosen_food_id in context.available
+    ]
+    bonus = 0.0
+
+    if role == "protein_anchor":
+        category = _protein_anchor_category(food)
+        chosen_categories = [_protein_anchor_category(context.available[chosen_food_id]) for chosen_food_id in chosen_same_role]
+        has_legume = "legume" in chosen_categories
+        has_soy = "soy" in chosen_categories
+        has_dairy_or_egg = any(value in {"dairy", "egg"} for value in chosen_categories)
+        has_lean_animal = any(value in {"lean_animal", "animal"} for value in chosen_categories)
+
+        if context.goal_profile == "muscle_gain":
+            if category in {"lean_animal", "egg", "dairy"}:
+                bonus += 0.12
+            if has_lean_animal and category in {"dairy", "egg"}:
+                bonus += 0.22
+            if has_dairy_or_egg and category == "lean_animal":
+                bonus += 0.2
+            if category == "legume":
+                bonus -= 0.18
+        elif context.goal_profile == "fat_loss":
+            if category in {"lean_animal", "soy", "dairy"}:
+                bonus += 0.18
+            if category in {"rich_animal", "nut_butter"}:
+                bonus -= 0.26
+            if has_lean_animal and category in {"dairy", "soy"}:
+                bonus += 0.12
+        elif context.goal_profile == "maintenance":
+            if category in {"lean_animal", "egg", "soy", "dairy"}:
+                bonus += 0.1
+            if has_lean_animal and category in {"egg", "soy", "dairy"}:
+                bonus += 0.08
+            if category == "legume":
+                bonus -= 0.08
+        elif context.goal_profile == "high_protein_vegetarian":
+            if category in {"dairy", "egg", "soy"}:
+                bonus += 0.2
+            if has_soy and category in {"dairy", "egg"}:
+                bonus += 0.24
+            if has_dairy_or_egg and category == "soy":
+                bonus += 0.28
+            if category in {"legume", "nut_butter"}:
+                bonus -= 0.18
+            if category in {"lean_animal", "animal", "rich_animal"}:
+                bonus -= 0.4
+        elif context.goal_profile == "budget_friendly_healthy":
+            if not chosen_same_role:
+                if category == "legume":
+                    bonus += 0.18
+                elif category in {"egg", "soy"}:
+                    bonus += 0.12
+            else:
+                if has_legume and category in {"egg", "soy"}:
+                    bonus += 0.36
+                if has_legume and category == "nut_butter":
+                    bonus += 0.14
+                if has_legume and category == "legume":
+                    bonus -= 0.42
+                if not has_legume and category == "legume":
+                    bonus += 0.16
+                if category in {"rich_animal", "animal"}:
+                    bonus -= 0.2
+
+    elif role == "carb_base":
+        if context.goal_profile == "muscle_gain":
+            if food_id_value in {"pasta", "bagel"}:
+                bonus += 0.26
+            if food_id_value in {"oats", "potatoes", "wholemeal_bread", "sweet_potatoes"}:
+                bonus += 0.1
+            if food_id_value == "rice":
+                bonus -= 0.08
+        elif context.goal_profile == "fat_loss":
+            if food_id_value in {"wholemeal_bread", "quinoa", "potatoes", "sweet_potatoes"}:
+                bonus += 0.18
+            if food_id_value in {"rice", "pasta"}:
+                bonus -= 0.18
+        elif context.goal_profile == "maintenance":
+            if food_id_value in {"wholemeal_bread", "potatoes", "quinoa", "rice"}:
+                bonus += 0.18 if food_id_value in {"wholemeal_bread", "potatoes", "quinoa"} else 0.04
+            if food_id_value == "oats":
+                bonus -= 0.08
+        elif context.goal_profile == "high_protein_vegetarian":
+            if food_id_value in {"wholemeal_bread", "quinoa"}:
+                bonus += 0.24
+            if food_id_value == "bagel":
+                bonus += 0.08
+            if food_id_value == "oats":
+                bonus -= 0.12
+            if food_id_value == "rice":
+                bonus -= 0.1
+        elif context.goal_profile == "budget_friendly_healthy":
+            if food_id_value in {"rice", "pasta", "potatoes", "wholemeal_bread"}:
+                bonus += 0.16
+            if food_id_value == "quinoa":
+                bonus -= 0.18
+
+    elif role == "produce":
+        cluster = _produce_combo_cluster(food)
+        chosen_clusters = [_produce_combo_cluster(context.available[chosen_food_id]) for chosen_food_id in chosen_same_role]
+        fruit_count = sum(1 for value in chosen_clusters if value == "fruit")
+        high_volume_count = sum(1 for value in chosen_clusters if value in {"leafy_dense", "crucifer_fiber", "watery_practical", "vitamin_c_crisp"})
+
+        if context.goal_profile == "muscle_gain":
+            if not chosen_same_role:
+                if cluster == "fruit":
+                    bonus += 0.16
+            else:
+                if fruit_count and cluster in {"leafy_dense", "vitamin_c_crisp", "crucifer_fiber"}:
+                    bonus += 0.18
+                elif not fruit_count and cluster == "fruit":
+                    bonus += 0.12
+                if cluster == "watery_practical":
+                    bonus -= 0.04
+        elif context.goal_profile == "fat_loss":
+            if cluster in {"leafy_dense", "crucifer_fiber", "watery_practical", "vitamin_c_crisp"}:
+                bonus += 0.18
+            if cluster == "fruit" and chosen_same_role:
+                bonus -= 0.12
+            if high_volume_count and cluster == "fruit":
+                bonus -= 0.08
+        elif context.goal_profile == "maintenance":
+            if not chosen_same_role:
+                if cluster in {"fruit", "watery_practical"}:
+                    bonus += 0.1
+            elif "fruit" in chosen_clusters and cluster in {"watery_practical", "vitamin_c_crisp"}:
+                bonus += 0.12
+            elif "fruit" not in chosen_clusters and cluster == "fruit":
+                bonus += 0.1
+        elif context.goal_profile == "high_protein_vegetarian":
+            if not chosen_same_role:
+                if cluster in {"leafy_dense", "fruit"}:
+                    bonus += 0.12
+            else:
+                if "leafy_dense" in chosen_clusters and cluster in {"fruit", "vitamin_c_crisp"}:
+                    bonus += 0.18
+                elif "fruit" in chosen_clusters and cluster in {"leafy_dense", "vitamin_c_crisp"}:
+                    bonus += 0.18
+        elif context.goal_profile == "budget_friendly_healthy":
+            if food_id_value in {"cabbage", "carrots", "onions", "frozen_vegetables", "bananas", "potatoes", "apples"}:
+                bonus += 0.16
+            if food_id_value in {"berries", "avocado", "bell_peppers", "broccoli"}:
+                bonus -= 0.12
+
+    elif role == "calorie_booster":
+        if context.goal_profile == "muscle_gain":
+            if food_id_value in {"peanut_butter", "olive_oil", "nuts", "almond_butter", "cheese"}:
+                bonus += 0.18
+        elif context.goal_profile == "fat_loss":
+            bonus -= 0.4
+        elif context.goal_profile == "maintenance":
+            if food_id_value in {"olive_oil", "peanut_butter"}:
+                bonus += 0.04
+        elif context.goal_profile == "high_protein_vegetarian":
+            if food_id_value in {"peanut_butter", "olive_oil"}:
+                bonus += 0.08
+        elif context.goal_profile == "budget_friendly_healthy":
+            if food_id_value in {"olive_oil", "peanut_butter"}:
+                bonus += 0.18
+            if food_family == "fat":
+                bonus += 0.04
+
+    return round(bonus, 6)
+
+
 def _role_nutrient_support_bonus(
     context: PlannerContext,
     *,
@@ -674,17 +883,24 @@ def _structured_candidate_terms(
         food_id=food_id,
         heuristic_reference_food_id=heuristic_reference_food_id,
     )
+    goal_structure_bonus = _goal_structure_selection_bonus(
+        context,
+        role=role,
+        food_id=food_id,
+        chosen=chosen,
+    )
     novelty = 0.04 if heuristic_reference_food_id and food_id != heuristic_reference_food_id else -0.01
     practicality = (
         max(float(context.available[food_id].get("budget_score") or 0.0) - 3.0, 0.0) * 0.012 * float(profile["cost_priority"])
         + _prep_score(context.available[food_id]) * 0.015 * float(profile["practicality_priority"])
         + _commonality_bonus(context.available[food_id]) * 0.65
     )
-    structured_bonus = nutrient_support + complementarity + reference_adjustment + novelty + practicality
+    structured_bonus = nutrient_support + complementarity + reference_adjustment + goal_structure_bonus + novelty + practicality
     return {
         "nutrient_support": round(nutrient_support, 6),
         "complementarity": round(complementarity, 6),
         "reference_adjustment": round(reference_adjustment, 6),
+        "goal_structure_bonus": round(goal_structure_bonus, 6),
         "novelty": round(novelty, 6),
         "practicality": round(practicality, 6),
         "structured_bonus": round(structured_bonus, 6),
@@ -1011,15 +1227,19 @@ def _goal_targeted_swap_allowed(
 ) -> bool:
     if current_food_id not in context.available or candidate_food_id not in context.available:
         return False
-    if context.goal_profile not in {"fat_loss", "maintenance"}:
-        return True
     if candidate_food_id == current_food_id:
         return False
 
     current_food = context.available[current_food_id]
     candidate_food = context.available[candidate_food_id]
+    goal_profile = context.goal_profile
+    if goal_profile == "generic_balanced":
+        return True
 
-    if context.goal_profile == "fat_loss":
+    current_category = _protein_anchor_category(current_food) if role == "protein_anchor" else ""
+    candidate_category = _protein_anchor_category(candidate_food) if role == "protein_anchor" else ""
+
+    if goal_profile == "fat_loss":
         if role == "protein_anchor":
             return (
                 _protein_density(candidate_food) >= (_protein_density(current_food) * 0.88)
@@ -1041,7 +1261,9 @@ def _goal_targeted_swap_allowed(
                     or _food_metric(candidate_food, "protein") >= _food_metric(current_food, "protein")
                 )
             )
-    if context.goal_profile == "maintenance":
+        if role == "calorie_booster":
+            return False
+    if goal_profile == "maintenance":
         if role == "protein_anchor":
             return (
                 _protein_density(candidate_food) >= (_protein_density(current_food) * 0.8)
@@ -1059,6 +1281,51 @@ def _goal_targeted_swap_allowed(
                     or _food_metric(candidate_food, "fiber") + 0.5 >= _food_metric(current_food, "fiber")
                 )
             )
+        if role == "calorie_booster":
+            return str(candidate_food.get("generic_food_id") or "") in {"olive_oil", "peanut_butter", "nuts"}
+    if goal_profile == "muscle_gain":
+        if role == "protein_anchor":
+            return (
+                _protein_density(candidate_food) + 0.01 >= (_protein_density(current_food) * 0.78)
+                and candidate_category != "legume"
+                and candidate_category != "nut_butter"
+            )
+        if role == "carb_base":
+            return str(candidate_food.get("generic_food_id") or "") in {"oats", "pasta", "bagel", "potatoes", "wholemeal_bread", "sweet_potatoes", "rice"}
+        if role == "produce":
+            return _food_metric(candidate_food, "energy_fibre_kcal") <= (_food_metric(current_food, "energy_fibre_kcal") + 35.0)
+        if role == "calorie_booster":
+            return str(candidate_food.get("generic_food_id") or "") in {"olive_oil", "peanut_butter", "nuts", "almond_butter", "cheese"}
+    if goal_profile == "high_protein_vegetarian":
+        if role == "protein_anchor":
+            return (
+                candidate_category in {"egg", "dairy", "soy"}
+                and candidate_category != "legume"
+                and candidate_category != "nut_butter"
+            )
+        if role == "carb_base":
+            return str(candidate_food.get("generic_food_id") or "") in {"wholemeal_bread", "quinoa", "oats", "bagel", "rice"}
+        if role == "produce":
+            return _food_metric(candidate_food, "vitamin_c") + _food_metric(candidate_food, "fiber") >= (
+                _food_metric(current_food, "vitamin_c") + _food_metric(current_food, "fiber") - 15.0
+            )
+        if role == "calorie_booster":
+            return str(candidate_food.get("generic_food_id") or "") in {"olive_oil", "peanut_butter"}
+    if goal_profile == "budget_friendly_healthy":
+        if role == "protein_anchor":
+            return (
+                float(candidate_food.get("budget_score") or 0.0) + 0.5 >= float(current_food.get("budget_score") or 0.0)
+                and candidate_category not in {"rich_animal", "animal"}
+            )
+        if role == "carb_base":
+            return str(candidate_food.get("generic_food_id") or "") in {"rice", "pasta", "potatoes", "wholemeal_bread", "oats"}
+        if role == "produce":
+            return (
+                float(candidate_food.get("budget_score") or 0.0) + 0.5 >= float(current_food.get("budget_score") or 0.0)
+                and int(candidate_food.get("commonality_rank") or 999) <= int(current_food.get("commonality_rank") or 999) + 18
+            )
+        if role == "calorie_booster":
+            return str(candidate_food.get("generic_food_id") or "") in {"olive_oil", "peanut_butter"}
     return True
 
 
@@ -1071,7 +1338,7 @@ def _generate_goal_targeted_substitution_seeds(
     source_backend: str,
     max_variants: int,
 ) -> list[CandidateSeed]:
-    if heuristic_reference_seed is None or max_variants <= 0 or context.goal_profile not in {"fat_loss", "maintenance"}:
+    if heuristic_reference_seed is None or max_variants <= 0 or context.goal_profile == "generic_balanced":
         return []
 
     heuristic_reference_by_role = _seed_role_reference_map(heuristic_reference_seed)
@@ -1091,7 +1358,13 @@ def _generate_goal_targeted_substitution_seeds(
             heuristic_reference_by_role=heuristic_reference_by_role,
         )
         alternatives: list[str] = []
-        max_alternatives = 3 if context.goal_profile == "fat_loss" and role == "produce" else (2 if role == "produce" else 1)
+        max_alternatives = {
+            "muscle_gain": {"protein_anchor": 2, "carb_base": 2, "produce": 2},
+            "fat_loss": {"protein_anchor": 2, "carb_base": 2, "produce": 3},
+            "maintenance": {"protein_anchor": 2, "carb_base": 1, "produce": 2},
+            "high_protein_vegetarian": {"protein_anchor": 3, "carb_base": 2, "produce": 2},
+            "budget_friendly_healthy": {"protein_anchor": 3, "carb_base": 2, "produce": 2},
+        }.get(context.goal_profile, {}).get(role, 1)
         for candidate_food_id, _score, _details in ranked:
             if not _goal_targeted_swap_allowed(
                 context,
@@ -1131,12 +1404,18 @@ def _generate_goal_targeted_substitution_seeds(
         return []
 
     role_priority = {
+        "muscle_gain": ("protein_anchor", "carb_base", "produce"),
         "fat_loss": ("produce", "protein_anchor", "carb_base"),
         "maintenance": ("produce", "protein_anchor", "carb_base"),
+        "high_protein_vegetarian": ("protein_anchor", "produce", "carb_base"),
+        "budget_friendly_healthy": ("protein_anchor", "carb_base", "produce"),
     }[context.goal_profile]
     pair_priority = {
+        "muscle_gain": (("protein_anchor", "protein_anchor"), ("protein_anchor", "carb_base"), ("produce", "produce")),
         "fat_loss": (("produce", "produce"), ("protein_anchor", "produce")),
         "maintenance": (("produce", "produce"), ("protein_anchor", "produce")),
+        "high_protein_vegetarian": (("protein_anchor", "protein_anchor"), ("protein_anchor", "produce"), ("produce", "produce")),
+        "budget_friendly_healthy": (("protein_anchor", "protein_anchor"), ("protein_anchor", "carb_base"), ("produce", "produce")),
     }[context.goal_profile]
 
     variants: list[CandidateSeed] = []
@@ -1224,7 +1503,7 @@ def _select_goal_balanced_model_seeds(
     candidate_count: int,
 ) -> list[CandidateSeed]:
     sorted_seeds = sorted(seeds, key=_seed_sort_key)
-    if context.goal_profile not in {"fat_loss", "maintenance"} or heuristic_reference_seed is None:
+    if context.goal_profile == "generic_balanced" or heuristic_reference_seed is None:
         return list(sorted_seeds[:candidate_count])
 
     priority_seeds: list[CandidateSeed] = []
@@ -1237,13 +1516,19 @@ def _select_goal_balanced_model_seeds(
         is_priority = any(source_hint.startswith("goal_targeted_") for source_hint in source_hints)
         if same_carb_base and changed_roles & {"produce", "protein_anchor"}:
             is_priority = True
+        if context.goal_profile in {"muscle_gain", "high_protein_vegetarian", "budget_friendly_healthy"} and changed_roles & {"protein_anchor", "carb_base"}:
+            is_priority = True
         if is_priority:
             priority_seeds.append(seed)
         else:
             fallback_seeds.append(seed)
 
     selected: list[CandidateSeed] = []
-    priority_quota = min(2, candidate_count, len(priority_seeds))
+    priority_quota = min(
+        3 if context.goal_profile in {"muscle_gain", "high_protein_vegetarian", "budget_friendly_healthy"} else 2,
+        candidate_count,
+        len(priority_seeds),
+    )
     selected.extend(priority_seeds[:priority_quota])
     for seed in [*priority_seeds[priority_quota:], *fallback_seeds]:
         if seed in selected:
@@ -1261,6 +1546,12 @@ def _generate_candidate_seeds(context: PlannerContext, candidate_count: int) -> 
         "carb_base": 3,
         "produce": 4,
     }
+    if context.goal_profile in {"budget_friendly_healthy", "high_protein_vegetarian", "muscle_gain"}:
+        branch_limits["protein_anchor"] = 4
+    if context.goal_profile in {"muscle_gain", "budget_friendly_healthy"}:
+        branch_limits["carb_base"] = 4
+    if context.goal_profile == "fat_loss":
+        branch_limits["produce"] = 5
     seeds = [
         CandidateSeed(
             chosen=[],
@@ -1400,6 +1691,8 @@ def _rank_model_candidates(
         "calorie_booster": 0.14,
     }[role]
     heuristic_window = gr._diversity_window(role, context.preferences) + 0.75  # noqa: SLF001
+    preferred_ids = gr._goal_template_ids_for_pick(context.goal_profile, role, chosen, context.available)  # noqa: SLF001
+    preferred_rank = {food_id: index for index, food_id in enumerate(preferred_ids)}
 
     ranked_rows: list[tuple[float, int, int, str, str, float, dict[str, object]]] = []
     for food_id, model_probability in model_role_scores[role].items():
@@ -1461,7 +1754,17 @@ def _rank_model_candidates(
             heuristic_reference_food_id=heuristic_reference_food_id,
         )
         structured_bonus = float(structured_terms["structured_bonus"])
-        adjusted_score = float(model_probability) + heuristic_bonus + novelty_bonus + structured_bonus - (diversity_penalty * 0.08)
+        template_bonus = 0.0
+        if food_id in preferred_rank:
+            template_bonus = max(0.05, 0.22 - (0.03 * preferred_rank[food_id]))
+        adjusted_score = (
+            float(model_probability)
+            + heuristic_bonus
+            + novelty_bonus
+            + structured_bonus
+            + template_bonus
+            - (diversity_penalty * 0.08)
+        )
         score_details = {
             "model_probability": round(float(model_probability), 6),
             "heuristic_role_score": round(heuristic_role_score, 6),
@@ -1469,6 +1772,7 @@ def _rank_model_candidates(
             "novelty_bonus": round(novelty_bonus, 6),
             "structured_bonus": round(structured_bonus, 6),
             "structured_terms": {key: float(value) for key, value in structured_terms.items()},
+            "template_bonus": round(template_bonus, 6),
             "goal_bonus": round(structured_bonus, 6),
             "diversity_penalty": round(float(diversity_penalty), 6),
             "heuristic_reference_food_id": heuristic_reference_food_id or None,
@@ -1529,6 +1833,7 @@ def _build_model_seed_from_choices(
                     "novelty_bonus": 0.0,
                     "structured_bonus": 0.0,
                     "structured_terms": {},
+                    "template_bonus": 0.0,
                     "goal_bonus": 0.0,
                     "diversity_penalty": 0.0,
                     "heuristic_reference_food_id": heuristic_reference_by_role.get((role, sum(1 for _existing_food_id, existing_role in built_chosen if existing_role == role))),
@@ -1674,6 +1979,12 @@ def _generate_model_candidate_seeds(
         "carb_base": 4,
         "produce": 5,
     }
+    if context.goal_profile in {"budget_friendly_healthy", "high_protein_vegetarian", "muscle_gain"}:
+        branch_limits["protein_anchor"] = 5
+    if context.goal_profile in {"muscle_gain", "budget_friendly_healthy"}:
+        branch_limits["carb_base"] = 5
+    if context.goal_profile == "fat_loss":
+        branch_limits["produce"] = 6
     model_role_scores, role_rank_maps = _model_role_score_maps(context, bundle)
     heuristic_reference_by_role = _seed_role_reference_map(heuristic_reference_seed)
     seeds = [
@@ -1759,6 +2070,14 @@ def _generate_model_candidate_seeds(
         source_backend=source_backend,
         max_variants=max(2, candidate_count),
     )
+    goal_targeted_variants = _generate_goal_targeted_substitution_seeds(
+        context,
+        model_role_scores=model_role_scores,
+        role_rank_maps=role_rank_maps,
+        heuristic_reference_seed=heuristic_reference_seed,
+        source_backend=source_backend,
+        max_variants=max(2, candidate_count),
+    )
     structured_variants = _generate_structured_substitution_seeds(
         context,
         model_role_scores=model_role_scores,
@@ -1769,6 +2088,7 @@ def _generate_model_candidate_seeds(
     )
     all_seeds = [seed for seed in seeds if seed.chosen]
     all_seeds.extend(substitution_variants)
+    all_seeds.extend(goal_targeted_variants)
     all_seeds.extend(structured_variants)
 
     deduped_model_seeds: dict[tuple[str, ...], CandidateSeed] = {}
@@ -1776,7 +2096,8 @@ def _generate_model_candidate_seeds(
         key = tuple(food_id for food_id, _role in seed.chosen)
         if key not in deduped_model_seeds:
             deduped_model_seeds[key] = seed
-    return _select_balanced_model_seeds(
+    return _select_goal_balanced_model_seeds(
+        context,
         list(deduped_model_seeds.values()),
         heuristic_reference_seed=heuristic_reference_seed,
         candidate_count=candidate_count,
@@ -1874,6 +2195,12 @@ def _candidate_bundle_from_response(
     shopping_ids = [str(item["generic_food_id"]) for item in shopping_list]
     shopping_food_ids = {food_id for food_id in shopping_ids if food_id in context.available}
     family_diversity = len({str(context.available[food_id]["food_family"]) for food_id in shopping_food_ids})
+    goal_structure = _goal_structure_analysis(
+        context,
+        chosen=chosen,
+        quantities=plan_quantities,
+        response=response,
+    )
     metadata = {
         "candidate_id": candidate_id,
         "chosen_food_ids": [food_id for food_id, _role in chosen],
@@ -1892,6 +2219,7 @@ def _candidate_bundle_from_response(
         "unrealistic_basket_penalty": _candidate_unrealistic_penalty(context, chosen, plan_quantities, response),
         "nearby_store_count": len(stores or []),
         "materialization_debug": dict(materialization_debug or {}),
+        **goal_structure,
     }
     return {
         "candidate_id": metadata["candidate_id"],
@@ -1955,6 +2283,191 @@ def _role_share_drift(
         ),
         6,
     )
+
+
+def _goal_structure_analysis(
+    context: PlannerContext,
+    *,
+    chosen: Sequence[tuple[str, str]],
+    quantities: Mapping[str, float],
+    response: Mapping[str, object],
+) -> dict[str, object]:
+    role_counts = _candidate_role_counts(list(chosen))
+    role_shares = _role_calorie_shares(context, chosen=chosen, quantities=quantities)
+    target_role_shares = _target_role_calorie_shares(
+        context,
+        booster_present=bool(role_counts.get("calorie_booster")),
+    )
+    role_share_gap_total = round(
+        sum(
+            abs(float(role_shares.get(role, 0.0)) - float(target_role_shares.get(role, 0.0)))
+            for role in ("protein_anchor", "carb_base", "produce", "calorie_booster")
+        ),
+        6,
+    )
+
+    protein_anchor_ids = [food_id for food_id, role in chosen if role == "protein_anchor" and food_id in context.available]
+    protein_categories = [_protein_anchor_category(context.available[food_id]) for food_id in protein_anchor_ids]
+    protein_category_set = set(protein_categories)
+    animal_protein_count = sum(1 for value in protein_categories if value in {"lean_animal", "rich_animal", "animal"})
+    lean_protein_count = sum(1 for value in protein_categories if value == "lean_animal")
+    dairy_or_egg_count = sum(1 for value in protein_categories if value in {"dairy", "egg"})
+    soy_count = sum(1 for value in protein_categories if value == "soy")
+    legume_count = sum(1 for value in protein_categories if value == "legume")
+    budget_support_anchor_count = sum(1 for value in protein_categories if value in {"egg", "soy"})
+
+    produce_ids = [food_id for food_id, role in chosen if role == "produce" and food_id in context.available]
+    produce_clusters = [_produce_combo_cluster(context.available[food_id]) for food_id in produce_ids]
+    fruit_count = sum(1 for value in produce_clusters if value == "fruit")
+    high_volume_produce_count = sum(
+        1
+        for value in produce_clusters
+        if value in {"leafy_dense", "crucifer_fiber", "watery_practical", "vitamin_c_crisp"}
+    )
+    low_cost_produce_count = sum(
+        1
+        for food_id in produce_ids
+        if food_id in {"cabbage", "carrots", "onions", "frozen_vegetables", "bananas", "potatoes", "apples"}
+    )
+
+    carb_base_id = next((food_id for food_id, role in chosen if role == "carb_base"), None)
+    booster_id = next((food_id for food_id, role in chosen if role == "calorie_booster"), None)
+    nutrition_summary = dict(response.get("nutrition_summary") or {})
+    estimated_calories = float(nutrition_summary.get("calorie_estimated_kcal") or 0.0)
+    estimated_protein = float(nutrition_summary.get("protein_estimated_g") or 0.0)
+    estimated_carbohydrate = float(nutrition_summary.get("carbohydrate_estimated_g") or 0.0)
+    estimated_fat = float(nutrition_summary.get("fat_estimated_g") or 0.0)
+    target_protein = float(nutrition_summary.get("protein_target_g") or 0.0)
+    target_fat = float(nutrition_summary.get("fat_target_g") or 0.0)
+    estimated_cost = float(response.get("estimated_basket_cost") or 0.0)
+    cost_per_1000_kcal = estimated_cost / max(estimated_calories / 1000.0, 0.1) if estimated_cost > 0 else 0.0
+    count_gap = (
+        abs(int(role_counts.get("protein_anchor", 0)) - int(context.basket_policy.get("desired_protein_anchors", 0)))
+        + abs(int(role_counts.get("produce", 0)) - int(context.basket_policy.get("desired_produce_items", 0)))
+        + abs(int(role_counts.get("carb_base", 0)) - 1)
+    )
+    share_fit = max(0.0, 1.0 - (role_share_gap_total / 0.95))
+    count_fit = max(0.0, 1.0 - (count_gap / 4.0))
+    score = 0.6 * share_fit + 0.18 * count_fit
+    notes: list[str] = []
+
+    if context.goal_profile == "muscle_gain":
+        if carb_base_id in {"oats", "pasta", "bagel", "potatoes", "wholemeal_bread", "sweet_potatoes"}:
+            score += 0.18
+            notes.append("performance-oriented carb base")
+        if lean_protein_count >= 1 and dairy_or_egg_count >= 1:
+            score += 0.2
+            notes.append("mixed lean and dairy/egg proteins")
+        elif lean_protein_count >= 1:
+            score += 0.08
+        if fruit_count >= 1:
+            score += 0.08
+            notes.append("includes quick-carb fruit")
+        if booster_id in {"olive_oil", "peanut_butter", "nuts", "almond_butter", "cheese"}:
+            score += 0.18
+            notes.append("keeps calorie-dense support")
+        elif float(role_shares.get("calorie_booster", 0.0)) < 0.08:
+            score -= 0.14
+    elif context.goal_profile == "fat_loss":
+        if booster_id is None:
+            score += 0.2
+            notes.append("avoids calorie booster")
+        else:
+            score -= 0.28
+        if int(role_counts.get("produce", 0)) >= 3 and high_volume_produce_count >= 2:
+            score += 0.22
+            notes.append("higher-volume produce structure")
+        if lean_protein_count >= 1 and animal_protein_count - lean_protein_count <= 0:
+            score += 0.18
+            notes.append("leans on lean protein anchors")
+        if carb_base_id in {"wholemeal_bread", "quinoa", "potatoes", "sweet_potatoes"}:
+            score += 0.14
+        if fruit_count > 1:
+            score -= 0.12
+        if float(role_shares.get("carb_base", 0.0)) > 0.33:
+            score -= 0.12
+    elif context.goal_profile == "maintenance":
+        if carb_base_id in {"wholemeal_bread", "potatoes", "quinoa", "rice"}:
+            score += 0.14
+            notes.append("moderate staple carb base")
+        if fruit_count >= 1 and int(role_counts.get("produce", 0)) >= 2:
+            score += 0.12
+            notes.append("balanced fruit and veg mix")
+        booster_share = float(role_shares.get("calorie_booster", 0.0))
+        if booster_id is None:
+            score += 0.05
+        elif 0.05 <= booster_share <= 0.16:
+            score += 0.08
+            notes.append("keeps booster moderate")
+        else:
+            score -= 0.06
+    elif context.goal_profile == "high_protein_vegetarian":
+        if animal_protein_count == 0:
+            score += 0.24
+            notes.append("fully vegetarian protein anchors")
+        else:
+            score -= 0.45
+        if soy_count >= 1 and dairy_or_egg_count >= 1:
+            score += 0.24
+            notes.append("combines soy with dairy/egg protein")
+        elif soy_count >= 1 or dairy_or_egg_count >= 1:
+            score += 0.1
+        if legume_count > 0:
+            score -= 0.08
+        if carb_base_id in {"wholemeal_bread", "quinoa", "oats", "bagel"}:
+            score += 0.12
+        if fruit_count >= 1 and any(value in {"leafy_dense", "vitamin_c_crisp"} for value in produce_clusters):
+            score += 0.14
+            notes.append("pairs fruit with greens or vitamin C produce")
+        if float(role_shares.get("calorie_booster", 0.0)) > 0.22:
+            score -= 0.1
+    elif context.goal_profile == "budget_friendly_healthy":
+        if legume_count >= 1 and budget_support_anchor_count >= 1:
+            score += 0.26
+            notes.append("pairs legumes with an economical support protein")
+        elif legume_count >= 2:
+            score -= 0.26
+        if carb_base_id in {"rice", "pasta", "potatoes", "wholemeal_bread"}:
+            score += 0.12
+        if low_cost_produce_count >= 2:
+            score += 0.18
+            notes.append("leans on low-cost produce staples")
+        if booster_id in {"olive_oil", "peanut_butter"}:
+            score += 0.14
+            notes.append("adds inexpensive fat support")
+        elif target_fat > 0 and estimated_fat < target_fat * 0.72:
+            score -= 0.18
+        if estimated_cost > 0:
+            if cost_per_1000_kcal <= 3.2:
+                score += 0.14
+            elif cost_per_1000_kcal >= 4.5:
+                score -= 0.12
+        if target_protein > 0 and estimated_protein < target_protein * 0.88:
+            score -= 0.12
+        carbohydrate_target = float(nutrition_summary.get("carbohydrate_target_g") or 0.0)
+        if carbohydrate_target > 0 and estimated_carbohydrate > carbohydrate_target * 1.28:
+            score -= 0.16
+
+    return {
+        "goal_structure_alignment_score": round(score, 6),
+        "role_calorie_shares": dict(role_shares),
+        "target_role_calorie_shares": dict(target_role_shares),
+        "role_share_gap_total": role_share_gap_total,
+        "protein_anchor_categories": list(protein_categories),
+        "protein_anchor_family_diversity": len(protein_category_set),
+        "animal_protein_anchor_count": animal_protein_count,
+        "lean_protein_anchor_count": lean_protein_count,
+        "vegetarian_protein_anchor_count": len(protein_categories) - animal_protein_count,
+        "legume_protein_anchor_count": legume_count,
+        "soy_protein_anchor_count": soy_count,
+        "dairy_or_egg_anchor_count": dairy_or_egg_count,
+        "budget_support_anchor_count": budget_support_anchor_count,
+        "produce_clusters": list(produce_clusters),
+        "fruit_produce_count": fruit_count,
+        "high_volume_produce_count": high_volume_produce_count,
+        "low_cost_produce_count": low_cost_produce_count,
+        "structure_notes": notes[:5],
+    }
 
 
 def _maintenance_materialization_drift_summary(
@@ -2277,7 +2790,13 @@ def _pick_structured_booster(
             + max(float(food.get("budget_score") or 0.0) - 3.0, 0.0) * 0.01 * float(profile["cost_priority"])
             + _commonality_bonus(food) * 0.6
         )
-        adjusted_score = float(role_scores.get(food_id, 0.0)) + complementarity + practicality
+        goal_structure_bonus = _goal_structure_selection_bonus(
+            context,
+            role=role,
+            food_id=food_id,
+            chosen=chosen,
+        )
+        adjusted_score = float(role_scores.get(food_id, 0.0)) + complementarity + practicality + goal_structure_bonus
         ranked_rows.append((-adjusted_score, int(food.get("commonality_rank") or 999), food_id))
     ranked_rows.sort()
     return str(ranked_rows[0][2]) if ranked_rows else None
@@ -2357,6 +2876,21 @@ def _target_role_calorie_shares(
     *,
     booster_present: bool,
 ) -> dict[str, float]:
+    configured = context.basket_policy.get("target_role_calorie_shares")
+    if isinstance(configured, Mapping):
+        normalized = {
+            role: max(0.0, float(configured.get(role, 0.0)))
+            for role in ("protein_anchor", "carb_base", "produce", "calorie_booster")
+        }
+        if not booster_present:
+            normalized["calorie_booster"] = 0.0
+        total = sum(normalized.values())
+        if total > 0:
+            return {
+                role: round(value / total, 6)
+                for role, value in normalized.items()
+            }
+
     profile = _priority_profile(context)
     protein_share = min(0.42, max(0.24, (context.protein_target_g * 4.0 / max(context.calorie_target_kcal, 1.0)) * 0.95))
     carb_share = min(0.52, max(0.3, float(context.basket_policy["carb_share"])))
@@ -3627,12 +4161,53 @@ def _score_and_rank_candidates(
     feature_rows = plan_scorer.build_request_feature_rows(candidates)
     heuristic_scores = [plan_scorer.heuristic_candidate_label(row) for row in feature_rows]
     model_scores = plan_scorer.score_feature_rows(scorer_bundle, feature_rows)
+
+    def ranking_adjustment(feature_row: Mapping[str, object]) -> float:
+        goal_profile = str(feature_row.get("goal_profile") or "generic_balanced")
+        adjustment = (
+            0.24 * float(feature_row.get("goal_structure_alignment_score") or 0.0)
+            - 0.08 * float(feature_row.get("role_share_gap_total") or 0.0)
+        )
+        if goal_profile == "muscle_gain":
+            adjustment += 0.14 * min(float(feature_row.get("dairy_or_egg_anchor_count") or 0.0), 1.0)
+            adjustment += 0.08 * min(float(feature_row.get("fruit_produce_count") or 0.0), 1.0)
+            adjustment += 0.35 * float(feature_row.get("calorie_booster_share") or 0.0)
+            if float(feature_row.get("calorie_booster_count") or 0.0) <= 0.0:
+                adjustment -= 0.18
+        elif goal_profile == "fat_loss":
+            adjustment += 0.08 * min(float(feature_row.get("high_volume_produce_count") or 0.0), 3.0)
+            adjustment -= 0.28 * float(feature_row.get("calorie_booster_count") or 0.0)
+            adjustment -= 0.08 * max(float(feature_row.get("fruit_produce_count") or 0.0) - 1.0, 0.0)
+        elif goal_profile == "maintenance":
+            booster_share = float(feature_row.get("calorie_booster_share") or 0.0)
+            if 0.04 <= booster_share <= 0.16:
+                adjustment += 0.08
+            adjustment += 0.05 * min(float(feature_row.get("fruit_produce_count") or 0.0), 1.0)
+        elif goal_profile == "high_protein_vegetarian":
+            adjustment += 0.2 * min(
+                float(feature_row.get("soy_protein_anchor_count") or 0.0),
+                float(feature_row.get("dairy_or_egg_anchor_count") or 0.0),
+                1.0,
+            )
+            adjustment -= 0.4 * float(feature_row.get("animal_protein_anchor_count") or 0.0)
+            adjustment -= 0.08 * float(feature_row.get("legume_protein_anchor_count") or 0.0)
+        elif goal_profile == "budget_friendly_healthy":
+            adjustment += 0.72 * min(float(feature_row.get("budget_support_anchor_count") or 0.0), 1.0)
+            adjustment -= 1.05 * max(float(feature_row.get("legume_protein_anchor_count") or 0.0) - 1.0, 0.0)
+            adjustment += 0.08 * min(float(feature_row.get("low_cost_produce_count") or 0.0), 2.0)
+            adjustment += 0.12 * float(feature_row.get("calorie_booster_share") or 0.0)
+            adjustment -= min(max(float(feature_row.get("fat_abs_gap_g") or 0.0) - 8.0, 0.0), 35.0) * 0.018
+            adjustment -= min(max(float(feature_row.get("carbohydrate_abs_gap_g") or 0.0) - 25.0, 0.0), 80.0) * 0.006
+            adjustment -= min(max(float(feature_row.get("protein_abs_gap_g") or 0.0) - 8.0, 0.0), 35.0) * 0.022
+        return round(adjustment, 6)
+
     ranked = [
         {
             "candidate": candidate,
             "feature_row": feature_row,
             "heuristic_score": float(heuristic_score),
             "model_score": float(model_score),
+            "ranking_score": round(float(model_score) + ranking_adjustment(feature_row), 6),
         }
         for candidate, feature_row, heuristic_score, model_score in zip(
             candidates,
@@ -3644,7 +4219,7 @@ def _score_and_rank_candidates(
     ]
     return sorted(
         ranked,
-        key=lambda row: (-row["model_score"], -row["heuristic_score"], str(row["candidate"]["candidate_id"])),
+        key=lambda row: (-row["ranking_score"], -row["model_score"], -row["heuristic_score"], str(row["candidate"]["candidate_id"])),
     )
 
 
@@ -4296,13 +4871,38 @@ def recommend_with_trained_scorer(
     response["selected_candidate_id"] = str(selected_candidate["candidate_id"])
     response["selected_candidate_source"] = str(selected_candidate["candidate_metadata"].get("source") or "heuristic")
     response["selected_candidate_sources"] = list(selected_candidate["candidate_metadata"].get("source_labels") or [response["selected_candidate_source"]])
-    response["route_b_algorithm_version"] = str(normalized_candidate_generation_config["algorithm_version"])
-    response["route_b_algorithm"] = {
+    response["hybrid_planner_algorithm_version"] = str(normalized_candidate_generation_config["algorithm_version"])
+    response["hybrid_planner_algorithm"] = {
         "version": str(normalized_candidate_generation_config["algorithm_version"]),
         "structured_complementarity_enabled": bool(normalized_candidate_generation_config["structured_complementarity_enabled"]),
         "structured_materialization_enabled": bool(normalized_candidate_generation_config["structured_materialization_enabled"]),
         "candidate_generator_backend": pool_debug.get("candidate_generator_backend"),
         "candidate_generator_model_path": pool_debug.get("candidate_generator_model_path"),
+    }
+    response["hybrid_planner_execution"] = {
+        "pipeline_mode": (
+            "full_hybrid"
+            if bool(normalized_candidate_generation_config["enable_model_candidates"])
+            else "heuristic_only"
+        ),
+        "algorithm_version": str(normalized_candidate_generation_config["algorithm_version"]),
+        "structured_complementarity_enabled": bool(normalized_candidate_generation_config["structured_complementarity_enabled"]),
+        "structured_materialization_enabled": bool(normalized_candidate_generation_config["structured_materialization_enabled"]),
+        "heuristic_candidate_generation_ran": True,
+        "learned_candidate_generation_ran": bool(normalized_candidate_generation_config["enable_model_candidates"]),
+        "candidate_fusion_ran": True,
+        "scorer_reranking_used": True,
+        "heuristic_candidate_count": int(pool_debug.get("heuristic_candidate_count") or 0),
+        "learned_candidate_count": int(pool_debug.get("model_candidate_count") or 0),
+        "raw_candidate_count": int(pool_debug.get("raw_candidate_count") or 0),
+        "fused_candidate_count": int(pool_debug.get("fused_candidate_count") or len(candidates)),
+        "candidates_ranked_count": len(candidates),
+        "candidate_generator_backend": pool_debug.get("candidate_generator_backend"),
+        "candidate_generator_model_path": pool_debug.get("candidate_generator_model_path"),
+        "scorer_backend": response["scorer_backend"],
+        "scorer_model_path": str(model_path),
+        "selected_candidate_id": response["selected_candidate_id"],
+        "selected_candidate_source": response["selected_candidate_source"],
     }
 
     best_heuristic_row = _best_ranked_entry(raw_ranked, origin="heuristic")
@@ -4533,9 +5133,8 @@ def recommend_with_trained_scorer(
         "best_model_candidate_shopping_food_ids": comparison_debug["best_model_candidate_shopping_food_ids"],
         "difference_summary_vs_best_heuristic": comparison_debug["selected_candidate_difference_summary"],
     }
-    response["algorithmic_faithfulness_debug"] = algorithmic_faithfulness
-
     if normalized_config["debug"]:
+        response["algorithmic_faithfulness_debug"] = algorithmic_faithfulness
         response["scoring_debug"] = {
             "candidate_count": len(candidates),
             "selected_candidate_id": selected_candidate["candidate_id"],
@@ -4557,6 +5156,7 @@ def recommend_with_trained_scorer(
         }
 
     if normalized_candidate_generation_config["debug"]:
+        response["algorithmic_faithfulness_debug"] = algorithmic_faithfulness
         response["candidate_generation_debug"] = {
             **pool_debug,
             "material_difference_rule": candidate_debug.MATERIAL_DIFFERENCE_RULE_TEXT,

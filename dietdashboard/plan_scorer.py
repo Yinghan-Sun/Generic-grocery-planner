@@ -54,6 +54,23 @@ NUMERIC_FEATURES = (
     "carb_base_count",
     "produce_count",
     "calorie_booster_count",
+    "goal_structure_alignment_score",
+    "role_share_gap_total",
+    "protein_anchor_share",
+    "carb_base_share",
+    "produce_share",
+    "calorie_booster_share",
+    "protein_anchor_family_diversity",
+    "animal_protein_anchor_count",
+    "lean_protein_anchor_count",
+    "vegetarian_protein_anchor_count",
+    "legume_protein_anchor_count",
+    "soy_protein_anchor_count",
+    "dairy_or_egg_anchor_count",
+    "budget_support_anchor_count",
+    "fruit_produce_count",
+    "high_volume_produce_count",
+    "low_cost_produce_count",
     "food_family_diversity_count",
     "role_diversity_count",
     "repetition_penalty",
@@ -368,6 +385,23 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
         "carb_base_count": _safe_int(metadata.get("role_counts", {}).get("carb_base") if isinstance(metadata.get("role_counts"), Mapping) else 0),
         "produce_count": _safe_int(metadata.get("role_counts", {}).get("produce") if isinstance(metadata.get("role_counts"), Mapping) else 0),
         "calorie_booster_count": _safe_int(metadata.get("role_counts", {}).get("calorie_booster") if isinstance(metadata.get("role_counts"), Mapping) else 0),
+        "goal_structure_alignment_score": _safe_float(metadata.get("goal_structure_alignment_score")),
+        "role_share_gap_total": _safe_float(metadata.get("role_share_gap_total")),
+        "protein_anchor_share": _safe_float(metadata.get("role_calorie_shares", {}).get("protein_anchor") if isinstance(metadata.get("role_calorie_shares"), Mapping) else 0),
+        "carb_base_share": _safe_float(metadata.get("role_calorie_shares", {}).get("carb_base") if isinstance(metadata.get("role_calorie_shares"), Mapping) else 0),
+        "produce_share": _safe_float(metadata.get("role_calorie_shares", {}).get("produce") if isinstance(metadata.get("role_calorie_shares"), Mapping) else 0),
+        "calorie_booster_share": _safe_float(metadata.get("role_calorie_shares", {}).get("calorie_booster") if isinstance(metadata.get("role_calorie_shares"), Mapping) else 0),
+        "protein_anchor_family_diversity": _safe_float(metadata.get("protein_anchor_family_diversity")),
+        "animal_protein_anchor_count": _safe_float(metadata.get("animal_protein_anchor_count")),
+        "lean_protein_anchor_count": _safe_float(metadata.get("lean_protein_anchor_count")),
+        "vegetarian_protein_anchor_count": _safe_float(metadata.get("vegetarian_protein_anchor_count")),
+        "legume_protein_anchor_count": _safe_float(metadata.get("legume_protein_anchor_count")),
+        "soy_protein_anchor_count": _safe_float(metadata.get("soy_protein_anchor_count")),
+        "dairy_or_egg_anchor_count": _safe_float(metadata.get("dairy_or_egg_anchor_count")),
+        "budget_support_anchor_count": _safe_float(metadata.get("budget_support_anchor_count")),
+        "fruit_produce_count": _safe_float(metadata.get("fruit_produce_count")),
+        "high_volume_produce_count": _safe_float(metadata.get("high_volume_produce_count")),
+        "low_cost_produce_count": _safe_float(metadata.get("low_cost_produce_count")),
         "food_family_diversity_count": _safe_int(metadata.get("food_family_diversity_count")),
         "role_diversity_count": _safe_int(metadata.get("role_diversity_count")),
         "repetition_penalty": _safe_float(metadata.get("repetition_penalty")),
@@ -410,6 +444,45 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
     return features
 
 
+def _goal_structure_label_adjustment(feature_row: Mapping[str, object]) -> float:
+    goal_profile = str(feature_row.get("goal_profile") or "generic_balanced")
+    alignment = _safe_float(feature_row.get("goal_structure_alignment_score"))
+    role_gap = _safe_float(feature_row.get("role_share_gap_total"))
+    booster_share = _safe_float(feature_row.get("calorie_booster_share"))
+    produce_share = _safe_float(feature_row.get("produce_share"))
+    score = (0.34 * alignment) - (0.2 * role_gap)
+    score += 0.03 * _safe_float(feature_row.get("protein_anchor_family_diversity"))
+
+    if goal_profile == "muscle_gain":
+        if _safe_float(feature_row.get("lean_protein_anchor_count")) >= 1 and _safe_float(feature_row.get("dairy_or_egg_anchor_count")) >= 1:
+            score += 0.12
+        score += 0.05 * min(_safe_float(feature_row.get("fruit_produce_count")), 1.0)
+        score += 0.24 * max(0.0, booster_share - 0.08)
+        if _safe_float(feature_row.get("calorie_booster_count")) == 0:
+            score -= 0.08
+    elif goal_profile == "fat_loss":
+        score += 0.06 * min(_safe_float(feature_row.get("high_volume_produce_count")), 3.0)
+        score -= 0.18 * _safe_float(feature_row.get("calorie_booster_count"))
+        score -= 0.07 * max(_safe_float(feature_row.get("fruit_produce_count")) - 1.0, 0.0)
+        if produce_share >= 0.22:
+            score += 0.08
+    elif goal_profile == "maintenance":
+        if 0.04 <= booster_share <= 0.16:
+            score += 0.06
+        score += 0.04 * min(_safe_float(feature_row.get("fruit_produce_count")), 1.0)
+    elif goal_profile == "high_protein_vegetarian":
+        score += 0.1 * min(_safe_float(feature_row.get("soy_protein_anchor_count")), _safe_float(feature_row.get("dairy_or_egg_anchor_count")), 1.0)
+        score -= 0.18 * _safe_float(feature_row.get("animal_protein_anchor_count"))
+        score -= 0.06 * _safe_float(feature_row.get("legume_protein_anchor_count"))
+    elif goal_profile == "budget_friendly_healthy":
+        score += 0.08 * min(_safe_float(feature_row.get("budget_support_anchor_count")), 1.0)
+        score += 0.06 * min(_safe_float(feature_row.get("low_cost_produce_count")), 2.0)
+        score -= 0.1 * max(_safe_float(feature_row.get("legume_protein_anchor_count")) - 1.0, 0.0)
+        if _safe_float(feature_row.get("estimated_fat_g")) < max(_safe_float(feature_row.get("target_calorie_kcal")) * 0.02, 35.0):
+            score -= 0.08
+    return round(score, 6)
+
+
 def heuristic_candidate_label(feature_row: Mapping[str, object]) -> float:
     profile = _goal_tradeoff_profile(feature_row)
     score = 0.0
@@ -420,6 +493,7 @@ def heuristic_candidate_label(feature_row: Mapping[str, object]) -> float:
     score += 0.25 * _safe_float(feature_row.get("food_family_diversity_count")) * profile["diversity_reward_scale"]
     score += 0.18 * _safe_float(feature_row.get("preference_match_score")) * profile["preference_reward_scale"]
     score += 0.02 * _safe_float(feature_row.get("heuristic_selection_score"))
+    score += _goal_structure_label_adjustment(feature_row)
     score -= 0.38 * _safe_float(feature_row.get("repetition_penalty")) * profile["repetition_penalty_scale"]
     score -= 0.65 * _safe_float(feature_row.get("unrealistic_basket_penalty"))
     score -= 0.15 * _safe_float(feature_row.get("warning_count"))

@@ -1,16 +1,16 @@
-# Route B Final Summary
+# Hybrid Planner Final Summary
 
 ## Main Algorithm
-- Version: `route_b_generalized_v5_main`
-- Label: Generalized Route B Main
-- Scorer artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib`
+- Version: `hybrid_planner_generalized_v5_main`
+- Label: Generalized Hybrid Planner Main
+- Scorer artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib`
 - Candidate-generator artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib`
 
 ## Use This Version
-- Cite algorithm version: `route_b_generalized_v5_main`
-- Final preset comparison artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json`
-- Final ablation artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/ablation/route_b_ablation_summary.json`
-- Final robustness artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/robustness/route_b_robustness_summary.json`
+- Cite algorithm version: `hybrid_planner_generalized_v5_main`
+- Final preset comparison artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/preset_comparison_summary.json`
+- Final ablation artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/ablation/hybrid_planner_ablation_summary.json`
+- Final robustness artifact: `/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/robustness/hybrid_planner_robustness_summary.json`
 - Regenerate preset comparison with: `make compare-preset-model-participation-final`
 
 ## Baseline vs Final
@@ -24,11 +24,11 @@
 ## Ablation Takeaways
 - Removing structured complementarity kept `3` model wins and `3` score improvements.
 - Removing structured materialization kept `3` model wins and `3` score improvements.
-- Full generalized Route B kept `4` model wins with `4` improved presets.
+- The full generalized hybrid planner kept `4` model wins with `4` improved presets.
 
 ## Robustness
 - Evaluated `30` local scenario variants.
-- Route B beat heuristic+scorer on `16` cases.
+- The hybrid planner pipeline beat heuristic+scorer on `16` cases.
 - Model or hybrid candidates won on `16` cases.
 - Average winner-source stability ratio: `0.733334`
 - Brittle cases detected: `0`
@@ -40,4 +40,4 @@
 - Current limitation: Materially-different model candidates survived, but the strongest one still lost due to poor produce choice. It lost mainly on repetition penalty.
 
 ## Final Positioning
-- This is the frozen final Route B configuration for presentation: one generalized hybrid planner, one fair scorer artifact, one selected candidate-generator artifact, and evaluation evidence that shows which shared components matter.
+- This is the frozen final hybrid planner configuration for presentation: one generalized hybrid planner, one fair scorer artifact, one selected candidate-generator artifact, and evaluation evidence that shows which shared components matter.

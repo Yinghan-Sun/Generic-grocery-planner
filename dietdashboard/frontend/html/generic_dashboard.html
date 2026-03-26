@@ -1,9 +1,7 @@
 {% extends "base.html" %} {% block head %}
 <title>Generic Food Recommendations</title>
 <script>
-  window.GENERIC_APP_CONFIG = {
-    isProduction: {{ "true" if is_production else "false" }}
-  };
+  window.GENERIC_APP_CONFIG = {{ generic_app_config | tojson }};
 </script>
 <script type="module" src="{{ static_asset_url('generic_bundle.js') }}"></script>
 <link rel="stylesheet" href="{{ static_asset_url('bundle.css') }}" />

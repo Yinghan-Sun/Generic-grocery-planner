@@ -1,6 +1,6 @@
-# Route B Slide Table: Preset Outcomes
+# Hybrid Planner Slide Table: Preset Outcomes
 
-Frozen final algorithm: route_b_generalized_v5_main
+Frozen final algorithm: hybrid_planner_generalized_v5_main
 
 | preset                  | heuristic_winner | final_winner | score_improved | materially_different | score_delta_vs_baseline | note                                     |
 | ----------------------- | ---------------- | ------------ | -------------- | -------------------- | ----------------------- | ---------------------------------------- |

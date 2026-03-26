@@ -1,0 +1,866 @@
+{
+  "aggregate": {
+    "average_shopping_list_jaccard": 0.128586,
+    "max_shopping_list_jaccard": 0.222222,
+    "min_shopping_list_jaccard": 0.090909
+  },
+  "algorithm": {
+    "algorithm_description": "Generalized hybrid planner pipeline with structured complementarity, shared learned-seed materialization, and the fair scorer artifact.",
+    "algorithm_label": "Generalized Hybrid Planner Main",
+    "algorithm_version": "hybrid_planner_generalized_v5_main",
+    "candidate_count": 6,
+    "candidate_generator_backend": "random_forest",
+    "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+    "model_candidate_count": 4,
+    "model_candidates_enabled": true,
+    "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+    "structured_complementarity_enabled": true,
+    "structured_materialization_enabled": true
+  },
+  "assessment": {
+    "all_presets_pass_visible_structure": true,
+    "basket_changed_count_vs_before": 5,
+    "critical_pairwise_checks": {
+      "budget_friendly_healthy_vs_maintenance": {
+        "notes": [
+          "budget preset keeps a low-cost staple structure",
+          "maintenance stays more moderate and animal-protein-based"
+        ],
+        "passed": true
+      },
+      "high_protein_vegetarian_vs_meat_presets": {
+        "notes": [
+          "vegetarian preset uses only vegetarian protein anchors",
+          "it stays visually distinct from the meat-based baskets"
+        ],
+        "passed": true
+      },
+      "muscle_gain_vs_fat_loss": {
+        "notes": [
+          "muscle gain keeps a calorie booster while fat loss avoids one",
+          "shopping-list overlap=0.090909"
+        ],
+        "passed": true
+      },
+      "muscle_gain_vs_maintenance": {
+        "notes": [
+          "muscle gain now uses a performance-style carb and quick-carb fruit",
+          "maintenance keeps a more moderate bread-based basket"
+        ],
+        "passed": true
+      }
+    },
+    "overall_judgment": "improved",
+    "preset_count": 5,
+    "summary": "Preset baskets now show clearer structural separation across the main user-facing goals.",
+    "visible_structure_pass_count": 5
+  },
+  "before_after_summary": {
+    "after_aggregate": {
+      "average_shopping_list_jaccard": 0.128586,
+      "max_shopping_list_jaccard": 0.222222,
+      "min_shopping_list_jaccard": 0.090909
+    },
+    "average_shopping_list_jaccard_delta": 0.007273,
+    "before_aggregate": {
+      "average_shopping_list_jaccard": 0.121313,
+      "max_shopping_list_jaccard": 0.222222,
+      "min_shopping_list_jaccard": 0.0
+    },
+    "before_path_version": "before_changes",
+    "max_shopping_list_jaccard_delta": 0.0,
+    "pairwise_deltas": [
+      {
+        "after_shopping_list_jaccard": 0.090909,
+        "before_shopping_list_jaccard": 0.2,
+        "delta_shopping_list_jaccard": -0.109091,
+        "left": "fat_loss",
+        "right": "muscle_gain"
+      },
+      {
+        "after_shopping_list_jaccard": 0.2,
+        "before_shopping_list_jaccard": 0.2,
+        "delta_shopping_list_jaccard": 0.0,
+        "left": "maintenance",
+        "right": "muscle_gain"
+      },
+      {
+        "after_shopping_list_jaccard": 0.1,
+        "before_shopping_list_jaccard": 0.222222,
+        "delta_shopping_list_jaccard": -0.122222,
+        "left": "high_protein_vegetarian",
+        "right": "muscle_gain"
+      },
+      {
+        "after_shopping_list_jaccard": 0.2,
+        "before_shopping_list_jaccard": 0.090909,
+        "delta_shopping_list_jaccard": 0.109091,
+        "left": "budget_friendly_healthy",
+        "right": "muscle_gain"
+      },
+      {
+        "after_shopping_list_jaccard": 0.090909,
+        "before_shopping_list_jaccard": 0.2,
+        "delta_shopping_list_jaccard": -0.109091,
+        "left": "fat_loss",
+        "right": "maintenance"
+      },
+      {
+        "after_shopping_list_jaccard": 0.222222,
+        "before_shopping_list_jaccard": 0.1,
+        "delta_shopping_list_jaccard": 0.122222,
+        "left": "fat_loss",
+        "right": "high_protein_vegetarian"
+      },
+      {
+        "after_shopping_list_jaccard": 0.090909,
+        "before_shopping_list_jaccard": 0.0,
+        "delta_shopping_list_jaccard": 0.090909,
+        "left": "budget_friendly_healthy",
+        "right": "fat_loss"
+      },
+      {
+        "after_shopping_list_jaccard": 0.1,
+        "before_shopping_list_jaccard": 0.0,
+        "delta_shopping_list_jaccard": 0.1,
+        "left": "high_protein_vegetarian",
+        "right": "maintenance"
+      },
+      {
+        "after_shopping_list_jaccard": 0.090909,
+        "before_shopping_list_jaccard": 0.2,
+        "delta_shopping_list_jaccard": -0.109091,
+        "left": "budget_friendly_healthy",
+        "right": "maintenance"
+      },
+      {
+        "after_shopping_list_jaccard": 0.1,
+        "before_shopping_list_jaccard": 0.0,
+        "delta_shopping_list_jaccard": 0.1,
+        "left": "budget_friendly_healthy",
+        "right": "high_protein_vegetarian"
+      }
+    ],
+    "preset_changes": {
+      "budget_friendly_healthy": {
+        "after_shopping_food_ids": [
+          "lentils",
+          "eggs",
+          "oats",
+          "cabbage",
+          "potatoes",
+          "olive_oil"
+        ],
+        "basket_changed": true,
+        "before_shopping_food_ids": [
+          "lentils",
+          "beans",
+          "rice",
+          "cabbage",
+          "carrots",
+          "olive_oil"
+        ]
+      },
+      "fat_loss": {
+        "after_shopping_food_ids": [
+          "tuna",
+          "tofu",
+          "oats",
+          "spinach",
+          "bell_peppers",
+          "broccoli"
+        ],
+        "basket_changed": true,
+        "before_shopping_food_ids": [
+          "chicken_breast",
+          "tuna",
+          "oats",
+          "bell_peppers",
+          "tomatoes",
+          "broccoli"
+        ]
+      },
+      "high_protein_vegetarian": {
+        "after_shopping_food_ids": [
+          "eggs",
+          "tofu",
+          "quinoa",
+          "berries",
+          "spinach"
+        ],
+        "basket_changed": true,
+        "before_shopping_food_ids": [
+          "eggs",
+          "tofu",
+          "oats",
+          "spinach",
+          "oranges"
+        ]
+      },
+      "maintenance": {
+        "after_shopping_food_ids": [
+          "chicken_breast",
+          "rotisserie_chicken",
+          "wholemeal_bread",
+          "spinach",
+          "carrots",
+          "olive_oil"
+        ],
+        "basket_changed": true,
+        "before_shopping_food_ids": [
+          "chicken_breast",
+          "rotisserie_chicken",
+          "wholemeal_bread",
+          "carrots",
+          "broccoli",
+          "olive_oil"
+        ]
+      },
+      "muscle_gain": {
+        "after_shopping_food_ids": [
+          "eggs",
+          "chicken_breast",
+          "pasta",
+          "bananas",
+          "bell_peppers",
+          "olive_oil"
+        ],
+        "basket_changed": true,
+        "before_shopping_food_ids": [
+          "chicken_breast",
+          "turkey",
+          "oats",
+          "spinach",
+          "bananas",
+          "olive_oil"
+        ]
+      }
+    }
+  },
+  "location": {
+    "label": "Mountain View, CA",
+    "lat": 37.401,
+    "lon": -122.09,
+    "radius_m": 10000.0,
+    "store_limit": 5
+  },
+  "pairwise": [
+    {
+      "changed_food_count": 10,
+      "difference_summary": "Large basket change",
+      "left": "muscle_gain",
+      "right": "fat_loss",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 0.0,
+        "produce": 0.25,
+        "protein_anchor": 0.0
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.090909
+    },
+    {
+      "changed_food_count": 8,
+      "difference_summary": "Large basket change",
+      "left": "muscle_gain",
+      "right": "maintenance",
+      "role_overlaps": {
+        "calorie_booster": 1.0,
+        "carb_base": 0.0,
+        "produce": 0.0,
+        "protein_anchor": 0.333333
+      },
+      "shared_food_count": 2,
+      "shopping_list_jaccard": 0.2
+    },
+    {
+      "changed_food_count": 9,
+      "difference_summary": "Large basket change",
+      "left": "muscle_gain",
+      "right": "high_protein_vegetarian",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 0.0,
+        "produce": 0.0,
+        "protein_anchor": 0.333333
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.1
+    },
+    {
+      "changed_food_count": 8,
+      "difference_summary": "Large basket change",
+      "left": "muscle_gain",
+      "right": "budget_friendly_healthy",
+      "role_overlaps": {
+        "calorie_booster": 1.0,
+        "carb_base": 0.0,
+        "produce": 0.0,
+        "protein_anchor": 0.333333
+      },
+      "shared_food_count": 2,
+      "shopping_list_jaccard": 0.2
+    },
+    {
+      "changed_food_count": 10,
+      "difference_summary": "Large basket change",
+      "left": "fat_loss",
+      "right": "maintenance",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 0.0,
+        "produce": 0.25,
+        "protein_anchor": 0.0
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.090909
+    },
+    {
+      "changed_food_count": 7,
+      "difference_summary": "Large basket change",
+      "left": "fat_loss",
+      "right": "high_protein_vegetarian",
+      "role_overlaps": {
+        "calorie_booster": 1.0,
+        "carb_base": 0.0,
+        "produce": 0.25,
+        "protein_anchor": 0.333333
+      },
+      "shared_food_count": 2,
+      "shopping_list_jaccard": 0.222222
+    },
+    {
+      "changed_food_count": 10,
+      "difference_summary": "Large basket change",
+      "left": "fat_loss",
+      "right": "budget_friendly_healthy",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 1.0,
+        "produce": 0.0,
+        "protein_anchor": 0.0
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.090909
+    },
+    {
+      "changed_food_count": 9,
+      "difference_summary": "Large basket change",
+      "left": "maintenance",
+      "right": "high_protein_vegetarian",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 0.0,
+        "produce": 0.333333,
+        "protein_anchor": 0.0
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.1
+    },
+    {
+      "changed_food_count": 10,
+      "difference_summary": "Large basket change",
+      "left": "maintenance",
+      "right": "budget_friendly_healthy",
+      "role_overlaps": {
+        "calorie_booster": 1.0,
+        "carb_base": 0.0,
+        "produce": 0.0,
+        "protein_anchor": 0.0
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.090909
+    },
+    {
+      "changed_food_count": 9,
+      "difference_summary": "Large basket change",
+      "left": "high_protein_vegetarian",
+      "right": "budget_friendly_healthy",
+      "role_overlaps": {
+        "calorie_booster": 0.0,
+        "carb_base": 0.0,
+        "produce": 0.0,
+        "protein_anchor": 0.333333
+      },
+      "shared_food_count": 1,
+      "shopping_list_jaccard": 0.1
+    }
+  ],
+  "presets": {
+    "budget_friendly_healthy": {
+      "estimated_basket_cost": 5.25,
+      "goal_profile": "budget_friendly_healthy",
+      "goal_structure_alignment_score": 1.189394,
+      "hybrid_planner_execution": {
+        "algorithm_version": "hybrid_planner_generalized_v5_main",
+        "candidate_fusion_ran": true,
+        "candidate_generator_backend": "random_forest",
+        "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+        "candidates_ranked_count": 9,
+        "fused_candidate_count": 9,
+        "heuristic_candidate_count": 6,
+        "heuristic_candidate_generation_ran": true,
+        "learned_candidate_count": 4,
+        "learned_candidate_generation_ran": true,
+        "pipeline_mode": "full_hybrid",
+        "raw_candidate_count": 10,
+        "scorer_backend": "sklearn_gradient_boosting",
+        "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+        "scorer_reranking_used": true,
+        "selected_candidate_id": "candidate_02",
+        "selected_candidate_source": "heuristic",
+        "structured_complementarity_enabled": true,
+        "structured_materialization_enabled": true
+      },
+      "label": "Budget-Friendly Healthy",
+      "nutrition_summary": {
+        "calorie_estimated_kcal": 2221.5,
+        "calorie_target_kcal": 2100.0,
+        "carbohydrate_estimated_g": 296.7,
+        "carbohydrate_target_g": 230.0,
+        "fat_estimated_g": 53.8,
+        "fat_target_g": 65.0,
+        "fiber_estimated_g": 49.7,
+        "fiber_target_g": 35.0,
+        "protein_estimated_g": 112.0,
+        "protein_target_g": 120.0
+      },
+      "role_counts": {
+        "calorie_booster": 1,
+        "carb_base": 1,
+        "produce": 2,
+        "protein_anchor": 2
+      },
+      "role_food_ids": {
+        "calorie_booster": [
+          "olive_oil"
+        ],
+        "carb_base": [
+          "oats"
+        ],
+        "produce": [
+          "cabbage",
+          "potatoes"
+        ],
+        "protein_anchor": [
+          "lentils",
+          "eggs"
+        ]
+      },
+      "role_share_gap_total": 0.238459,
+      "selected_candidate_source": "heuristic",
+      "selected_features": {
+        "animal_protein_anchor_count": 0.0,
+        "budget_support_anchor_count": 1.0,
+        "calorie_abs_gap_kcal": 121.5,
+        "calorie_booster_share": 0.06077,
+        "carbohydrate_abs_gap_g": 66.69999999999999,
+        "dairy_or_egg_anchor_count": 1.0,
+        "fat_abs_gap_g": 11.200000000000003,
+        "fruit_produce_count": 0.0,
+        "goal_structure_alignment_score": 1.189394,
+        "high_volume_produce_count": 0.0,
+        "legume_protein_anchor_count": 1.0,
+        "low_cost_produce_count": 2.0,
+        "protein_abs_gap_g": 8.0,
+        "role_share_gap_total": 0.238459,
+        "soy_protein_anchor_count": 0.0
+      },
+      "shopping_food_ids": [
+        "lentils",
+        "eggs",
+        "oats",
+        "cabbage",
+        "potatoes",
+        "olive_oil"
+      ],
+      "visible_structure_judgment": {
+        "notes": [
+          "uses a low-cost legume anchor",
+          "pairs it with eggs or tofu for support",
+          "adds inexpensive fat support"
+        ],
+        "passed": true
+      }
+    },
+    "fat_loss": {
+      "estimated_basket_cost": 14.67,
+      "goal_profile": "fat_loss",
+      "goal_structure_alignment_score": 1.121253,
+      "hybrid_planner_execution": {
+        "algorithm_version": "hybrid_planner_generalized_v5_main",
+        "candidate_fusion_ran": true,
+        "candidate_generator_backend": "random_forest",
+        "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+        "candidates_ranked_count": 6,
+        "fused_candidate_count": 6,
+        "heuristic_candidate_count": 6,
+        "heuristic_candidate_generation_ran": true,
+        "learned_candidate_count": 4,
+        "learned_candidate_generation_ran": true,
+        "pipeline_mode": "full_hybrid",
+        "raw_candidate_count": 10,
+        "scorer_backend": "sklearn_gradient_boosting",
+        "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+        "scorer_reranking_used": true,
+        "selected_candidate_id": "candidate_02",
+        "selected_candidate_source": "heuristic",
+        "structured_complementarity_enabled": true,
+        "structured_materialization_enabled": true
+      },
+      "label": "Fat Loss",
+      "nutrition_summary": {
+        "calorie_estimated_kcal": 1560.7,
+        "calorie_target_kcal": 1800.0,
+        "carbohydrate_estimated_g": 129.5,
+        "carbohydrate_target_g": 160.0,
+        "fat_estimated_g": 38.4,
+        "fat_target_g": 55.0,
+        "fiber_estimated_g": 45.6,
+        "fiber_target_g": 30.0,
+        "protein_estimated_g": 148.2,
+        "protein_target_g": 150.0
+      },
+      "role_counts": {
+        "calorie_booster": 0,
+        "carb_base": 1,
+        "produce": 3,
+        "protein_anchor": 2
+      },
+      "role_food_ids": {
+        "calorie_booster": [],
+        "carb_base": [
+          "oats"
+        ],
+        "produce": [
+          "spinach",
+          "bell_peppers",
+          "broccoli"
+        ],
+        "protein_anchor": [
+          "tuna",
+          "tofu"
+        ]
+      },
+      "role_share_gap_total": 0.219682,
+      "selected_candidate_source": "heuristic",
+      "selected_features": {
+        "animal_protein_anchor_count": 1.0,
+        "budget_support_anchor_count": 1.0,
+        "calorie_abs_gap_kcal": 239.29999999999995,
+        "calorie_booster_share": 0.0,
+        "carbohydrate_abs_gap_g": 30.5,
+        "dairy_or_egg_anchor_count": 0.0,
+        "fat_abs_gap_g": 16.6,
+        "fruit_produce_count": 0.0,
+        "goal_structure_alignment_score": 1.121253,
+        "high_volume_produce_count": 3.0,
+        "legume_protein_anchor_count": 0.0,
+        "low_cost_produce_count": 0.0,
+        "protein_abs_gap_g": 1.8000000000000114,
+        "role_share_gap_total": 0.219682,
+        "soy_protein_anchor_count": 1.0
+      },
+      "shopping_food_ids": [
+        "tuna",
+        "tofu",
+        "oats",
+        "spinach",
+        "bell_peppers",
+        "broccoli"
+      ],
+      "visible_structure_judgment": {
+        "notes": [
+          "no calorie booster",
+          "three-produce volume structure"
+        ],
+        "passed": true
+      }
+    },
+    "high_protein_vegetarian": {
+      "estimated_basket_cost": 12.37,
+      "goal_profile": "high_protein_vegetarian",
+      "goal_structure_alignment_score": 1.397409,
+      "hybrid_planner_execution": {
+        "algorithm_version": "hybrid_planner_generalized_v5_main",
+        "candidate_fusion_ran": true,
+        "candidate_generator_backend": "random_forest",
+        "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+        "candidates_ranked_count": 10,
+        "fused_candidate_count": 10,
+        "heuristic_candidate_count": 6,
+        "heuristic_candidate_generation_ran": true,
+        "learned_candidate_count": 4,
+        "learned_candidate_generation_ran": true,
+        "pipeline_mode": "full_hybrid",
+        "raw_candidate_count": 10,
+        "scorer_backend": "sklearn_gradient_boosting",
+        "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+        "scorer_reranking_used": true,
+        "selected_candidate_id": "candidate_06",
+        "selected_candidate_source": "model",
+        "structured_complementarity_enabled": true,
+        "structured_materialization_enabled": true
+      },
+      "label": "High-Protein Vegetarian",
+      "nutrition_summary": {
+        "calorie_estimated_kcal": 2142.0,
+        "calorie_target_kcal": 2100.0,
+        "carbohydrate_estimated_g": 171.4,
+        "carbohydrate_target_g": 220.0,
+        "fat_estimated_g": 89.5,
+        "fat_target_g": 70.0,
+        "fiber_estimated_g": 40.1,
+        "fiber_target_g": 32.0,
+        "iron_estimated_mg": 39.2,
+        "iron_target_mg": 18.0,
+        "protein_estimated_g": 141.3,
+        "protein_target_g": 140.0
+      },
+      "role_counts": {
+        "calorie_booster": 0,
+        "carb_base": 1,
+        "produce": 2,
+        "protein_anchor": 2
+      },
+      "role_food_ids": {
+        "calorie_booster": [],
+        "carb_base": [
+          "quinoa"
+        ],
+        "produce": [
+          "berries",
+          "spinach"
+        ],
+        "protein_anchor": [
+          "eggs",
+          "tofu"
+        ]
+      },
+      "role_share_gap_total": 0.194103,
+      "selected_candidate_source": "model",
+      "selected_features": {
+        "animal_protein_anchor_count": 0.0,
+        "budget_support_anchor_count": 2.0,
+        "calorie_abs_gap_kcal": 42.0,
+        "calorie_booster_share": 0.0,
+        "carbohydrate_abs_gap_g": 48.599999999999994,
+        "dairy_or_egg_anchor_count": 1.0,
+        "fat_abs_gap_g": 19.5,
+        "fruit_produce_count": 1.0,
+        "goal_structure_alignment_score": 1.397409,
+        "high_volume_produce_count": 1.0,
+        "legume_protein_anchor_count": 0.0,
+        "low_cost_produce_count": 0.0,
+        "protein_abs_gap_g": 1.3000000000000114,
+        "role_share_gap_total": 0.194103,
+        "soy_protein_anchor_count": 1.0
+      },
+      "shopping_food_ids": [
+        "eggs",
+        "tofu",
+        "quinoa",
+        "berries",
+        "spinach"
+      ],
+      "visible_structure_judgment": {
+        "notes": [
+          "protein anchors are fully vegetarian",
+          "combines soy with egg/dairy protein"
+        ],
+        "passed": true
+      }
+    },
+    "maintenance": {
+      "estimated_basket_cost": 8.38,
+      "goal_profile": "maintenance",
+      "goal_structure_alignment_score": 0.633326,
+      "hybrid_planner_execution": {
+        "algorithm_version": "hybrid_planner_generalized_v5_main",
+        "candidate_fusion_ran": true,
+        "candidate_generator_backend": "random_forest",
+        "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+        "candidates_ranked_count": 9,
+        "fused_candidate_count": 9,
+        "heuristic_candidate_count": 6,
+        "heuristic_candidate_generation_ran": true,
+        "learned_candidate_count": 4,
+        "learned_candidate_generation_ran": true,
+        "pipeline_mode": "full_hybrid",
+        "raw_candidate_count": 10,
+        "scorer_backend": "sklearn_gradient_boosting",
+        "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+        "scorer_reranking_used": true,
+        "selected_candidate_id": "candidate_06",
+        "selected_candidate_source": "model",
+        "structured_complementarity_enabled": true,
+        "structured_materialization_enabled": true
+      },
+      "label": "Maintenance",
+      "nutrition_summary": {
+        "calorie_estimated_kcal": 2112.2,
+        "calorie_target_kcal": 2200.0,
+        "carbohydrate_estimated_g": 199.7,
+        "carbohydrate_target_g": 240.0,
+        "fat_estimated_g": 76.6,
+        "fat_target_g": 70.0,
+        "fiber_estimated_g": 38.6,
+        "fiber_target_g": 30.0,
+        "protein_estimated_g": 136.0,
+        "protein_target_g": 130.0
+      },
+      "role_counts": {
+        "calorie_booster": 1,
+        "carb_base": 1,
+        "produce": 2,
+        "protein_anchor": 2
+      },
+      "role_food_ids": {
+        "calorie_booster": [
+          "olive_oil"
+        ],
+        "carb_base": [
+          "wholemeal_bread"
+        ],
+        "produce": [
+          "spinach",
+          "carrots"
+        ],
+        "protein_anchor": [
+          "chicken_breast",
+          "rotisserie_chicken"
+        ]
+      },
+      "role_share_gap_total": 0.3589,
+      "selected_candidate_source": "model",
+      "selected_features": {
+        "animal_protein_anchor_count": 2.0,
+        "budget_support_anchor_count": 0.0,
+        "calorie_abs_gap_kcal": 87.80000000000018,
+        "calorie_booster_share": 0.21305,
+        "carbohydrate_abs_gap_g": 40.30000000000001,
+        "dairy_or_egg_anchor_count": 0.0,
+        "fat_abs_gap_g": 6.599999999999994,
+        "fruit_produce_count": 0.0,
+        "goal_structure_alignment_score": 0.633326,
+        "high_volume_produce_count": 1.0,
+        "legume_protein_anchor_count": 0.0,
+        "low_cost_produce_count": 1.0,
+        "protein_abs_gap_g": 6.0,
+        "role_share_gap_total": 0.3589,
+        "soy_protein_anchor_count": 0.0
+      },
+      "shopping_food_ids": [
+        "chicken_breast",
+        "rotisserie_chicken",
+        "wholemeal_bread",
+        "spinach",
+        "carrots",
+        "olive_oil"
+      ],
+      "visible_structure_judgment": {
+        "notes": [
+          "keeps a moderate booster",
+          "middle-ground mixed basket"
+        ],
+        "passed": true
+      }
+    },
+    "muscle_gain": {
+      "estimated_basket_cost": 9.43,
+      "goal_profile": "muscle_gain",
+      "goal_structure_alignment_score": 1.212851,
+      "hybrid_planner_execution": {
+        "algorithm_version": "hybrid_planner_generalized_v5_main",
+        "candidate_fusion_ran": true,
+        "candidate_generator_backend": "random_forest",
+        "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+        "candidates_ranked_count": 10,
+        "fused_candidate_count": 10,
+        "heuristic_candidate_count": 6,
+        "heuristic_candidate_generation_ran": true,
+        "learned_candidate_count": 4,
+        "learned_candidate_generation_ran": true,
+        "pipeline_mode": "full_hybrid",
+        "raw_candidate_count": 10,
+        "scorer_backend": "sklearn_gradient_boosting",
+        "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+        "scorer_reranking_used": true,
+        "selected_candidate_id": "candidate_05",
+        "selected_candidate_source": "heuristic",
+        "structured_complementarity_enabled": true,
+        "structured_materialization_enabled": true
+      },
+      "label": "Muscle Gain",
+      "nutrition_summary": {
+        "calorie_estimated_kcal": 2873.5,
+        "calorie_target_kcal": 2800.0,
+        "carbohydrate_estimated_g": 349.6,
+        "carbohydrate_target_g": 330.0,
+        "fat_estimated_g": 81.7,
+        "fat_target_g": 85.0,
+        "fiber_estimated_g": 32.5,
+        "fiber_target_g": 35.0,
+        "protein_estimated_g": 171.1,
+        "protein_target_g": 170.0
+      },
+      "role_counts": {
+        "calorie_booster": 1,
+        "carb_base": 1,
+        "produce": 2,
+        "protein_anchor": 2
+      },
+      "role_food_ids": {
+        "calorie_booster": [
+          "olive_oil"
+        ],
+        "carb_base": [
+          "pasta"
+        ],
+        "produce": [
+          "bananas",
+          "bell_peppers"
+        ],
+        "protein_anchor": [
+          "eggs",
+          "chicken_breast"
+        ]
+      },
+      "role_share_gap_total": 0.327986,
+      "selected_candidate_source": "heuristic",
+      "selected_features": {
+        "animal_protein_anchor_count": 1.0,
+        "budget_support_anchor_count": 1.0,
+        "calorie_abs_gap_kcal": 73.5,
+        "calorie_booster_share": 0.031321,
+        "carbohydrate_abs_gap_g": 19.600000000000023,
+        "dairy_or_egg_anchor_count": 1.0,
+        "fat_abs_gap_g": 3.299999999999997,
+        "fruit_produce_count": 1.0,
+        "goal_structure_alignment_score": 1.212851,
+        "high_volume_produce_count": 1.0,
+        "legume_protein_anchor_count": 0.0,
+        "low_cost_produce_count": 1.0,
+        "protein_abs_gap_g": 1.0999999999999943,
+        "role_share_gap_total": 0.327986,
+        "soy_protein_anchor_count": 0.0
+      },
+      "shopping_food_ids": [
+        "eggs",
+        "chicken_breast",
+        "pasta",
+        "bananas",
+        "bell_peppers",
+        "olive_oil"
+      ],
+      "visible_structure_judgment": {
+        "notes": [
+          "includes explicit calorie support",
+          "keeps quick-carb fruit"
+        ],
+        "passed": true
+      }
+    }
+  },
+  "version": "after_changes"
+}

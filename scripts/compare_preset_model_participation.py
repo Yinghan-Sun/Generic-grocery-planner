@@ -12,22 +12,22 @@ import duckdb
 
 from dietdashboard import candidate_debug
 from dietdashboard import model_candidate_generator
-from dietdashboard import route_b_evaluation
-from dietdashboard import route_b_final
+from dietdashboard import hybrid_pipeline_evaluation
+from dietdashboard import hybrid_pipeline_final
 from dietdashboard.store_discovery import DEFAULT_LIMIT as DEFAULT_STORE_LIMIT
 from dietdashboard.store_discovery import DEFAULT_RADIUS_M
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--db-path", type=Path, default=route_b_evaluation.default_db_path(), help="Path to the local DuckDB database.")
-    parser.add_argument("--lat", type=float, default=route_b_final.DEFAULT_LOCATION["lat"], help="Latitude for preset comparison.")
-    parser.add_argument("--lon", type=float, default=route_b_final.DEFAULT_LOCATION["lon"], help="Longitude for preset comparison.")
+    parser.add_argument("--db-path", type=Path, default=hybrid_pipeline_evaluation.default_db_path(), help="Path to the local DuckDB database.")
+    parser.add_argument("--lat", type=float, default=hybrid_pipeline_final.DEFAULT_LOCATION["lat"], help="Latitude for preset comparison.")
+    parser.add_argument("--lon", type=float, default=hybrid_pipeline_final.DEFAULT_LOCATION["lon"], help="Longitude for preset comparison.")
     parser.add_argument("--radius-m", type=float, default=DEFAULT_RADIUS_M, help="Nearby-store search radius in meters.")
     parser.add_argument("--store-limit", type=int, default=DEFAULT_STORE_LIMIT, help="Nearby-store limit.")
     parser.add_argument("--candidate-count", type=int, default=6, help="Total candidates ranked by the scorer.")
     parser.add_argument("--model-candidate-count", type=int, default=4, help="Maximum learned candidates to add in hybrid mode.")
-    parser.add_argument("--scorer-model-path", type=Path, default=route_b_final.FINAL_SCORER_MODEL_PATH, help="Path to the trained plan-scorer artifact.")
+    parser.add_argument("--scorer-model-path", type=Path, default=hybrid_pipeline_final.FINAL_SCORER_MODEL_PATH, help="Path to the trained plan-scorer artifact.")
     parser.add_argument(
         "--candidate-generator-model-path",
         type=Path,
@@ -37,14 +37,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=route_b_final.FINAL_OUTPUT_DIR,
+        default=hybrid_pipeline_final.FINAL_OUTPUT_DIR,
         help="Directory for the preset comparison CSV and JSON outputs.",
     )
     return parser.parse_args()
 
 
 def _selected_scorer_score(response: dict[str, object]) -> float:
-    return route_b_evaluation.selected_scorer_score(response)
+    return hybrid_pipeline_evaluation.selected_scorer_score(response)
 
 
 def _protein_gap(response: dict[str, object]) -> float:
@@ -69,14 +69,14 @@ def _run_system(
     model_candidate_count: int,
     candidate_generator_model_path: Path,
 ) -> dict[str, object]:
-    return route_b_evaluation.run_scored_system(
+    return hybrid_pipeline_evaluation.run_scored_system(
         con,
         preset=preset,
         stores=stores,
         price_context=price_context,
         scorer_model_path=scorer_model_path,
         candidate_count=candidate_count,
-        candidate_generation_config=route_b_final.final_candidate_generation_config(
+        candidate_generation_config=hybrid_pipeline_final.final_candidate_generation_config(
             enable_model_candidates=enable_model_candidates,
             model_candidate_count=model_candidate_count,
             candidate_generator_model_path=candidate_generator_model_path,
@@ -93,7 +93,7 @@ def main() -> int:
     json_path = args.output_dir / "preset_comparison_summary.json"
 
     with duckdb.connect(args.db_path, read_only=True) as con:
-        stores, price_context = route_b_evaluation.load_store_context(
+        stores, price_context = hybrid_pipeline_evaluation.load_store_context(
             con,
             lat=args.lat,
             lon=args.lon,
@@ -102,7 +102,7 @@ def main() -> int:
         )
 
         rows: list[dict[str, object]] = []
-        for preset in route_b_final.MAIN_PRESETS:
+        for preset in hybrid_pipeline_final.MAIN_PRESETS:
             heuristic_response = _run_system(
                 con,
                 preset=preset,
@@ -130,12 +130,12 @@ def main() -> int:
             hybrid_debug = dict(hybrid_response.get("candidate_comparison_debug") or {})
             algorithmic_faithfulness = dict(hybrid_debug.get("algorithmic_faithfulness") or {})
             row = {
-                "route_b_algorithm_version": str(hybrid_response.get("route_b_algorithm_version") or ""),
-                "route_b_structured_complementarity_enabled": int(
-                    bool((hybrid_response.get("route_b_algorithm") or {}).get("structured_complementarity_enabled", True))
+                "hybrid_planner_algorithm_version": str(hybrid_response.get("hybrid_planner_algorithm_version") or ""),
+                "hybrid_planner_structured_complementarity_enabled": int(
+                    bool((hybrid_response.get("hybrid_planner_algorithm") or {}).get("structured_complementarity_enabled", True))
                 ),
-                "route_b_structured_materialization_enabled": int(
-                    bool((hybrid_response.get("route_b_algorithm") or {}).get("structured_materialization_enabled", True))
+                "hybrid_planner_structured_materialization_enabled": int(
+                    bool((hybrid_response.get("hybrid_planner_algorithm") or {}).get("structured_materialization_enabled", True))
                 ),
                 "preset_id": str(preset["preset_id"]),
                 "preset_label": str(preset["label"]),
@@ -238,9 +238,9 @@ def main() -> int:
         writer.writerows(rows)
 
     summary_payload = {
-        "main_algorithm": route_b_final.final_runtime_metadata(),
+        "main_algorithm": hybrid_pipeline_final.final_runtime_metadata(),
         "location": {
-            "label": route_b_final.DEFAULT_LOCATION["label"],
+            "label": hybrid_pipeline_final.DEFAULT_LOCATION["label"],
             "lat": args.lat,
             "lon": args.lon,
             "radius_m": args.radius_m,

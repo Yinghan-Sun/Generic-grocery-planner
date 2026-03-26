@@ -1,9 +1,9 @@
 {
   "main_algorithm": {
-    "algorithm_version": "route_b_generalized_v5_main",
-    "algorithm_label": "Generalized Route B Main",
-    "algorithm_description": "Generalized Route B hybrid planner with structured complementarity, shared model-seed materialization, and the fair scorer artifact.",
-    "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib",
+    "algorithm_version": "hybrid_planner_generalized_v5_main",
+    "algorithm_label": "Generalized Hybrid Planner Main",
+    "algorithm_description": "Generalized hybrid planner pipeline with structured complementarity, shared learned-seed materialization, and the fair scorer artifact.",
+    "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
     "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
     "structured_complementarity_enabled": true,
     "structured_materialization_enabled": true,
@@ -11,18 +11,18 @@
     "model_candidate_count": 4
   },
   "official_artifacts": {
-    "main_algorithm_config_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_main_algorithm_config.json",
-    "preset_comparison_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json",
-    "ablation_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/ablation/route_b_ablation_summary.json",
-    "robustness_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/robustness/route_b_robustness_summary.json",
-    "final_summary_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_final_summary.json",
-    "final_summary_md": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/route_b_final_summary.md"
+    "main_algorithm_config_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/hybrid_planner_main_algorithm_config.json",
+    "preset_comparison_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/preset_comparison_summary.json",
+    "ablation_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/ablation/hybrid_planner_ablation_summary.json",
+    "robustness_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/robustness/hybrid_planner_robustness_summary.json",
+    "final_summary_json": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/hybrid_planner_final_summary.json",
+    "final_summary_md": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/hybrid_planner_final_summary.md"
   },
   "regeneration_commands": {
     "preset_comparison": "make compare-preset-model-participation-final",
-    "ablation": "make route-b-ablation",
-    "robustness": "make route-b-robustness",
-    "final_summary": "make route-b-final-summary"
+    "ablation": "make hybrid-planner-ablation",
+    "robustness": "make hybrid-planner-robustness",
+    "final_summary": "make hybrid-planner-final-summary"
   },
   "baseline_vs_final": {
     "hybrid_score_improved_preset_count": 4,
@@ -89,9 +89,9 @@
         }
       ]
     },
-    "route_b_no_complementarity": {
-      "system_id": "route_b_no_complementarity",
-      "system_label": "Route B Without Structured Complementarity",
+    "hybrid_planner_no_structured_complementarity": {
+      "system_id": "hybrid_planner_no_structured_complementarity",
+      "system_label": "Hybrid Planner Without Structured Complementarity",
       "system_mode": "hybrid",
       "hybrid_score_improved_preset_count": 3,
       "model_selected_preset_count": 3,
@@ -135,9 +135,9 @@
         }
       ]
     },
-    "route_b_no_structured_materialization": {
-      "system_id": "route_b_no_structured_materialization",
-      "system_label": "Route B Without Structured Materialization",
+    "hybrid_planner_no_structured_materialization": {
+      "system_id": "hybrid_planner_no_structured_materialization",
+      "system_label": "Hybrid Planner Without Structured Materialization",
       "system_mode": "hybrid",
       "hybrid_score_improved_preset_count": 3,
       "model_selected_preset_count": 3,
@@ -181,9 +181,9 @@
         }
       ]
     },
-    "route_b_generalized_main": {
-      "system_id": "route_b_generalized_main",
-      "system_label": "Generalized Route B Main",
+    "hybrid_planner_generalized_main": {
+      "system_id": "hybrid_planner_generalized_main",
+      "system_label": "Generalized Hybrid Planner Main",
       "system_mode": "hybrid",
       "hybrid_score_improved_preset_count": 4,
       "model_selected_preset_count": 4,
@@ -253,7 +253,7 @@
     ]
   },
   "why_this_is_the_final_algorithm": [
-    "The runtime now uses one frozen generalized Route B configuration rather than accumulating more preset-specific fixes.",
+    "The runtime now uses one frozen generalized hybrid planner configuration rather than accumulating more preset-specific fixes.",
     "Candidate generation is driven by shared structured terms such as complementarity, novelty, practicality, and nutrient support.",
     "Model materialization uses shared seed-preservation and allocation rules instead of preset-only correction layers.",
     "The fair scorer artifact remains in place, so materially different but valid alternatives are still rankable."

@@ -1,4 +1,4 @@
-"""Shared local evaluation helpers for the frozen Route B final algorithm."""
+"""Shared local evaluation helpers for the frozen hybrid planner pipeline."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import duckdb
 from dietdashboard import candidate_debug
 from dietdashboard import model_candidate_training
 from dietdashboard import plan_scorer
-from dietdashboard import route_b_final
+from dietdashboard import hybrid_pipeline_final
 from dietdashboard.generic_recommender import recommend_generic_foods, resolve_price_context
 from dietdashboard.hybrid_planner import _best_heuristic_candidate_by_generation, _build_candidate_pool
 from dietdashboard.store_discovery import DEFAULT_LIMIT as DEFAULT_STORE_LIMIT
@@ -39,9 +39,9 @@ def merged_scorer_config(
     candidate_count: int | None = None,
     debug: bool = True,
 ) -> dict[str, object]:
-    return route_b_final.final_scorer_config(
+    return hybrid_pipeline_final.final_scorer_config(
         debug=debug,
-        candidate_count=int(candidate_count or route_b_final.final_runtime_metadata()["candidate_count"]),
+        candidate_count=int(candidate_count or hybrid_pipeline_final.final_runtime_metadata()["candidate_count"]),
         scorer_model_path=scorer_model_path,
     )
 
@@ -51,7 +51,7 @@ def merged_candidate_generation_config(
     *,
     debug: bool = True,
 ) -> dict[str, object]:
-    merged = route_b_final.final_candidate_generation_config(debug=debug)
+    merged = hybrid_pipeline_final.final_candidate_generation_config(debug=debug)
     merged.update(dict(config or {}))
     merged["debug"] = bool(debug)
     return merged
@@ -98,23 +98,26 @@ def estimated_basket_cost(payload: Mapping[str, object]) -> float:
     return round(float(candidate_debug.estimated_cost(payload)), 6)
 
 
-def route_b_metadata(
+def hybrid_planner_metadata(
     *,
     scorer_model_path: Path,
     candidate_generation_config: Mapping[str, object],
 ) -> dict[str, object]:
     return {
-        **route_b_final.final_runtime_metadata(),
+        **hybrid_pipeline_final.final_runtime_metadata(),
         "scorer_model_path": str(scorer_model_path),
-        "algorithm_version": str(candidate_generation_config.get("algorithm_version") or route_b_final.FINAL_ALGORITHM_VERSION),
+        "algorithm_version": str(candidate_generation_config.get("algorithm_version") or hybrid_pipeline_final.FINAL_ALGORITHM_VERSION),
         "structured_complementarity_enabled": bool(candidate_generation_config.get("structured_complementarity_enabled", True)),
         "structured_materialization_enabled": bool(candidate_generation_config.get("structured_materialization_enabled", True)),
         "candidate_generator_model_path": str(
-            candidate_generation_config.get("candidate_generator_model_path") or route_b_final.FINAL_CANDIDATE_GENERATOR_MODEL_PATH
+            candidate_generation_config.get("candidate_generator_model_path") or hybrid_pipeline_final.FINAL_CANDIDATE_GENERATOR_MODEL_PATH
         ),
         "candidate_generator_backend": str(candidate_generation_config.get("candidate_generator_backend") or "auto"),
         "model_candidates_enabled": bool(candidate_generation_config.get("enable_model_candidates", True)),
-        "model_candidate_count": int(candidate_generation_config.get("model_candidate_count") or route_b_final.final_runtime_metadata()["model_candidate_count"]),
+        "model_candidate_count": int(
+            candidate_generation_config.get("model_candidate_count")
+            or hybrid_pipeline_final.final_runtime_metadata()["model_candidate_count"]
+        ),
     }
 
 
@@ -148,17 +151,17 @@ def run_scored_system(
         scorer_config=merged_scorer,
         candidate_generation_config=merged_generation,
     )
-    algorithm_metadata = route_b_metadata(
+    algorithm_metadata = hybrid_planner_metadata(
         scorer_model_path=Path(str(merged_scorer["scorer_model_path"])),
         candidate_generation_config=merged_generation,
     )
-    runtime_algorithm = dict(response.get("route_b_algorithm") or {})
-    response["route_b_algorithm"] = {
+    runtime_algorithm = dict(response.get("hybrid_planner_algorithm") or {})
+    response["hybrid_planner_algorithm"] = {
         **algorithm_metadata,
         **runtime_algorithm,
         "algorithm_version": str(algorithm_metadata["algorithm_version"]),
     }
-    response["route_b_algorithm_version"] = str(response["route_b_algorithm"]["algorithm_version"])
+    response["hybrid_planner_algorithm_version"] = str(response["hybrid_planner_algorithm"]["algorithm_version"])
     return response
 
 
@@ -180,11 +183,11 @@ def run_legacy_heuristic(
     scorer_model_path: Path | None = None,
     candidate_count: int | None = None,
 ) -> dict[str, object]:
-    scorer_path = Path(str(scorer_model_path or route_b_final.FINAL_SCORER_MODEL_PATH))
+    scorer_path = Path(str(scorer_model_path or hybrid_pipeline_final.FINAL_SCORER_MODEL_PATH))
     merged_generation = merged_candidate_generation_config(
         {
             "enable_model_candidates": False,
-            "algorithm_version": f"{route_b_final.FINAL_ALGORITHM_VERSION}__legacy_heuristic",
+            "algorithm_version": f"{hybrid_pipeline_final.FINAL_ALGORITHM_VERSION}__legacy_heuristic",
         },
         debug=True,
     )
@@ -199,7 +202,7 @@ def run_legacy_heuristic(
         shopping_mode=str(preset["shopping_mode"]),
         price_context=dict(price_context),
         stores=list(stores),
-        candidate_count=int(candidate_count or route_b_final.final_runtime_metadata()["candidate_count"]),
+        candidate_count=int(candidate_count or hybrid_pipeline_final.final_runtime_metadata()["candidate_count"]),
         candidate_generation_config=merged_generation,
     )
     selected_candidate = _best_heuristic_candidate_by_generation(candidates) or candidates[0]
@@ -222,10 +225,10 @@ def run_legacy_heuristic(
         **pool_debug,
         "selection_mode": "legacy_heuristic_best_by_generation",
     }
-    response["route_b_algorithm"] = route_b_metadata(
+    response["hybrid_planner_algorithm"] = hybrid_planner_metadata(
         scorer_model_path=scorer_path,
         candidate_generation_config=merged_generation,
     )
-    response["route_b_algorithm"]["selection_mode"] = "legacy_heuristic_best_by_generation"
-    response["route_b_algorithm_version"] = str(response["route_b_algorithm"]["algorithm_version"])
+    response["hybrid_planner_algorithm"]["selection_mode"] = "legacy_heuristic_best_by_generation"
+    response["hybrid_planner_algorithm_version"] = str(response["hybrid_planner_algorithm"]["algorithm_version"])
     return response

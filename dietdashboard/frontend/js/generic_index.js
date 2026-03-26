@@ -5,7 +5,7 @@ import { StoreResults } from "./components/store_results";
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const DEFAULT_SCORER_CANDIDATE_COUNT = 6;
 const DEFAULT_MODEL_CANDIDATE_COUNT = 4;
-const DEFAULT_CANDIDATE_GENERATOR_BACKEND = "auto";
+const DEFAULT_CANDIDATE_GENERATOR_BACKEND = "random_forest";
 const ALLOWED_CANDIDATE_GENERATOR_BACKENDS = new Set([
   "auto",
   "logistic_regression",
@@ -163,15 +163,29 @@ function frontendAppConfig() {
   return window.GENERIC_APP_CONFIG || {};
 }
 
-function defaultPlannerState() {
-  const isProduction = Boolean(frontendAppConfig().isProduction);
+function developerModeEnabled() {
+  return Boolean(frontendAppConfig().developerMode);
+}
+
+function hybridPlannerDefaults() {
+  const defaults = frontendAppConfig().hybridPlannerDefaults || {};
   return {
-    enable_model_candidates: !isProduction,
-    model_candidate_count: String(DEFAULT_MODEL_CANDIDATE_COUNT),
-    candidate_generator_backend: DEFAULT_CANDIDATE_GENERATOR_BACKEND,
-    debug_candidate_generation: !isProduction,
-    debug_scorer: !isProduction,
-    candidate_count: String(DEFAULT_SCORER_CANDIDATE_COUNT)
+    candidateCount: Number(defaults.candidateCount || DEFAULT_SCORER_CANDIDATE_COUNT),
+    modelCandidateCount: Number(defaults.modelCandidateCount || DEFAULT_MODEL_CANDIDATE_COUNT),
+    candidateGeneratorBackend: String(defaults.candidateGeneratorBackend || DEFAULT_CANDIDATE_GENERATOR_BACKEND)
+  };
+}
+
+function defaultPlannerState() {
+  const defaults = hybridPlannerDefaults();
+  return {
+    developerMode: developerModeEnabled(),
+    enable_model_candidates: true,
+    model_candidate_count: String(defaults.modelCandidateCount),
+    candidate_generator_backend: defaults.candidateGeneratorBackend,
+    debug_candidate_generation: false,
+    debug_scorer: false,
+    candidate_count: String(defaults.candidateCount)
   };
 }
 
@@ -263,6 +277,9 @@ function currentLocationSearch() {
 }
 
 export function getScorerQueryOverrides(search = currentLocationSearch()) {
+  if (!developerModeEnabled()) {
+    return {};
+  }
   const params = new URLSearchParams(search || "");
   const overrides = {};
 
@@ -362,13 +379,7 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
     pantry_items: Array.isArray(currentState.pantry_items) ? currentState.pantry_items : [],
     store_limit: Number(currentState.store_limit),
     days: Number(currentState.days || 1),
-    shopping_mode: currentState.shopping_mode || "balanced",
-    enable_model_candidates: Boolean(currentState.enable_model_candidates),
-    model_candidate_count: Number(currentState.model_candidate_count || DEFAULT_MODEL_CANDIDATE_COUNT),
-    candidate_generator_backend: currentState.candidate_generator_backend || DEFAULT_CANDIDATE_GENERATOR_BACKEND,
-    debug_candidate_generation: Boolean(currentState.debug_candidate_generation),
-    debug_scorer: Boolean(currentState.debug_scorer),
-    candidate_count: Number(currentState.candidate_count || DEFAULT_SCORER_CANDIDATE_COUNT)
+    shopping_mode: currentState.shopping_mode || "balanced"
   };
 
   const currentStoreContext = storeLookupContext(currentState);
@@ -395,7 +406,16 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
     }
   }
 
-  Object.assign(payload, getScorerQueryOverrides(search));
+  if (developerModeEnabled()) {
+    const defaults = hybridPlannerDefaults();
+    payload.enable_model_candidates = Boolean(currentState.enable_model_candidates);
+    payload.model_candidate_count = Number(currentState.model_candidate_count || defaults.modelCandidateCount);
+    payload.candidate_generator_backend = currentState.candidate_generator_backend || defaults.candidateGeneratorBackend;
+    payload.debug_candidate_generation = Boolean(currentState.debug_candidate_generation);
+    payload.debug_scorer = Boolean(currentState.debug_scorer);
+    payload.candidate_count = Number(currentState.candidate_count || defaults.candidateCount);
+    Object.assign(payload, getScorerQueryOverrides(search));
+  }
   return payload;
 }
 

@@ -1,5 +1,12 @@
 function checkboxChecked(form, name) {
-  return form.querySelector(`[name="${name}"]`)?.checked || false;
+  const input = form.querySelector(`[name="${name}"]`);
+  if (!input) {
+    return false;
+  }
+  if (input.type === "hidden") {
+    return String(input.value || "").trim().toLowerCase() === "true";
+  }
+  return input.checked || false;
 }
 
 function checkedValues(form, name) {
@@ -64,6 +71,7 @@ export function LocationInput(parent, state, actions) {
     .join("");
 
   const controlsDisabled = state.isLocating || state.isResolvingAddress || state.isLookingUpStores || state.isGeneratingRecommendations;
+  const developerMode = Boolean(state.developerMode);
   const pantryCheckboxes = COMMON_PANTRY_ITEMS
     .map(
       item => `
@@ -79,6 +87,78 @@ export function LocationInput(parent, state, actions) {
       `
     )
     .join("");
+  const plannerControls = developerMode
+    ? `
+      <details class="generic-advanced">
+        <summary>Developer planner overrides</summary>
+        <p class="generic-help">These controls are hidden from the normal one-click flow. Use them only when you need to inspect or compare internal hybrid-planner behavior.</p>
+        <div class="generic-form-grid">
+          <label>
+            Learned candidates to add
+            <input
+              name="model_candidate_count"
+              type="number"
+              min="1"
+              max="8"
+              step="1"
+              value="${escapeHtml(state.model_candidate_count)}"
+            />
+            <span class="generic-help">How many learned candidate baskets to add before fusion and reranking.</span>
+          </label>
+          <label>
+            Total candidates reranked
+            <input
+              name="candidate_count"
+              type="number"
+              min="1"
+              max="12"
+              step="1"
+              value="${escapeHtml(state.candidate_count)}"
+            />
+            <span class="generic-help">How many fused candidates the trained scorer reranks before choosing the final basket.</span>
+          </label>
+          <label>
+            Candidate generator backend
+            <select name="candidate_generator_backend">
+              <option value="auto" ${state.candidate_generator_backend === "auto" ? "selected" : ""}>Auto</option>
+              <option value="logistic_regression" ${state.candidate_generator_backend === "logistic_regression" ? "selected" : ""}>Logistic regression</option>
+              <option value="random_forest" ${state.candidate_generator_backend === "random_forest" ? "selected" : ""}>Random forest</option>
+              <option value="hist_gradient_boosting" ${state.candidate_generator_backend === "hist_gradient_boosting" ? "selected" : ""}>HistGradientBoosting</option>
+            </select>
+            <span class="generic-help">Choose a backend only when comparing internal candidate-generator artifacts.</span>
+          </label>
+        </div>
+        <div class="generic-checkboxes" style="margin-top: 0.75rem">
+          <label>
+            <input name="enable_model_candidates" type="checkbox" ${state.enable_model_candidates ? "checked" : ""} />
+            Enable learned candidates
+          </label>
+          <label>
+            <input name="debug_candidate_generation" type="checkbox" ${state.debug_candidate_generation ? "checked" : ""} />
+            Show candidate-generation debug
+          </label>
+          <label>
+            <input name="debug_scorer" type="checkbox" ${state.debug_scorer ? "checked" : ""} />
+            Show scorer debug
+          </label>
+        </div>
+      </details>
+    `
+    : `
+      <div class="generic-list-item" style="margin-top: 1rem">
+        <div class="generic-inline-group">
+          <h3>How recommendations run</h3>
+          <span class="generic-badge">Automatic hybrid pipeline</span>
+        </div>
+        <p class="generic-help">Click Recommend once and the app automatically runs heuristic candidate generation, learned candidate generation, candidate fusion, trained scorer reranking, and nearby store-fit ranking.</p>
+        <input name="enable_model_candidates" type="hidden" value="true" />
+        <input name="model_candidate_count" type="hidden" value="${escapeHtml(state.model_candidate_count)}" />
+        <input name="candidate_generator_backend" type="hidden" value="${escapeHtml(state.candidate_generator_backend)}" />
+        <input name="debug_candidate_generation" type="hidden" value="false" />
+        <input name="debug_scorer" type="hidden" value="false" />
+        <input name="candidate_count" type="hidden" value="${escapeHtml(state.candidate_count)}" />
+      </div>
+    `;
 
   parent.innerHTML = `
     <form id="generic-input-form" novalidate>
@@ -270,60 +350,7 @@ export function LocationInput(parent, state, actions) {
         </div>
       </details>
 
-      <details class="generic-advanced">
-        <summary>Advanced planner settings</summary>
-        <p class="generic-help">Local demo mode keeps Route B enabled by default so learned candidates join the heuristic pool. Turn it off here only when you want a clean heuristic-only baseline comparison.</p>
-        <div class="generic-form-grid">
-          <label>
-            Model candidates to add
-            <input
-              name="model_candidate_count"
-              type="number"
-              min="1"
-              max="8"
-              step="1"
-              value="${escapeHtml(state.model_candidate_count)}"
-            />
-            <span class="generic-help">How many learned candidate baskets to add before fusion and ranking.</span>
-          </label>
-          <label>
-            Total candidates ranked
-            <input
-              name="candidate_count"
-              type="number"
-              min="1"
-              max="12"
-              step="1"
-              value="${escapeHtml(state.candidate_count)}"
-            />
-            <span class="generic-help">How many fused candidates the scorer ranks before choosing the final basket.</span>
-          </label>
-          <label>
-            Candidate generator backend
-            <select name="candidate_generator_backend">
-              <option value="auto" ${state.candidate_generator_backend === "auto" ? "selected" : ""}>Auto</option>
-              <option value="logistic_regression" ${state.candidate_generator_backend === "logistic_regression" ? "selected" : ""}>Logistic regression</option>
-              <option value="random_forest" ${state.candidate_generator_backend === "random_forest" ? "selected" : ""}>Random forest</option>
-              <option value="hist_gradient_boosting" ${state.candidate_generator_backend === "hist_gradient_boosting" ? "selected" : ""}>HistGradientBoosting</option>
-            </select>
-            <span class="generic-help">Auto uses the selected local artifact backend. Pick one explicitly if you want to compare backends.</span>
-          </label>
-        </div>
-        <div class="generic-checkboxes" style="margin-top: 0.75rem">
-          <label>
-            <input name="enable_model_candidates" type="checkbox" ${state.enable_model_candidates ? "checked" : ""} />
-            Enable learned candidates
-          </label>
-          <label>
-            <input name="debug_candidate_generation" type="checkbox" ${state.debug_candidate_generation ? "checked" : ""} />
-            Show candidate-generation debug
-          </label>
-          <label>
-            <input name="debug_scorer" type="checkbox" ${state.debug_scorer ? "checked" : ""} />
-            Show scorer debug
-          </label>
-        </div>
-      </details>
+      ${plannerControls}
 
       <div class="generic-actions">
         <button type="button" id="use-location-button" ${controlsDisabled ? "disabled" : ""}>
@@ -333,7 +360,7 @@ export function LocationInput(parent, state, actions) {
           ${state.isResolvingAddress || state.isLookingUpStores ? "Looking Up..." : "Find Nearby Supermarkets"}
         </button>
         <button type="submit" ${controlsDisabled ? "disabled" : ""}>
-          ${state.isResolvingAddress || state.isGeneratingRecommendations ? "Generating..." : "Build Shopping List"}
+          ${state.isResolvingAddress || state.isGeneratingRecommendations ? "Generating..." : "Recommend"}
         </button>
       </div>
 

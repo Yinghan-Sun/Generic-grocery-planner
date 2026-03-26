@@ -119,10 +119,10 @@ The repo keeps `*.db` ignored by default, so those database files should be trea
 
 ## Run Locally
 
-Dependency install:
+Dependency install for the normal hybrid runtime:
 
 ```bash
-uv sync --frozen --no-dev
+uv sync --frozen --extra ml
 ```
 
 Frontend build:
@@ -201,14 +201,14 @@ Generated artifacts land in:
 artifacts/plan_scorer/
 ```
 
-Runtime request flags:
+Developer-only request overrides:
 - `candidate_count`
 - `scorer_model_path`
 - `debug_scorer`
 
 Runtime environment variables:
 - `TRAINED_SCORER_CANDIDATE_COUNT=6`
-- `TRAINED_SCORER_MODEL_PATH=artifacts/plan_scorer/plan_candidate_scorer.joblib`
+- `TRAINED_SCORER_MODEL_PATH=artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib`
 - `TRAINED_SCORER_DEBUG=0|1`
 
 See [Plan Scorer Runtime](docs/plan-scorer.md) for the training-data strategy, feature set,
@@ -216,16 +216,16 @@ artifact layout, and runtime behavior.
 
 ## Hybrid Learned Candidate Generator
 
-The planner now supports an additive Route B upgrade:
+The normal recommendation flow now runs the full hybrid planner pipeline automatically:
 
 1. keep the deterministic heuristic planner
 2. add a trainable local candidate generator
 3. fuse heuristic and learned candidates
 4. rank the fused pool with the existing local scorer
 
-Runtime stays local-only. The learned path is optional and disabled by default.
+In the standard UI, clicking `Recommend` once runs that full pipeline automatically. Normal users do not choose model backends, candidate counts, scorer paths, or debug flags.
 
-New runtime request flags:
+Developer-only runtime overrides:
 
 - `enable_model_candidates`
 - `model_candidate_count`

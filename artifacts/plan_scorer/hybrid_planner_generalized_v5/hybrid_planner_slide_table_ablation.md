@@ -1,0 +1,11 @@
+# Hybrid Planner Slide Table: Ablation Outcomes
+
+Higher model wins and score improvements indicate more of the frozen final behavior was preserved.
+
+| component                                         | model_wins | score_improved_presets | source_changed_presets | materially_different_presets | current_full_wins_lost |
+| ------------------------------------------------- | ---------- | ---------------------- | ---------------------- | ---------------------------- | ---------------------- |
+| Heuristic Legacy Baseline                         | 0          | 0                      | 0                      | 4                            | 4                      |
+| Heuristic + Scorer Only                           | 0          | 0                      | 0                      | 0                            | 4                      |
+| Hybrid Planner Without Structured Complementarity | 3          | 3                      | 3                      | 3                            | 1                      |
+| Hybrid Planner Without Structured Materialization | 3          | 3                      | 3                      | 3                            | 1                      |
+| Generalized Hybrid Planner Main                   | 4          | 4                      | 4                      | 4                            | 0                      |

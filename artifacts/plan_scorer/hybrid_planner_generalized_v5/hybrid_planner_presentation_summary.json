@@ -1,10 +1,11 @@
 {
-  "algorithm_to_present": "route_b_generalized_v5_main",
-  "label": "Generalized Route B Main",
+  "algorithm_to_present": "hybrid_planner_generalized_v5_main",
+  "label": "Generalized Hybrid Planner Main",
   "what_the_system_does": [
     "Keeps the deterministic grocery planner as the baseline path.",
     "Adds a learned local candidate generator that proposes extra structured basket seeds.",
-    "Uses one fair scorer to rank heuristic and learned candidates together."
+    "Uses one fair scorer to rank heuristic and learned candidates together.",
+    "Runs as a one-click recommendation flow in the normal UI without user-facing model-selection controls."
   ],
   "baseline_vs_final": {
     "hybrid_score_improved_preset_count": 4,
@@ -74,10 +75,10 @@
     "fat_loss_explanation": "Materially-different model candidates survived, but the strongest one still lost due to poor produce choice. It lost mainly on repetition penalty."
   },
   "use_this_version": {
-    "algorithm_version": "route_b_generalized_v5_main",
-    "scorer_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib",
+    "algorithm_version": "hybrid_planner_generalized_v5_main",
+    "scorer_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
     "candidate_generator_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
-    "preset_comparison_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5/preset_comparison_summary.json",
+    "preset_comparison_artifact": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5/preset_comparison_summary.json",
     "regenerate_preset_comparison_command": "make compare-preset-model-participation-final"
   }
 }

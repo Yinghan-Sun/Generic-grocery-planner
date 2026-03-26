@@ -35,7 +35,7 @@ API routes:
 3. The frontend can geocode the address to coordinates.
 4. The frontend calls `GET /api/stores/nearby`.
 5. The frontend submits targets, preferences, pantry items, and nearby stores to `POST /api/recommendations/generic`.
-6. The backend builds multiple deterministic heuristic candidates, can optionally add learned candidates from a local trained model, ranks the fused set with a local trained scorer, and returns the highest-scoring result.
+6. The backend automatically builds deterministic heuristic candidates, adds learned candidates from the frozen local candidate-generator artifact, fuses and deduplicates the combined pool, ranks it with the trained scorer, and returns the highest-scoring result.
 7. The backend adds representative regional price guidance and store-fit metadata.
 8. The frontend renders the shopping list, basket summary, store picks, and export actions.
 

@@ -14,7 +14,7 @@ explicitly instead of falling back to another planner path.
 The scorer now ranks both:
 
 - heuristic-only candidate pools
-- fused heuristic + learned candidate pools when the optional candidate-generator model is enabled
+- fused heuristic + learned candidate pools in the standard app flow
 
 ## Training Data
 
@@ -89,9 +89,11 @@ Default outputs:
 - `plan_candidate_training_metrics.json`
 - `plan_candidate_feature_summary.csv`
 
-## Runtime Flags
+## Runtime Controls
 
-API request fields:
+The normal UI does not ask the user for these values. The standard recommendation flow uses the frozen hybrid-planner defaults and the trained scorer automatically.
+
+Developer-only API request overrides:
 
 - `candidate_count`
 - `scorer_model_path`
@@ -102,7 +104,7 @@ API request fields:
 - `candidate_generator_backend`
 - `debug_candidate_generation`
 
-Environment variables:
+Developer-oriented environment variables:
 
 - `TRAINED_SCORER_CANDIDATE_COUNT`
 - `TRAINED_SCORER_MODEL_PATH`

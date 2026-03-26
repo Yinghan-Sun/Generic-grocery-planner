@@ -1,0 +1,12 @@
+{
+  "algorithm_version": "hybrid_planner_generalized_v5_main",
+  "algorithm_label": "Generalized Hybrid Planner Main",
+  "algorithm_description": "Generalized hybrid planner pipeline with structured complementarity, shared learned-seed materialization, and the fair scorer artifact.",
+  "scorer_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib",
+  "candidate_generator_model_path": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib",
+  "structured_complementarity_enabled": true,
+  "structured_materialization_enabled": true,
+  "candidate_count": 6,
+  "model_candidate_count": 4,
+  "final_output_dir": "/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5"
+}

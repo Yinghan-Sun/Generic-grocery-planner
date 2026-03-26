@@ -1,6 +1,6 @@
 system_id,system_label,model_selected_preset_count,hybrid_score_improved_preset_count,selected_candidate_source_changed_preset_count,materially_different_preset_count,average_score_delta_vs_heuristic_scorer
 heuristic_legacy,Heuristic Legacy Baseline,0,0,0,4,-1.302724
 heuristic_scorer_only,Heuristic + Scorer Only,0,0,0,0,0.0
-route_b_no_complementarity,Route B Without Structured Complementarity,3,3,3,3,0.182698
-route_b_no_structured_materialization,Route B Without Structured Materialization,3,3,3,3,0.034601
-route_b_generalized_main,Generalized Route B Main,4,4,4,4,0.213597
+hybrid_planner_no_structured_complementarity,Hybrid Planner Without Structured Complementarity,3,3,3,3,0.182698
+hybrid_planner_no_structured_materialization,Hybrid Planner Without Structured Materialization,3,3,3,3,0.034601
+hybrid_planner_generalized_main,Generalized Hybrid Planner Main,4,4,4,4,0.213597

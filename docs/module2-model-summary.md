@@ -20,11 +20,11 @@ This turns the planner from heuristic-only into a hybrid decision system:
 
 The final presentation version is frozen as:
 
-- algorithm version: `route_b_generalized_v5_main`
-- label: `Generalized Route B Main`
-- frozen scorer artifact: [`artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib`](/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_fair_v1/plan_candidate_scorer.joblib)
+- algorithm version: `hybrid_planner_generalized_v5_main`
+- label: `Generalized Hybrid Planner Main`
+- frozen scorer artifact: [`artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib`](/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_fair_v1/plan_candidate_scorer.joblib)
 - frozen candidate-generator artifact: [`artifacts/candidate_generator/candidate_generator_best.joblib`](/Users/yinghansun/Desktop/diet-optimization-main/artifacts/candidate_generator/candidate_generator_best.joblib)
-- final evaluation output directory: [`artifacts/plan_scorer/route_b_generalized_v5`](/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/route_b_generalized_v5)
+- final evaluation output directory: [`artifacts/plan_scorer/hybrid_planner_generalized_v5`](/Users/yinghansun/Desktop/diet-optimization-main/artifacts/plan_scorer/hybrid_planner_generalized_v5)
 
 This is the version used for the final preset comparison, ablation study, robustness sweep, and presentation-ready summary artifacts.
 

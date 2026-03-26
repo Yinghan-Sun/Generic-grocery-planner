@@ -85,7 +85,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--new-scorer-model-path",
         type=Path,
-        default=plan_scorer.default_model_dir() / "route_b_fair_v1" / plan_scorer.default_model_path().name,
+        default=plan_scorer.default_model_dir() / "hybrid_planner_fair_v1" / plan_scorer.default_model_path().name,
         help="Path to the new scorer artifact.",
     )
     parser.add_argument(

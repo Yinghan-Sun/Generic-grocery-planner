@@ -10,6 +10,7 @@ from flask import Flask, g, render_template, request, url_for
 from flask_compress import Compress
 
 from dietdashboard.generic_recommender import recommend_generic_foods, resolve_price_context
+from dietdashboard import hybrid_pipeline_final
 from dietdashboard.model_candidate_generator import ModelCandidateArtifactError
 from dietdashboard.plan_scorer import PlanScorerArtifactError
 from dietdashboard.request_logging import setup_logging
@@ -28,12 +29,14 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 TEMPLATE_FOLDER = Path(__file__).parent / "frontend/html"
 STATIC_FOLDER = Path(__file__).parent / "static"
 IS_PROD = os.getenv("PROD", "0") == "1"
-DEFAULT_TRAINED_SCORER_CANDIDATE_COUNT = 6
+FINAL_RUNTIME_DEFAULTS = hybrid_pipeline_final.final_runtime_metadata()
+DEFAULT_TRAINED_SCORER_CANDIDATE_COUNT = int(FINAL_RUNTIME_DEFAULTS["candidate_count"])
 MAX_TRAINED_SCORER_CANDIDATE_COUNT = 12
-DEFAULT_TRAINED_SCORER_MODEL_PATH = str(Path(__file__).parent.parent / "artifacts" / "plan_scorer" / "plan_candidate_scorer.joblib")
-DEFAULT_MODEL_CANDIDATE_COUNT = 4
+DEFAULT_TRAINED_SCORER_MODEL_PATH = str(hybrid_pipeline_final.FINAL_SCORER_MODEL_PATH)
+DEFAULT_MODEL_CANDIDATE_COUNT = int(FINAL_RUNTIME_DEFAULTS["model_candidate_count"])
 MAX_MODEL_CANDIDATE_COUNT = 8
-DEFAULT_CANDIDATE_GENERATOR_MODEL_PATH = str(Path(__file__).parent.parent / "artifacts" / "candidate_generator" / "candidate_generator_best.joblib")
+DEFAULT_CANDIDATE_GENERATOR_MODEL_PATH = str(hybrid_pipeline_final.FINAL_CANDIDATE_GENERATOR_MODEL_PATH)
+DEFAULT_CANDIDATE_GENERATOR_BACKEND = str(FINAL_RUNTIME_DEFAULTS["candidate_generator_backend"])
 
 
 def get_con() -> duckdb.DuckDBPyConnection:
@@ -111,13 +114,33 @@ def create_app() -> Flask:
     def json_error(message: str, status: int = 400):
         return app.json.response({"error": message}), status
 
+    def developer_ui_enabled() -> bool:
+        if IS_PROD:
+            return False
+        try:
+            return parse_bool(request.args.get("developer"), default=False)
+        except ValueError:
+            return False
+
+    def frontend_app_config() -> dict[str, object]:
+        return {
+            "isProduction": IS_PROD,
+            "developerMode": developer_ui_enabled(),
+            "hybridPlannerDefaults": {
+                "algorithmVersion": str(FINAL_RUNTIME_DEFAULTS["algorithm_version"]),
+                "candidateCount": int(FINAL_RUNTIME_DEFAULTS["candidate_count"]),
+                "modelCandidateCount": int(FINAL_RUNTIME_DEFAULTS["model_candidate_count"]),
+                "candidateGeneratorBackend": str(FINAL_RUNTIME_DEFAULTS["candidate_generator_backend"]),
+            },
+        }
+
     @app.route("/")
     def index():
-        return render_template("generic_dashboard.html", is_production=IS_PROD)
+        return render_template("generic_dashboard.html", is_production=IS_PROD, generic_app_config=frontend_app_config())
 
     @app.route("/generic")
     def generic():
-        return render_template("generic_dashboard.html", is_production=IS_PROD)
+        return render_template("generic_dashboard.html", is_production=IS_PROD, generic_app_config=frontend_app_config())
 
     @app.route("/about")
     def about():
@@ -168,6 +191,7 @@ def create_app() -> Flask:
             return json_error("stores must be a list when provided.")
 
         try:
+            final_runtime_defaults = hybrid_pipeline_final.final_runtime_metadata()
             lat = parse_float(location.get("lat"), "location.lat")
             lon = parse_float(location.get("lon"), "location.lon")
             protein_target_g = parse_float(targets.get("protein"), "targets.protein")
@@ -184,20 +208,32 @@ def create_app() -> Flask:
             days = parse_int(data.get("days", 1), "days")
             shopping_mode = parse_choice(data.get("shopping_mode"), "shopping_mode", {"fresh", "balanced", "bulk"}, "balanced")
             candidate_count = parse_int(
-                data.get("candidate_count", os.getenv("TRAINED_SCORER_CANDIDATE_COUNT", str(DEFAULT_TRAINED_SCORER_CANDIDATE_COUNT))),
+                data.get(
+                    "candidate_count",
+                    os.getenv("TRAINED_SCORER_CANDIDATE_COUNT", str(final_runtime_defaults["candidate_count"])),
+                ),
                 "candidate_count",
             )
             debug_scorer = parse_bool(data.get("debug_scorer"), default=os.getenv("TRAINED_SCORER_DEBUG", "0") == "1")
-            enable_model_candidates = parse_bool(data.get("enable_model_candidates"), default=os.getenv("ENABLE_MODEL_CANDIDATES", "0") == "1")
+            enable_model_candidates = parse_bool(
+                data.get("enable_model_candidates"),
+                default=parse_bool(os.getenv("ENABLE_MODEL_CANDIDATES"), default=bool(final_runtime_defaults["model_candidates_enabled"])),
+            )
             model_candidate_count = parse_int(
-                data.get("model_candidate_count", os.getenv("MODEL_CANDIDATE_COUNT", str(DEFAULT_MODEL_CANDIDATE_COUNT))),
+                data.get(
+                    "model_candidate_count",
+                    os.getenv("MODEL_CANDIDATE_COUNT", str(final_runtime_defaults["model_candidate_count"])),
+                ),
                 "model_candidate_count",
             )
             candidate_generator_backend = parse_choice(
-                data.get("candidate_generator_backend"),
+                data.get(
+                    "candidate_generator_backend",
+                    os.getenv("CANDIDATE_GENERATOR_BACKEND", str(final_runtime_defaults["candidate_generator_backend"])),
+                ),
                 "candidate_generator_backend",
                 {"auto", "logistic_regression", "random_forest", "hist_gradient_boosting"},
-                "auto",
+                DEFAULT_CANDIDATE_GENERATOR_BACKEND,
             )
             debug_candidate_generation = parse_bool(
                 data.get("debug_candidate_generation"),
@@ -217,11 +253,14 @@ def create_app() -> Flask:
                 ),
             }
             pantry_items = [str(food_id).strip() for food_id in pantry_items_raw if str(food_id).strip()]
-            scorer_model_path_raw = data.get("scorer_model_path", os.getenv("TRAINED_SCORER_MODEL_PATH", DEFAULT_TRAINED_SCORER_MODEL_PATH))
+            scorer_model_path_raw = data.get(
+                "scorer_model_path",
+                os.getenv("TRAINED_SCORER_MODEL_PATH", str(final_runtime_defaults["scorer_model_path"])),
+            )
             scorer_model_path = str(scorer_model_path_raw).strip() if scorer_model_path_raw is not None and str(scorer_model_path_raw).strip() else None
             candidate_generator_model_path_raw = data.get(
                 "candidate_generator_model_path",
-                os.getenv("CANDIDATE_GENERATOR_MODEL_PATH", DEFAULT_CANDIDATE_GENERATOR_MODEL_PATH),
+                os.getenv("CANDIDATE_GENERATOR_MODEL_PATH", str(final_runtime_defaults["candidate_generator_model_path"])),
             )
             candidate_generator_model_path = (
                 str(candidate_generator_model_path_raw).strip()
@@ -253,6 +292,18 @@ def create_app() -> Flask:
                 stores = nearby_stores(con, lat=lat, lon=lon, radius_m=DEFAULT_RADIUS_M, limit=store_limit)
             price_context = resolve_price_context(lat, lon, stores)
             try:
+                scorer_config = hybrid_pipeline_final.final_scorer_config(
+                    debug=debug_scorer,
+                    candidate_count=candidate_count,
+                    scorer_model_path=Path(scorer_model_path) if scorer_model_path else None,
+                )
+                candidate_generation_config = hybrid_pipeline_final.final_candidate_generation_config(
+                    debug=debug_candidate_generation,
+                    enable_model_candidates=enable_model_candidates,
+                    model_candidate_count=model_candidate_count,
+                    candidate_generator_model_path=Path(candidate_generator_model_path) if candidate_generator_model_path else None,
+                    candidate_generator_backend=candidate_generator_backend,
+                )
                 recommendation = recommend_generic_foods(
                     con,
                     protein_target_g=protein_target_g,
@@ -264,18 +315,8 @@ def create_app() -> Flask:
                     shopping_mode=shopping_mode,
                     price_context=price_context,
                     stores=stores,
-                    scorer_config={
-                        "candidate_count": candidate_count,
-                        "scorer_model_path": scorer_model_path,
-                        "debug": debug_scorer,
-                    },
-                    candidate_generation_config={
-                        "enable_model_candidates": enable_model_candidates,
-                        "model_candidate_count": model_candidate_count,
-                        "candidate_generator_model_path": candidate_generator_model_path,
-                        "candidate_generator_backend": candidate_generator_backend,
-                        "debug": debug_candidate_generation,
-                    },
+                    scorer_config=scorer_config,
+                    candidate_generation_config=candidate_generation_config,
                 )
             except PlanScorerArtifactError as e:
                 return json_error(str(e), status=500)
@@ -295,16 +336,24 @@ def create_app() -> Flask:
         g.request_metadata["candidate_count"] = candidate_count
         g.request_metadata["model_candidates_enabled"] = bool(enable_model_candidates)
         g.request_metadata["model_candidate_count"] = model_candidate_count
+        execution_summary = recommendation.get("hybrid_planner_execution")
+        execution_summary = dict(execution_summary) if isinstance(execution_summary, dict) else {}
         candidate_generation_debug = recommendation.get("candidate_generation_debug")
         candidate_generation_debug = candidate_generation_debug if isinstance(candidate_generation_debug, dict) else {}
-        actual_candidate_generator_backend = candidate_generation_debug.get("candidate_generator_backend") or candidate_generator_backend
-        heuristic_candidate_total = candidate_generation_debug.get("heuristic_candidate_count")
-        model_candidate_total = candidate_generation_debug.get("model_candidate_count")
-        fused_candidate_total = candidate_generation_debug.get("fused_candidate_count") or recommendation.get("candidate_count_considered")
+        actual_candidate_generator_backend = (
+            execution_summary.get("candidate_generator_backend")
+            or candidate_generation_debug.get("candidate_generator_backend")
+            or candidate_generator_backend
+        )
+        heuristic_candidate_total = execution_summary.get("heuristic_candidate_count")
+        model_candidate_total = execution_summary.get("learned_candidate_count")
+        fused_candidate_total = execution_summary.get("fused_candidate_count") or recommendation.get("candidate_count_considered")
         if "scorer_used" in recommendation:
             g.request_metadata["scorer_used"] = bool(recommendation.get("scorer_used"))
         if recommendation.get("scorer_backend"):
             g.request_metadata["scorer_backend"] = recommendation.get("scorer_backend")
+        if execution_summary.get("pipeline_mode"):
+            g.request_metadata["pipeline_mode"] = execution_summary["pipeline_mode"]
         if actual_candidate_generator_backend:
             g.request_metadata["candidate_generator_backend"] = actual_candidate_generator_backend
         if recommendation.get("selected_candidate_source"):
@@ -318,7 +367,8 @@ def create_app() -> Flask:
         if fused_candidate_total is not None:
             g.request_metadata["fused_candidate_count"] = fused_candidate_total
         app.logger.info(
-            "generic recommendation: model_enabled=%s candidate_generator_backend=%s heuristic_candidates=%s model_candidates=%s fused_candidates=%s selected_source=%s selected_id=%s",
+            "generic recommendation: pipeline_mode=%s model_enabled=%s candidate_generator_backend=%s heuristic_candidates=%s model_candidates=%s fused_candidates=%s selected_source=%s selected_id=%s",
+            execution_summary.get("pipeline_mode") or ("full_hybrid" if enable_model_candidates else "heuristic_only"),
             bool(enable_model_candidates),
             actual_candidate_generator_backend or "unknown",
             heuristic_candidate_total if heuristic_candidate_total is not None else "n/a",
@@ -334,6 +384,15 @@ def create_app() -> Flask:
             days=days,
             shopping_mode=shopping_mode,
         )
+        execution_summary.update(
+            {
+                "store_fit_ranking_ran": True,
+                "stores_evaluated_count": len(stores),
+                "store_fit_ranked_store_count": len(store_fit["recommended_store_order"]),
+                "full_pipeline_completed": bool(execution_summary.get("scorer_reranking_used", recommendation.get("scorer_used"))),
+            }
+        )
+        recommendation["hybrid_planner_execution"] = execution_summary
         g.request_metadata["recommended_store_count"] = len(store_fit["recommended_store_order"])
         return app.json.response({"stores": stores, **recommendation, **store_fit})
 

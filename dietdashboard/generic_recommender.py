@@ -200,6 +200,12 @@ def _goal_basket_policy(
         "booster_fat_gap": 10.0,
         "booster_enabled": True,
         "protein_anchor_shares": (0.35, 0.2),
+        "target_role_calorie_shares": {
+            "protein_anchor": 0.34,
+            "carb_base": 0.38,
+            "produce": 0.16,
+            "calorie_booster": 0.12,
+        },
         "fat_loss_overshoot_ratio": 0.05,
         "fat_loss_overshoot_floor": 70.0,
         "final_carb_fill_ratio": 0.7,
@@ -210,15 +216,21 @@ def _goal_basket_policy(
         policy.update(
             {
                 "desired_protein_anchors": 2,
-                "desired_produce_items": 2 if any(nutrition_targets.get(key) for key in ("fiber", "vitamin_c")) else 1,
-                "carb_share": 0.42,
-                "carb_fiber_ratio": 0.18,
-                "booster_gap_ratio": 0.05,
-                "booster_gap_floor": 120.0,
-                "booster_fat_gap": 8.0,
-                "protein_anchor_shares": (0.32, 0.18),
-                "final_carb_fill_ratio": 0.8,
-                "final_booster_fill_ratio": 0.85,
+                "desired_produce_items": 2,
+                "carb_share": 0.47,
+                "carb_fiber_ratio": 0.16,
+                "booster_gap_ratio": 0.03,
+                "booster_gap_floor": 90.0,
+                "booster_fat_gap": 6.0,
+                "protein_anchor_shares": (0.28, 0.18),
+                "target_role_calorie_shares": {
+                    "protein_anchor": 0.29,
+                    "carb_base": 0.43,
+                    "produce": 0.1,
+                    "calorie_booster": 0.18,
+                },
+                "final_carb_fill_ratio": 0.95,
+                "final_booster_fill_ratio": 1.15,
             }
         )
     elif goal_profile == "fat_loss":
@@ -226,13 +238,19 @@ def _goal_basket_policy(
             {
                 "desired_protein_anchors": 2 if protein_target_g >= 100 else 1,
                 "desired_produce_items": 3 if calorie_target_kcal <= 2000 or nutrition_targets.get("fiber") else 2,
-                "carb_share": 0.32,
+                "carb_share": 0.29,
                 "carb_fiber_ratio": 0.12,
                 "booster_gap_ratio": 0.16,
                 "booster_gap_floor": 260.0,
                 "booster_fat_gap": 14.0,
                 "booster_enabled": False,
                 "protein_anchor_shares": (0.42, 0.24),
+                "target_role_calorie_shares": {
+                    "protein_anchor": 0.43,
+                    "carb_base": 0.24,
+                    "produce": 0.33,
+                    "calorie_booster": 0.0,
+                },
                 "fat_loss_overshoot_ratio": 0.035,
                 "fat_loss_overshoot_floor": 50.0,
                 "final_carb_fill_ratio": 0.0,
@@ -244,12 +262,18 @@ def _goal_basket_policy(
             {
                 "desired_protein_anchors": 2 if protein_target_g >= 110 else 1,
                 "desired_produce_items": 2,
-                "carb_share": 0.42,
+                "carb_share": 0.38,
                 "carb_fiber_ratio": 0.22,
                 "booster_gap_ratio": 0.1,
                 "booster_gap_floor": 180.0,
                 "booster_fat_gap": 11.0,
-                "protein_anchor_shares": (0.36, 0.2),
+                "protein_anchor_shares": (0.31, 0.18),
+                "target_role_calorie_shares": {
+                    "protein_anchor": 0.32,
+                    "carb_base": 0.37,
+                    "produce": 0.19,
+                    "calorie_booster": 0.12,
+                },
                 "final_carb_fill_ratio": 0.55,
                 "final_booster_fill_ratio": 0.65,
             }
@@ -259,14 +283,20 @@ def _goal_basket_policy(
             {
                 "desired_protein_anchors": 2 if protein_target_g >= 100 else 1,
                 "desired_produce_items": 2,
-                "carb_share": 0.46,
+                "carb_share": 0.36,
                 "carb_fiber_ratio": 0.08,
-                "booster_gap_ratio": 0.12,
-                "booster_gap_floor": 220.0,
-                "booster_fat_gap": 12.0,
-                "protein_anchor_shares": (0.33, 0.2),
-                "final_carb_fill_ratio": 0.18,
-                "final_booster_fill_ratio": 0.18,
+                "booster_gap_ratio": 0.07,
+                "booster_gap_floor": 130.0,
+                "booster_fat_gap": 9.0,
+                "protein_anchor_shares": (0.3, 0.22),
+                "target_role_calorie_shares": {
+                    "protein_anchor": 0.27,
+                    "carb_base": 0.36,
+                    "produce": 0.19,
+                    "calorie_booster": 0.18,
+                },
+                "final_carb_fill_ratio": 0.3,
+                "final_booster_fill_ratio": 0.55,
             }
         )
     elif goal_profile == "high_protein_vegetarian":
@@ -274,14 +304,20 @@ def _goal_basket_policy(
             {
                 "desired_protein_anchors": 2,
                 "desired_produce_items": 2,
-                "carb_share": 0.4,
+                "carb_share": 0.34,
                 "carb_fiber_ratio": 0.2,
-                "booster_gap_ratio": 0.1,
-                "booster_gap_floor": 180.0,
-                "booster_fat_gap": 10.0,
-                "protein_anchor_shares": (0.36, 0.22),
-                "final_carb_fill_ratio": 0.5,
-                "final_booster_fill_ratio": 0.55,
+                "booster_gap_ratio": 0.08,
+                "booster_gap_floor": 150.0,
+                "booster_fat_gap": 8.0,
+                "protein_anchor_shares": (0.33, 0.22),
+                "target_role_calorie_shares": {
+                    "protein_anchor": 0.35,
+                    "carb_base": 0.31,
+                    "produce": 0.18,
+                    "calorie_booster": 0.16,
+                },
+                "final_carb_fill_ratio": 0.42,
+                "final_booster_fill_ratio": 0.75,
             }
         )
     return policy
@@ -308,11 +344,26 @@ def _goal_template_ids_for_pick(
     if goal_profile == "muscle_gain":
         if role == "protein_anchor":
             if chosen_role_ids:
+                chosen_has_lean_meat = any(
+                    str(available.get(food_id, {}).get("generic_food_id") or "") in {"turkey", "chicken_breast", "tuna"}
+                    for food_id in chosen_role_ids
+                )
+                if chosen_has_lean_meat:
+                    return ("eggs", "milk", "greek_yogurt", "protein_yogurt", "cottage_cheese", "turkey", "chicken_breast")
                 return ("turkey", "chicken_breast", "eggs", "milk", "greek_yogurt", "protein_yogurt", "cottage_cheese")
-            return tuple(template_ids)
+            return ("turkey", "chicken_breast", "eggs", "greek_yogurt", "protein_yogurt", "milk", "cottage_cheese")
+        if role == "carb_base":
+            return ("bagel", "pasta", "oats", "potatoes", "wholemeal_bread", "sweet_potatoes", "rice")
         if role == "produce":
             if chosen_role_ids:
-                return ("bell_peppers", "spinach", "frozen_vegetables", "berries", "bananas", "oranges")
+                chosen_clusters = {
+                    _produce_cluster(available.get(food_id, {}))
+                    for food_id in chosen_role_ids
+                    if food_id in available
+                }
+                if "fruit" in chosen_clusters:
+                    return ("bell_peppers", "spinach", "frozen_vegetables", "broccoli", "berries", "bananas")
+                return ("bananas", "berries", "oranges", "bell_peppers", "spinach", "frozen_vegetables")
             return ("bananas", "berries", "oranges")
     if goal_profile == "fat_loss" and role == "produce":
         if chosen_role_ids:
@@ -330,12 +381,51 @@ def _goal_template_ids_for_pick(
                 for food_id in chosen_role_ids
             )
             if chosen_legume:
-                return ("eggs", "tofu", "peanut_butter", "beans", "lentils")
-            return tuple(template_ids)
+                return ("eggs", "tofu")
+            return ("lentils", "beans", "eggs", "tofu", "peanut_butter")
+        if role == "carb_base":
+            return ("rice", "pasta", "potatoes", "wholemeal_bread", "oats")
         if role == "produce":
             if chosen_role_ids:
                 return ("potatoes", "bananas", "carrots", "onions", "frozen_vegetables", "apples", "lettuce", "cabbage")
             return ("cabbage", "frozen_vegetables", "carrots", "onions")
+    if goal_profile == "maintenance":
+        if role == "protein_anchor" and chosen_role_ids:
+            chosen_has_animal = any(
+                str(available.get(food_id, {}).get("food_family") or "") == "protein"
+                for food_id in chosen_role_ids
+            )
+            if chosen_has_animal:
+                return ("eggs", "tofu", "greek_yogurt", "rotisserie_chicken", "chicken_breast", "tuna")
+            return ("chicken_breast", "rotisserie_chicken", "eggs", "tofu", "greek_yogurt", "tuna")
+        if role == "carb_base":
+            return ("wholemeal_bread", "potatoes", "quinoa", "rice", "oats")
+        if role == "produce":
+            if chosen_role_ids:
+                return ("carrots", "lettuce", "apples", "bell_peppers", "spinach", "bananas")
+            return ("carrots", "apples", "lettuce", "bell_peppers")
+    if goal_profile == "high_protein_vegetarian":
+        if role == "protein_anchor":
+            chosen_has_soy = any(
+                str(available.get(food_id, {}).get("generic_food_id") or "") in {"tofu", "edamame"}
+                for food_id in chosen_role_ids
+            )
+            chosen_has_dairy_or_egg = any(
+                str(available.get(food_id, {}).get("food_family") or "") == "dairy"
+                or str(available.get(food_id, {}).get("generic_food_id") or "") == "eggs"
+                for food_id in chosen_role_ids
+            )
+            if chosen_has_soy and not chosen_has_dairy_or_egg:
+                return ("greek_yogurt", "protein_yogurt", "cottage_cheese", "eggs", "tofu", "edamame", "milk")
+            if chosen_has_dairy_or_egg and not chosen_has_soy:
+                return ("tofu", "edamame", "eggs", "greek_yogurt", "protein_yogurt", "cottage_cheese", "milk")
+            return ("tofu", "eggs", "greek_yogurt", "protein_yogurt", "cottage_cheese", "edamame", "milk")
+        if role == "carb_base":
+            return ("wholemeal_bread", "quinoa", "oats", "bagel", "rice")
+        if role == "produce":
+            if chosen_role_ids:
+                return ("spinach", "bell_peppers", "oranges", "berries", "bananas", "broccoli")
+            return ("spinach", "berries", "oranges", "bell_peppers")
     return tuple(template_ids)
 
 
@@ -419,7 +509,7 @@ def _goal_quantity_cap(food: dict[str, object], role: str, goal_profile: str) ->
             if food_id == "oats":
                 return 350.0
             if food_id in {"rice", "pasta"}:
-                return 520.0
+                return 360.0
             if food_id in {"potatoes", "sweet_potatoes"}:
                 return 760.0
             if food_id in {"bagel", "wholemeal_bread"}:
@@ -926,8 +1016,10 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
         elif role == "carb_base":
             if food_id in MUSCLE_GAIN_CARB_IDS:
                 score += 3.0
-            if food_id in {"oats", "pasta", "potatoes", "bagel", "wholemeal_bread"}:
-                score += 1.6
+            if food_id in {"pasta", "bagel"}:
+                score += 2.3
+            if food_id in {"oats", "potatoes", "wholemeal_bread"}:
+                score += 1.1
             if cluster == "meal_base":
                 score += 1.0
             if food_id == "rice":
@@ -1002,11 +1094,13 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
             if food_id in MAINTENANCE_CARB_IDS:
                 score += 1.8
             if food_id in {"potatoes", "wholemeal_bread"}:
-                score += 2.0
+                score += 2.5
+            if food_id == "quinoa":
+                score += 1.2
             if food_id == "oats":
                 score -= 1.1
             if food_id == "rice":
-                score -= 0.9
+                score -= 1.8
             if food_id == "corn_flakes":
                 score -= 0.8
         elif role == "produce":
@@ -1024,10 +1118,12 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
         if role == "protein_anchor":
             if food_id in BUDGET_HEALTHY_PROTEIN_IDS:
                 score += 3.2
-            if food_id in {"eggs", "tofu", "peanut_butter"}:
-                score += 1.3
+            if food_id in {"eggs", "tofu"}:
+                score += 2.2
+            if food_id == "peanut_butter":
+                score += 0.2
             if food_id in {"beans", "black_beans", "chickpeas"}:
-                score -= 0.4
+                score -= 1.0
             if food_id in {"rotisserie_chicken", "salmon", "shrimp", "protein_yogurt", "cottage_cheese"}:
                 score -= 2.0
         elif role == "carb_base":
@@ -1036,7 +1132,7 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
             if food_id in {"rice", "pasta", "potatoes"}:
                 score += 1.2
             if food_id == "oats":
-                score -= 0.5
+                score -= 1.0
             if cluster in {"meal_base", "starchy_produce"}:
                 score += 0.6
             if food_id == "quinoa":
@@ -1072,8 +1168,10 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
         elif role == "carb_base":
             if food_id in HIGH_PROTEIN_VEGETARIAN_CARB_IDS:
                 score += 2.4
-            if food_id in {"oats", "wholemeal_bread", "quinoa"}:
-                score += 1.0
+            if food_id in {"wholemeal_bread", "quinoa"}:
+                score += 2.2
+            if food_id in {"oats", "bagel"}:
+                score -= 0.2 if food_id == "oats" else 0.4
             if food_id == "rice":
                 score -= 0.9
             if food_id == "corn_flakes":
@@ -2300,6 +2398,90 @@ def _build_meal_suggestions(
                 "description": _meal_suggestion_description(meal_type, chosen_items),
             }
         )
+
+    if len(suggestions) < 2:
+        fallback_templates = [
+            ("snack", "Snack idea", ["protein_anchor", "produce", "carb_base", "calorie_booster"], 2, 3, 1.2),
+            ("lunch", "Lunch idea", ["protein_anchor", "carb_base", "produce"], 2, 3, 0.6),
+        ]
+        for meal_type, title, role_order, min_items, max_items, min_avg_score in fallback_templates:
+            if len(suggestions) >= 3:
+                break
+            chosen_items = []
+            chosen_scores = []
+            excluded = set()
+            for role in role_order:
+                if len(chosen_items) >= max_items:
+                    break
+                candidate, candidate_score = _best_meal_item(
+                    shopping_list,
+                    available,
+                    role,
+                    meal_type,
+                    excluded,
+                    used_counts,
+                    used_role_clusters,
+                )
+                if candidate is None:
+                    continue
+                if candidate_score < (_meal_suggestion_role_min_score(meal_type, role) - 0.8):
+                    continue
+                chosen_items.append(candidate)
+                chosen_scores.append(candidate_score)
+                excluded.add(str(candidate["generic_food_id"]))
+
+            if len(chosen_items) < min_items:
+                continue
+            average_score = sum(chosen_scores) / len(chosen_scores) if chosen_scores else 0.0
+            if average_score < min_avg_score:
+                continue
+            signature = tuple(sorted(str(item["generic_food_id"]) for item in chosen_items))
+            if signature in seen_signatures:
+                continue
+            seen_signatures.add(signature)
+            suggestions.append(
+                {
+                    "meal_type": meal_type,
+                    "title": title,
+                    "items": [str(item["name"]) for item in chosen_items],
+                    "description": _meal_suggestion_description(meal_type, chosen_items),
+                }
+            )
+
+    if len(suggestions) < 2:
+        ranked_snack_items: list[tuple[float, int, dict[str, object]]] = []
+        for item in shopping_list:
+            food = available[str(item["generic_food_id"])]
+            score = _meal_suggestion_item_score(food, str(item["role"]), "snack")
+            ranked_snack_items.append(
+                (
+                    -score,
+                    int(food.get("commonality_rank") or 999),
+                    item,
+                )
+            )
+        ranked_snack_items.sort()
+        compact_items: list[dict[str, object]] = []
+        compact_signature_ids: set[str] = set()
+        for _neg_score, _rank, item in ranked_snack_items:
+            food_id = str(item["generic_food_id"])
+            if food_id in compact_signature_ids:
+                continue
+            compact_items.append(item)
+            compact_signature_ids.add(food_id)
+            if len(compact_items) >= 3:
+                break
+        if len(compact_items) >= 2:
+            signature = tuple(sorted(compact_signature_ids))
+            if signature not in seen_signatures:
+                suggestions.append(
+                    {
+                        "meal_type": "snack",
+                        "title": "Snack idea",
+                        "items": [str(item["name"]) for item in compact_items],
+                        "description": _meal_suggestion_description("snack", compact_items),
+                    }
+                )
 
     return suggestions
 
