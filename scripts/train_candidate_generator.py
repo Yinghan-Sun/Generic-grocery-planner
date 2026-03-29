@@ -74,13 +74,24 @@ def main() -> int:
         config_path=config_path,
         random_seed=args.random_seed,
     )
+
     print(f"dataset_path={summary['dataset_path']}")
     print(f"model_path={summary['model_path']}")
     print(f"metrics_path={summary['metrics_path']}")
     print(f"feature_summary_path={summary['feature_summary_path']}")
-    print(f"metrics={summary['metrics']}")
-    return 0
 
+    metrics = summary["metrics"]
+    print("\n=== Candidate Generator Results ===")
+    print(f"Backend: {metrics['backend']}")
+    print(f"Average Precision: {metrics['test_average_precision']:.6f}")
+    print(f"ROC-AUC: {metrics['test_roc_auc']:.6f}")
+    print(f"Recall@Budget: {metrics['test_role_recall_at_budget']:.6f}")
+    print(f"Hit Rate@Budget: {metrics['test_role_hit_rate_at_budget']:.6f}")
+    print(f"Exact Match Rate: {metrics['test_role_exact_match_rate']:.6f}")
+    print(f"Mean Jaccard: {metrics['test_role_mean_jaccard']:.6f}")
+
+    return 0
+    
 
 if __name__ == "__main__":
     raise SystemExit(main())

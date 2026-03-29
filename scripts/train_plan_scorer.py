@@ -78,6 +78,7 @@ def main() -> int:
         random_seed=args.random_seed,
     )
     metrics = summary["metrics"]
+
     print(f"dataset_path={summary['dataset_path']}")
     print(f"schema_path={summary['schema_path']}")
     print(f"model_path={summary['model_path']}")
@@ -85,14 +86,24 @@ def main() -> int:
     print(f"feature_summary_path={summary['feature_summary_path']}")
     print(f"row_count={summary['row_count']}")
     print(f"request_count={summary['request_count']}")
-    print(f"backend={metrics['backend']}")
-    print(f"model_candidates_in_dataset={not args.disable_model_candidates}")
-    print(f"candidate_generator_model_path={args.candidate_generator_model_path}")
-    print(f"validation_mae={metrics['validation_mae']}")
-    print(f"validation_rmse={metrics['validation_rmse']}")
-    print(f"validation_r2={metrics['validation_r2']}")
-    print(f"validation_top1_accuracy={metrics['validation_top1_accuracy']}")
-    print(f"validation_pairwise_accuracy={metrics['validation_pairwise_accuracy']}")
+
+    print("\n=== Plan Scorer Configuration ===")
+    print(f"Backend: {metrics['backend']}")
+    print(f"Model Candidates Enabled: {not args.disable_model_candidates}")
+    print(f"Candidate Generator Model Path: {args.candidate_generator_model_path}")
+    print(f"Learning Rate: {args.learning_rate}")
+    print(f"Max Depth: {args.max_depth}")
+    print(f"Number of Estimators: {args.n_estimators}")
+    print(f"Validation Split: {args.validation_split}")
+    print(f"Random Seed: {args.random_seed}")
+
+    print("\n=== Plan Scorer Results ===")
+    print(f"MAE: {metrics['validation_mae']:.6f}")
+    print(f"RMSE: {metrics['validation_rmse']:.6f}")
+    print(f"R2: {metrics['validation_r2']:.6f}")
+    print(f"Top-1 Accuracy: {metrics['validation_top1_accuracy']:.6f}")
+    print(f"Pairwise Accuracy: {metrics['validation_pairwise_accuracy']:.6f}")
+
     return 0
 
 

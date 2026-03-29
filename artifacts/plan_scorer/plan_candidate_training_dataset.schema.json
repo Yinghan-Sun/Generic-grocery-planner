@@ -6,8 +6,18 @@
     "low_prep_preference",
     "vegetarian_preference",
     "vegan_preference",
-    "dairy_free_preference"
+    "dairy_free_preference",
+    "materially_different_from_best_heuristic",
+    "nutritionally_competitive_with_best_heuristic",
+    "cost_competitive_with_best_heuristic",
+    "diversity_improved_vs_best_heuristic"
   ],
+  "candidate_source_counts": {
+    "heuristic": 524,
+    "hybrid": 46,
+    "model": 104,
+    "repaired_model": 75
+  },
   "categorical_features": [
     "goal_profile",
     "shopping_mode",
@@ -21,10 +31,13 @@
     "maintenance",
     "muscle_gain"
   ],
+  "label_description": "label_score combines the base basket-quality heuristic with an alternative-quality bonus that rewards materially different candidates when they stay nutritionally competitive, practical, and goal-appropriate relative to the best heuristic baseline for the same request.",
   "label_field": "label_score",
   "metadata_fields": [
     "request_id",
     "candidate_id",
+    "baseline_candidate_id",
+    "candidate_source",
     "label_score"
   ],
   "numeric_features": [
@@ -59,12 +72,42 @@
     "carb_base_count",
     "produce_count",
     "calorie_booster_count",
+    "goal_structure_alignment_score",
+    "role_share_gap_total",
+    "protein_anchor_share",
+    "carb_base_share",
+    "produce_share",
+    "calorie_booster_share",
+    "protein_anchor_family_diversity",
+    "animal_protein_anchor_count",
+    "lean_protein_anchor_count",
+    "vegetarian_protein_anchor_count",
+    "legume_protein_anchor_count",
+    "soy_protein_anchor_count",
+    "dairy_or_egg_anchor_count",
+    "budget_support_anchor_count",
+    "fruit_produce_count",
+    "high_volume_produce_count",
+    "low_cost_produce_count",
     "food_family_diversity_count",
     "role_diversity_count",
     "repetition_penalty",
     "unrealistic_basket_penalty",
     "preference_match_score",
     "heuristic_selection_score",
+    "overlap_with_best_heuristic_jaccard",
+    "changed_food_count_vs_best_heuristic",
+    "role_assignment_changes_vs_best_heuristic",
+    "cost_delta_vs_best_heuristic",
+    "protein_gap_delta_vs_best_heuristic",
+    "calorie_gap_delta_vs_best_heuristic",
+    "macro_gap_ratio_delta_vs_best_heuristic",
+    "diversity_gain_vs_best_heuristic",
+    "role_diversity_delta_vs_best_heuristic",
+    "repetition_penalty_delta_vs_best_heuristic",
+    "unrealistic_penalty_delta_vs_best_heuristic",
+    "preference_match_delta_vs_best_heuristic",
+    "alternative_quality_score",
     "nearby_store_count",
     "warning_count",
     "realism_note_count",
@@ -72,5 +115,5 @@
     "scaling_note_count"
   ],
   "request_count": 72,
-  "row_count": 570
+  "row_count": 749
 }
