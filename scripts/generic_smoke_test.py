@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import sys
+from unittest.mock import patch
 
+import dietdashboard.app as app_module
 from dietdashboard.app import create_app
 
 
@@ -16,6 +18,27 @@ def assert_equal(actual, expected, label: str) -> None:
 def assert_true(value: bool, label: str) -> None:
     if not value:
         raise AssertionError(f"{label}: expected truthy value")
+
+
+def assert_no_hybrid_debug_metadata(payload: dict[str, object], label: str) -> None:
+    execution = payload.get("hybrid_planner_execution")
+    assert_true(isinstance(execution, dict), f"{label} hybrid execution summary")
+    assert_true(
+        not any(
+            key.endswith("_model_path") or key.endswith("_backend") or key.startswith("candidate_generator_")
+            for key in execution
+        ),
+        f"{label} hybrid execution metadata sanitized",
+    )
+    algorithm = payload.get("hybrid_planner_algorithm")
+    assert_true(isinstance(algorithm, dict), f"{label} hybrid algorithm summary")
+    assert_true(
+        not any(
+            key.endswith("_model_path") or key.endswith("_backend") or key.startswith("candidate_generator_")
+            for key in algorithm
+        ),
+        f"{label} hybrid algorithm metadata sanitized",
+    )
 
 
 def main() -> int:
@@ -115,6 +138,73 @@ def main() -> int:
     invalid_json = invalid.get_json()
     assert_equal(invalid_json["error"], "Invalid lat.", "invalid nearby-store error")
 
+    prod_debug_payload = {
+        **balanced_payload,
+        "radius_m": 8000,
+        "debug_candidate_generation": True,
+        "debug_scorer": True,
+    }
+    with patch.object(app_module, "IS_PROD", True):
+        prod_app = app_module.create_app()
+        prod_client = prod_app.test_client()
+        prod_debug = prod_client.post("/api/recommendations/generic", json=prod_debug_payload)
+    assert_equal(prod_debug.status_code, 200, "prod debug recommendation status")
+    prod_debug_json = prod_debug.get_json()
+    assert_true("scoring_debug" not in prod_debug_json, "prod scorer debug removed")
+    assert_true("candidate_generation_debug" not in prod_debug_json, "prod candidate-generation debug removed")
+    assert_true("candidate_comparison_debug" not in prod_debug_json, "prod candidate comparison debug removed")
+    assert_true("algorithmic_faithfulness_debug" not in prod_debug_json, "prod algorithmic faithfulness debug removed")
+    assert_true("scorer_backend" not in prod_debug_json, "prod scorer backend removed")
+    prod_execution = prod_debug_json.get("hybrid_planner_execution")
+    assert_true(isinstance(prod_execution, dict), "prod hybrid execution summary")
+    assert_true("candidate_generator_backend" not in prod_execution, "prod execution backend removed")
+    assert_true("candidate_generator_model_path" not in prod_execution, "prod execution candidate-generator path removed")
+    assert_true("scorer_backend" not in prod_execution, "prod execution scorer backend removed")
+    assert_true("scorer_model_path" not in prod_execution, "prod execution scorer path removed")
+    prod_algorithm = prod_debug_json.get("hybrid_planner_algorithm")
+    assert_true(isinstance(prod_algorithm, dict), "prod hybrid algorithm summary")
+    assert_true("candidate_generator_backend" not in prod_algorithm, "prod algorithm backend removed")
+    assert_true("candidate_generator_model_path" not in prod_algorithm, "prod algorithm path removed")
+    assert_no_hybrid_debug_metadata(prod_debug_json, "prod nested planner metadata")
+
+    radius_calls: list[float] = []
+
+    def fake_nearby_stores(_con, lat: float, lon: float, radius_m: float = 0.0, limit: int = 5):
+        del lat, lon, limit
+        radius_calls.append(float(radius_m))
+        if radius_m <= 500.0:
+            return []
+        return [
+            {
+                "store_id": "stub:wide-radius",
+                "name": "Wide Radius Store",
+                "address": "100 Demo St, Mountain View, CA 94040",
+                "distance_m": 750.0,
+                "lat": 37.401,
+                "lon": -122.09,
+                "category": "supermarket",
+            }
+        ]
+
+    with patch.object(app_module, "nearby_stores", side_effect=fake_nearby_stores):
+        radius_app = app_module.create_app()
+        radius_client = radius_app.test_client()
+        nearby_small = radius_client.get("/api/stores/nearby?lat=37.401&lon=-122.09&radius_m=500&limit=5")
+        assert_equal(nearby_small.status_code, 200, "small-radius nearby-store status")
+        nearby_small_json = nearby_small.get_json()
+        assert_equal(len(nearby_small_json["stores"]), 0, "small-radius nearby-store count")
+
+        small_radius_payload = {
+            **balanced_payload,
+            "radius_m": 500,
+        }
+        small_radius_recommendation = radius_client.post("/api/recommendations/generic", json=small_radius_payload)
+        assert_equal(small_radius_recommendation.status_code, 200, "small-radius recommendation status")
+        small_radius_json = small_radius_recommendation.get_json()
+        assert_equal(len(small_radius_json["stores"]), 0, "small-radius recommendation stores")
+
+    assert_equal(radius_calls, [500.0, 500.0], "nearby-store radius reused for recommendation")
+
     print("generic_page=ok")
     print(f"nearby_store_count={len(stores)}")
     print(f"balanced_item_count={len(balanced_json['shopping_list'])}")
@@ -124,6 +214,9 @@ def main() -> int:
     print(f"balanced_fused_candidates={hybrid_execution['fused_candidate_count']}")
     print(f"balanced_candidate_backend={hybrid_execution['candidate_generator_backend']}")
     print(f"vegetarian_item_count={len(vegetarian_json['shopping_list'])}")
+    print("prod_debug_suppression=ok")
+    print("prod_hybrid_metadata_sanitization=ok")
+    print("recommendation_radius_reuse=ok")
     print("invalid_input_check=ok")
     return 0
 

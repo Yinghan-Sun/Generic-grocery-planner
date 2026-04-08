@@ -96,6 +96,43 @@ def parse_int(value: object, field_name: str) -> int:
     return out
 
 
+def sanitize_recommendation_response_for_prod(payload: dict[str, object]) -> dict[str, object]:
+    """Strip debug-only planner details from production responses."""
+    sanitized = dict(payload)
+    for key in (
+        "algorithmic_faithfulness_debug",
+        "candidate_comparison_debug",
+        "candidate_generation_debug",
+        "scorer_backend",
+        "scoring_debug",
+    ):
+        sanitized.pop(key, None)
+
+    execution = sanitized.get("hybrid_planner_execution")
+    if isinstance(execution, dict):
+        sanitized_execution = dict(execution)
+        for key in (
+            "candidate_generator_backend",
+            "candidate_generator_model_path",
+            "scorer_backend",
+            "scorer_model_path",
+        ):
+            sanitized_execution.pop(key, None)
+        sanitized["hybrid_planner_execution"] = sanitized_execution
+
+    algorithm = sanitized.get("hybrid_planner_algorithm")
+    if isinstance(algorithm, dict):
+        sanitized_algorithm = dict(algorithm)
+        for key in (
+            "candidate_generator_backend",
+            "candidate_generator_model_path",
+        ):
+            sanitized_algorithm.pop(key, None)
+        sanitized["hybrid_planner_algorithm"] = sanitized_algorithm
+
+    return sanitized
+
+
 def create_app() -> Flask:
     app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config["COMPRESS_MIMETYPES"] = ["text/html", "text/css", "text/javascript", "text/csv", "text/plain"]
@@ -196,6 +233,7 @@ def create_app() -> Flask:
             lon = parse_float(location.get("lon"), "location.lon")
             protein_target_g = parse_float(targets.get("protein"), "targets.protein")
             calorie_target_kcal = parse_float(targets.get("energy_fibre_kcal"), "targets.energy_fibre_kcal")
+            radius_m = parse_float(data.get("radius_m", DEFAULT_RADIUS_M), "radius_m")
             nutrition_targets = {
                 "carbohydrate": parse_optional_float(targets.get("carbohydrate"), "targets.carbohydrate"),
                 "fat": parse_optional_float(targets.get("fat"), "targets.fat"),
@@ -214,7 +252,11 @@ def create_app() -> Flask:
                 ),
                 "candidate_count",
             )
-            debug_scorer = parse_bool(data.get("debug_scorer"), default=os.getenv("TRAINED_SCORER_DEBUG", "0") == "1")
+            debug_scorer = (
+                False
+                if IS_PROD
+                else parse_bool(data.get("debug_scorer"), default=os.getenv("TRAINED_SCORER_DEBUG", "0") == "1")
+            )
             enable_model_candidates = parse_bool(
                 data.get("enable_model_candidates"),
                 default=parse_bool(os.getenv("ENABLE_MODEL_CANDIDATES"), default=bool(final_runtime_defaults["model_candidates_enabled"])),
@@ -235,9 +277,13 @@ def create_app() -> Flask:
                 {"auto", "logistic_regression", "random_forest", "hist_gradient_boosting"},
                 DEFAULT_CANDIDATE_GENERATOR_BACKEND,
             )
-            debug_candidate_generation = parse_bool(
-                data.get("debug_candidate_generation"),
-                default=os.getenv("MODEL_CANDIDATE_DEBUG", "0") == "1",
+            debug_candidate_generation = (
+                False
+                if IS_PROD
+                else parse_bool(
+                    data.get("debug_candidate_generation"),
+                    default=os.getenv("MODEL_CANDIDATE_DEBUG", "0") == "1",
+                )
             )
             preferences = {
                 "vegetarian": parse_bool(preferences_raw.get("vegetarian"), default=False),
@@ -274,6 +320,8 @@ def create_app() -> Flask:
             return json_error("targets.protein must be greater than 0.")
         if calorie_target_kcal <= 0:
             return json_error("targets.energy_fibre_kcal must be greater than 0.")
+        if radius_m <= 0 or radius_m > MAX_RADIUS_M:
+            return json_error(f"radius_m must be between 0 and {int(MAX_RADIUS_M)}.")
         invalid_optional_targets = [name for name, value in nutrition_targets.items() if value is not None and value <= 0]
         if invalid_optional_targets:
             return json_error(f"targets.{invalid_optional_targets[0]} must be greater than 0 when provided.")
@@ -289,7 +337,7 @@ def create_app() -> Flask:
         with get_con() as con:
             stores = normalize_store_snapshot(stores_raw, limit=store_limit) if stores_raw is not None else []
             if not stores:
-                stores = nearby_stores(con, lat=lat, lon=lon, radius_m=DEFAULT_RADIUS_M, limit=store_limit)
+                stores = nearby_stores(con, lat=lat, lon=lon, radius_m=radius_m, limit=store_limit)
             price_context = resolve_price_context(lat, lon, stores)
             try:
                 scorer_config = hybrid_pipeline_final.final_scorer_config(
@@ -330,6 +378,7 @@ def create_app() -> Flask:
         g.request_metadata["protein_target_g"] = protein_target_g
         g.request_metadata["calorie_target_kcal"] = calorie_target_kcal
         g.request_metadata["days"] = days
+        g.request_metadata["radius_m"] = radius_m
         g.request_metadata["shopping_mode"] = shopping_mode
         g.request_metadata["pantry_item_count"] = len(pantry_items)
         g.request_metadata["price_area_code"] = recommendation.get("price_area_code")
@@ -394,7 +443,10 @@ def create_app() -> Flask:
         )
         recommendation["hybrid_planner_execution"] = execution_summary
         g.request_metadata["recommended_store_count"] = len(store_fit["recommended_store_order"])
-        return app.json.response({"stores": stores, **recommendation, **store_fit})
+        response_payload = {"stores": stores, **recommendation, **store_fit}
+        return app.json.response(
+            sanitize_recommendation_response_for_prod(response_payload) if IS_PROD else response_payload
+        )
 
     return app
 

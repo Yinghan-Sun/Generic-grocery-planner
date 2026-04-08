@@ -359,6 +359,7 @@ function sameStoreLookupContext(first, second) {
 }
 
 export function buildRecommendationPayload(currentState, search = currentLocationSearch()) {
+  const recommendationRadius = parseNumber(currentState.radius_m);
   const payload = {
     location: {
       lat: Number(currentState.lat),
@@ -381,6 +382,10 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
     days: Number(currentState.days || 1),
     shopping_mode: currentState.shopping_mode || "balanced"
   };
+
+  if (recommendationRadius !== null) {
+    payload.radius_m = recommendationRadius;
+  }
 
   const currentStoreContext = storeLookupContext(currentState);
   if (
