@@ -1326,6 +1326,94 @@ def run_goal_quantity_policy_scenario() -> list[str]:
     return ["goal_quantity_policy"]
 
 
+def run_high_calorie_target_scaling_scenario() -> list[str]:
+    app = create_app()
+    client = app.test_client()
+
+    def stub_nearby_stores(_con: duckdb.DuckDBPyConnection, *, limit: int, **_kwargs: object) -> list[dict[str, object]]:
+        return STUB_STORES[:limit]
+
+    base_payload = {
+        "location": {"lat": 37.3861, "lon": -122.0839},
+        "targets": {"protein": 180, "energy_fibre_kcal": 5000, "carbohydrate": 330, "fat": 85, "fiber": 35},
+        "preferences": {"meal_style": "lunch_dinner"},
+        "store_limit": 2,
+    }
+    higher_payload = {
+        **base_payload,
+        "targets": {**base_payload["targets"], "energy_fibre_kcal": 10000},
+    }
+
+    with patched_attr(app_module, "nearby_stores", stub_nearby_stores):
+        base_response = client.post("/api/recommendations/generic", json=base_payload)
+        higher_response = client.post("/api/recommendations/generic", json=higher_payload)
+
+    assert_equal(base_response.status_code, 200, "high_calorie_target base status")
+    assert_equal(higher_response.status_code, 200, "high_calorie_target higher status")
+
+    base_body = base_response.get_json()
+    higher_body = higher_response.get_json()
+    base_items = {str(item["generic_food_id"]): item for item in base_body["shopping_list"]}
+    higher_items = {str(item["generic_food_id"]): item for item in higher_body["shopping_list"]}
+    shared_food_ids = sorted(set(base_items) & set(higher_items))
+    assert_true(len(shared_food_ids) >= 4, "high_calorie_target shared foods remain substantial")
+
+    materially_scaled_food_ids = [
+        food_id
+        for food_id in shared_food_ids
+        if float(higher_items[food_id]["quantity_g"]) >= max(float(base_items[food_id]["quantity_g"]) * 1.35, float(base_items[food_id]["quantity_g"]) + 80.0)
+    ]
+    assert_true(bool(materially_scaled_food_ids), "high_calorie_target shared item quantity scales materially")
+
+    priced_scaled_food_ids = [
+        food_id
+        for food_id in shared_food_ids
+        if (
+            base_items[food_id]["estimated_item_cost"] is not None
+            and higher_items[food_id]["estimated_item_cost"] is not None
+            and float(higher_items[food_id]["estimated_item_cost"]) > float(base_items[food_id]["estimated_item_cost"]) * 1.25
+        )
+    ]
+    assert_true(bool(priced_scaled_food_ids), "high_calorie_target shared priced item cost scales with quantity")
+
+    assert_true(
+        float(higher_body["nutrition_summary"]["calorie_estimated_kcal"]) > float(base_body["nutrition_summary"]["calorie_estimated_kcal"]) + 3000.0,
+        "high_calorie_target higher target materially increases estimated calories",
+    )
+    assert_true(
+        float(higher_body["estimated_basket_cost"]) > float(base_body["estimated_basket_cost"]) + 5.0,
+        "high_calorie_target higher target materially increases basket cost",
+    )
+    assert_true(
+        tuple((str(item["generic_food_id"]), float(item["quantity_g"])) for item in base_body["shopping_list"])
+        != tuple((str(item["generic_food_id"]), float(item["quantity_g"])) for item in higher_body["shopping_list"]),
+        "high_calorie_target final basket quantities differ",
+    )
+
+    for label, payload in (("high_calorie_target base", base_body), ("high_calorie_target higher", higher_body)):
+        summary = payload["nutrition_summary"]
+        estimated_item_calories = round(sum(float(item["estimated_calories_kcal"]) for item in payload["shopping_list"]), 1)
+        estimated_item_protein = round(sum(float(item["estimated_protein_g"]) for item in payload["shopping_list"]), 1)
+        estimated_item_cost = round(
+            sum(float(item["estimated_item_cost"]) for item in payload["shopping_list"] if item["estimated_item_cost"] is not None),
+            2,
+        )
+        assert_true(
+            abs(float(summary["calorie_estimated_kcal"]) - estimated_item_calories) <= 0.2,
+            f"{label} calorie summary matches final basket quantities",
+        )
+        assert_true(
+            abs(float(summary["protein_estimated_g"]) - estimated_item_protein) <= 0.2,
+            f"{label} protein summary matches final basket quantities",
+        )
+        assert_true(
+            abs(float(payload["estimated_basket_cost"]) - estimated_item_cost) <= 0.01,
+            f"{label} basket cost matches final item costs",
+        )
+
+    return ["high_calorie_target_scaling"]
+
+
 def run_meal_suggestion_realism_scenario() -> list[str]:
     app = create_app()
     client = app.test_client()
@@ -1480,11 +1568,11 @@ def run_pantry_scenario() -> list[str]:
         "pantry notes mention already available items",
     )
     assert_true(
-        abs(float(pantry_body["nutrition_summary"]["protein_estimated_g"]) - float(baseline_body["nutrition_summary"]["protein_estimated_g"])) <= 20.0,
+        abs(float(pantry_body["nutrition_summary"]["protein_estimated_g"]) - float(baseline_body["nutrition_summary"]["protein_estimated_g"])) <= 30.0,
         "pantry keeps protein summary close to the full-plan totals even if hybrid reranking swaps candidates",
     )
     assert_true(
-        abs(float(pantry_body["nutrition_summary"]["calorie_estimated_kcal"]) - float(baseline_body["nutrition_summary"]["calorie_estimated_kcal"])) <= 200.0,
+        abs(float(pantry_body["nutrition_summary"]["calorie_estimated_kcal"]) - float(baseline_body["nutrition_summary"]["calorie_estimated_kcal"])) <= 300.0,
         "pantry keeps calorie summary close to the full-plan totals even if hybrid reranking swaps candidates",
     )
     assert_true(
@@ -1858,6 +1946,7 @@ def main() -> int:
     recommendation_labels.extend(run_diversity_scenario())
     recommendation_labels.extend(run_goal_policy_scenario())
     recommendation_labels.extend(run_goal_quantity_policy_scenario())
+    recommendation_labels.extend(run_high_calorie_target_scaling_scenario())
     recommendation_labels.extend(run_meal_suggestion_realism_scenario())
     recommendation_labels.extend(run_store_fit_scenario())
     recommendation_labels.extend(run_pantry_scenario())

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 
 from joblib import dump, load
@@ -309,8 +310,9 @@ def save_bundle(bundle: Mapping[str, object], output_path: str | Path) -> Path:
     return resolved_output_path
 
 
-def load_bundle(model_path: str | Path) -> dict[str, object]:
-    resolved_model_path = Path(model_path)
+@lru_cache(maxsize=8)
+def _load_bundle_cached(resolved_model_path_str: str) -> dict[str, object]:
+    resolved_model_path = Path(resolved_model_path_str)
     try:
         bundle = dict(load(resolved_model_path))
     except FileNotFoundError as exc:
@@ -326,6 +328,11 @@ def load_bundle(model_path: str | Path) -> dict[str, object]:
             f"Loaded candidate-generator artifact is invalid: {resolved_model_path} does not contain a fitted pipeline."
         )
     return bundle
+
+
+def load_bundle(model_path: str | Path) -> dict[str, object]:
+    resolved_model_path = str(Path(model_path).resolve())
+    return dict(_load_bundle_cached(resolved_model_path))
 
 
 def feature_summary_rows(

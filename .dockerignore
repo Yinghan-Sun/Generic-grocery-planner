@@ -3,3 +3,8 @@ fly.toml
 __pycache__/
 .envrc
 .venv/
+tmp/
+scripts/
+data/*
+!data/data.db
+!data/store_discovery.db

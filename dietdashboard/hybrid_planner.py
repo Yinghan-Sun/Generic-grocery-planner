@@ -335,6 +335,24 @@ def _food_metric(food: Mapping[str, object], nutrient_id: str) -> float:
     return float(food.get(nutrient_id) or 0.0)
 
 
+def _apply_contextual_quantity_caps(
+    context: PlannerContext,
+    *,
+    chosen: Sequence[tuple[str, str]],
+    quantities: dict[str, float],
+) -> None:
+    gr._apply_goal_quantity_caps(
+        chosen,
+        context.available,
+        quantities,
+        context.goal_profile,
+        protein_target_g=context.protein_target_g,
+        calorie_target_kcal=context.calorie_target_kcal,
+        nutrition_targets=context.nutrition_targets,
+        basket_policy=context.basket_policy,
+    )
+
+
 def _protein_density(food: Mapping[str, object]) -> float:
     return _food_metric(food, "protein") / max(_food_metric(food, "energy_fibre_kcal"), 1.0)
 
@@ -2247,6 +2265,164 @@ def _quantity_totals(
     return totals
 
 
+def _contextual_quantity_cap(
+    context: PlannerContext,
+    *,
+    chosen: Sequence[tuple[str, str]],
+    food_id: str,
+    role: str,
+) -> float:
+    role_count = sum(1 for _chosen_food_id, chosen_role in chosen if chosen_role == role)
+    cap_g = gr._goal_quantity_cap(
+        context.available[food_id],
+        role,
+        context.goal_profile,
+        protein_target_g=context.protein_target_g,
+        calorie_target_kcal=context.calorie_target_kcal,
+        nutrition_targets=context.nutrition_targets,
+        basket_policy=context.basket_policy,
+        role_count=role_count,
+    )
+    return float(cap_g) if cap_g is not None else float("inf")
+
+
+def _quantity_headroom(
+    context: PlannerContext,
+    *,
+    chosen: Sequence[tuple[str, str]],
+    quantities: Mapping[str, float],
+    food_id: str,
+    role: str,
+) -> float:
+    cap_g = _contextual_quantity_cap(
+        context,
+        chosen=chosen,
+        food_id=food_id,
+        role=role,
+    )
+    return max(0.0, cap_g - float(quantities.get(food_id, 0.0)))
+
+
+def _close_remaining_quantity_gaps(
+    context: PlannerContext,
+    *,
+    chosen: Sequence[tuple[str, str]],
+    quantities: dict[str, float],
+    protein_anchors: Sequence[str],
+    carb_base: str | None,
+    booster: str | None,
+) -> None:
+    protein_tolerance = max(4.0, context.protein_target_g * 0.03)
+    calorie_tolerance = max(60.0, context.calorie_target_kcal * 0.03)
+
+    for _ in range(4):
+        totals = _quantity_totals(context, quantities)
+        protein_gap = max(0.0, context.protein_target_g - totals["protein"])
+        calorie_gap = max(0.0, context.calorie_target_kcal - totals["energy_fibre_kcal"])
+        if protein_gap <= protein_tolerance and calorie_gap <= calorie_tolerance:
+            break
+
+        progressed = False
+        if protein_gap > protein_tolerance and protein_anchors:
+            ranked_anchors = sorted(
+                (
+                    food_id
+                    for food_id in protein_anchors
+                    if food_id in quantities and food_id in context.available
+                ),
+                key=lambda food_id: (
+                    -_protein_density(context.available[food_id]),
+                    -_food_metric(context.available[food_id], "energy_fibre_kcal"),
+                    int(context.available[food_id].get("commonality_rank") or 999),
+                    food_id,
+                ),
+            )
+            remaining_protein_gap = protein_gap
+            for index, food_id in enumerate(ranked_anchors):
+                headroom_g = _quantity_headroom(
+                    context,
+                    chosen=chosen,
+                    quantities=quantities,
+                    food_id=food_id,
+                    role="protein_anchor",
+                )
+                if headroom_g <= 0.0:
+                    continue
+                protein_per_100g = max(_food_metric(context.available[food_id], "protein"), 1.0)
+                gap_share = 0.65 if index == 0 else 0.35
+                desired_add_g = 100.0 * remaining_protein_gap * gap_share / protein_per_100g
+                add_g = min(headroom_g, desired_add_g)
+                if add_g <= 0.0:
+                    continue
+                quantities[food_id] += add_g
+                remaining_protein_gap = max(0.0, remaining_protein_gap - ((add_g / 100.0) * protein_per_100g))
+                progressed = True
+            if progressed:
+                _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
+
+        totals = _quantity_totals(context, quantities)
+        calorie_gap = max(0.0, context.calorie_target_kcal - totals["energy_fibre_kcal"])
+        if calorie_gap <= calorie_tolerance:
+            if not progressed:
+                break
+            continue
+
+        target_role_shares = _target_role_calorie_shares(context, booster_present=booster is not None)
+        fill_shares = {
+            "carb_base": max(0.42, float(target_role_shares.get("carb_base", 0.0))),
+            "protein_anchor": max(0.18, min(0.34, float(target_role_shares.get("protein_anchor", 0.0)))),
+            "calorie_booster": max(0.0, min(0.2, float(target_role_shares.get("calorie_booster", 0.0)))),
+        }
+        if booster is None:
+            fill_shares["carb_base"] += fill_shares["calorie_booster"]
+            fill_shares["calorie_booster"] = 0.0
+        fill_total = sum(fill_shares.values())
+        if fill_total > 0.0:
+            fill_shares = {
+                role: share / fill_total
+                for role, share in fill_shares.items()
+            }
+
+        calorie_fill_targets: list[tuple[str, str, float]] = []
+        if carb_base is not None and carb_base in quantities and carb_base in context.available:
+            calorie_fill_targets.append((carb_base, "carb_base", fill_shares["carb_base"]))
+        if protein_anchors:
+            per_anchor_share = fill_shares["protein_anchor"] / max(len(protein_anchors), 1)
+            for food_id in protein_anchors:
+                if food_id in quantities and food_id in context.available:
+                    calorie_fill_targets.append((food_id, "protein_anchor", per_anchor_share))
+        if booster is not None and booster in quantities and booster in context.available:
+            calorie_fill_targets.append((booster, "calorie_booster", fill_shares["calorie_booster"]))
+
+        remaining_calorie_gap = calorie_gap
+        for food_id, role, share in calorie_fill_targets:
+            if remaining_calorie_gap <= calorie_tolerance:
+                break
+            headroom_g = _quantity_headroom(
+                context,
+                chosen=chosen,
+                quantities=quantities,
+                food_id=food_id,
+                role=role,
+            )
+            if headroom_g <= 0.0:
+                continue
+            calorie_density = max(_food_metric(context.available[food_id], "energy_fibre_kcal"), 1.0)
+            desired_calories = max(remaining_calorie_gap * share, remaining_calorie_gap * 0.12 if role == "carb_base" else 0.0)
+            desired_add_g = 100.0 * desired_calories / calorie_density
+            add_g = min(headroom_g, desired_add_g)
+            if add_g <= 0.0:
+                continue
+            quantities[food_id] += add_g
+            remaining_calorie_gap = max(0.0, remaining_calorie_gap - ((add_g / 100.0) * calorie_density))
+            progressed = True
+
+        if progressed:
+            _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
+        else:
+            break
+
+
 def _role_calorie_shares(
     context: PlannerContext,
     *,
@@ -2676,7 +2852,7 @@ def _preserve_seed_fill(
         if additional_grams <= 0:
             continue
         quantities[food_id] += additional_grams
-        gr._apply_goal_quantity_caps(chosen, context.available, quantities, context.goal_profile)  # noqa: SLF001
+        _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
 
 
 def _rebalance_seed_quantities(
@@ -2755,7 +2931,7 @@ def _rebalance_seed_quantities(
             refill_calories = min(removed_calories * 0.45, calorie_deficit)
             quantities[booster] += 100.0 * refill_calories / max(_food_metric(booster_food, "energy_fibre_kcal"), 1.0)
 
-    gr._apply_goal_quantity_caps(chosen, context.available, quantities, context.goal_profile)  # noqa: SLF001
+    _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
 
 
 def _pick_structured_booster(
@@ -3065,7 +3241,7 @@ def _rebalance_goal_specific_model_quantities(
             * carb_fill_ratio
             / max(_food_metric(carb_food, "energy_fibre_kcal"), 1.0)
         )
-        gr._apply_goal_quantity_caps(chosen, context.available, quantities, context.goal_profile)  # noqa: SLF001
+        _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
         totals = _quantity_totals(context, quantities)
         protein_surplus = totals["protein"] - context.protein_target_g
         if protein_surplus <= target_buffer:
@@ -3176,7 +3352,7 @@ def _preserve_model_seed_fill(
         if additional_grams <= 0:
             continue
         quantities[food_id] += additional_grams
-        gr._apply_goal_quantity_caps(chosen, context.available, quantities, context.goal_profile)  # noqa: SLF001
+        _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
 
 
 def _pick_seed_preserving_booster(
@@ -3376,7 +3552,7 @@ def _materialize_candidate(
                 booster_grams *= max(0.72, 0.95 - (0.15 * float(priority_profile["calorie_tightness"])))
             quantities[booster] = booster_grams
 
-    gr._apply_goal_quantity_caps(chosen, available, quantities, context.goal_profile)  # noqa: SLF001
+    _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
     if use_structured_materialization:
         _rebalance_seed_quantities(
             context,
@@ -3498,7 +3674,15 @@ def _materialize_candidate(
             / max(float(available[booster]["energy_fibre_kcal"]), 1.0)
         )
 
-    gr._apply_goal_quantity_caps(chosen, available, quantities, context.goal_profile)  # noqa: SLF001
+    _apply_contextual_quantity_caps(context, chosen=chosen, quantities=quantities)
+    _close_remaining_quantity_gaps(
+        context,
+        chosen=chosen,
+        quantities=quantities,
+        protein_anchors=protein_anchors,
+        carb_base=carb_base,
+        booster=booster,
+    )
 
     scaled_quantities: dict[str, float] = {}
     warnings: list[str] = []

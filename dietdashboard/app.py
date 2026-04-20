@@ -3,6 +3,10 @@
 
 import math
 import os
+import queue
+import threading
+import time
+from collections.abc import Callable
 from pathlib import Path
 
 import duckdb
@@ -22,7 +26,7 @@ from dietdashboard.store_discovery import (
     nearby_stores,
     normalize_store_snapshot,
 )
-from dietdashboard.store_fit import recommend_store_fits
+from dietdashboard.store_fit import GROUPED_PICK_FIELDS, recommend_store_fits
 
 DEBUG_DIR = Path(__file__).parent.parent / "tmp"
 DATA_DIR = Path(__file__).parent.parent / "data"
@@ -37,6 +41,21 @@ DEFAULT_MODEL_CANDIDATE_COUNT = int(FINAL_RUNTIME_DEFAULTS["model_candidate_coun
 MAX_MODEL_CANDIDATE_COUNT = 8
 DEFAULT_CANDIDATE_GENERATOR_MODEL_PATH = str(hybrid_pipeline_final.FINAL_CANDIDATE_GENERATOR_MODEL_PATH)
 DEFAULT_CANDIDATE_GENERATOR_BACKEND = str(FINAL_RUNTIME_DEFAULTS["candidate_generator_backend"])
+
+
+def _env_timeout_seconds(name: str, default: float) -> float:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    try:
+        return max(0.0, float(raw_value))
+    except ValueError:
+        return default
+
+
+NEARBY_STORES_TIMEOUT_S = _env_timeout_seconds("NEARBY_STORES_TIMEOUT_S", 3.0)
+RECOMMENDATION_STORE_LOOKUP_TIMEOUT_S = _env_timeout_seconds("RECOMMENDATION_STORE_LOOKUP_TIMEOUT_S", 2.0)
+STORE_FIT_TIMEOUT_S = _env_timeout_seconds("STORE_FIT_TIMEOUT_S", 0.75)
 
 
 def get_con() -> duckdb.DuckDBPyConnection:
@@ -133,6 +152,81 @@ def sanitize_recommendation_response_for_prod(payload: dict[str, object]) -> dic
     return sanitized
 
 
+def _record_stage_timing(stage_timings: dict[str, float], stage_name: str, start_time: float) -> None:
+    stage_timings[stage_name] = round((time.perf_counter() - start_time) * 1000.0, 1)
+
+
+def _run_stage(stage_timings: dict[str, float], stage_name: str, fn: Callable[[], object]) -> object:
+    start_time = time.perf_counter()
+    try:
+        return fn()
+    finally:
+        _record_stage_timing(stage_timings, stage_name, start_time)
+
+
+def _mark_degraded_stage(request_metadata: dict[str, object], stage_name: str, *, timeout_s: float | None = None) -> None:
+    degraded_stages = request_metadata.setdefault("degraded_stages", [])
+    if isinstance(degraded_stages, list):
+        degraded_stages.append(stage_name)
+    request_metadata[f"{stage_name}_degraded"] = True
+    if timeout_s is not None:
+        request_metadata[f"{stage_name}_timeout_s"] = round(float(timeout_s), 3)
+
+
+def _run_optional_stage(
+    *,
+    app: Flask,
+    request_metadata: dict[str, object],
+    stage_timings: dict[str, float],
+    stage_name: str,
+    timeout_s: float,
+    fn: Callable[[], object],
+    fallback: object,
+) -> object:
+    if timeout_s <= 0:
+        return _run_stage(stage_timings, stage_name, fn)
+
+    result_queue: queue.Queue[tuple[str, object]] = queue.Queue(maxsize=1)
+
+    def runner() -> None:
+        try:
+            result_queue.put(("ok", fn()))
+        except Exception as exc:  # noqa: BLE001
+            result_queue.put(("error", exc))
+
+    start_time = time.perf_counter()
+    thread = threading.Thread(target=runner, name=f"generic-{stage_name}", daemon=True)
+    thread.start()
+    thread.join(timeout_s)
+    _record_stage_timing(stage_timings, stage_name, start_time)
+
+    if thread.is_alive():
+        _mark_degraded_stage(request_metadata, stage_name, timeout_s=timeout_s)
+        app.logger.warning("%s timed out after %.2fs; returning fallback.", stage_name, timeout_s)
+        return fallback
+
+    try:
+        status, payload = result_queue.get_nowait()
+    except queue.Empty:
+        _mark_degraded_stage(request_metadata, stage_name, timeout_s=timeout_s)
+        app.logger.warning("%s completed without a result; returning fallback.", stage_name)
+        return fallback
+
+    if status == "error":
+        _mark_degraded_stage(request_metadata, stage_name, timeout_s=timeout_s)
+        app.logger.warning("%s failed with %s; returning fallback.", stage_name, type(payload).__name__)
+        return fallback
+    return payload
+
+
+def _empty_store_fit_payload() -> dict[str, object]:
+    return {
+        "recommended_store_order": [],
+        "store_fit_notes": [],
+        **{pick_name: None for pick_name in GROUPED_PICK_FIELDS},
+    }
+
+
 def create_app() -> Flask:
     app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config["COMPRESS_MIMETYPES"] = ["text/html", "text/css", "text/javascript", "text/csv", "text/plain"]
@@ -198,11 +292,32 @@ def create_app() -> Flask:
         if limit <= 0 or limit > MAX_STORE_LIMIT:
             return json_error(f"limit must be between 1 and {MAX_STORE_LIMIT}.")
 
-        with get_con() as con:
-            stores = nearby_stores(con, lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+        stage_timings: dict[str, float] = {}
+
+        def load_stores() -> list[dict[str, object]]:
+            with get_con() as con:
+                return nearby_stores(con, lat=lat, lon=lon, radius_m=radius_m, limit=limit)
+
+        stores = _run_optional_stage(
+            app=app,
+            request_metadata=g.request_metadata,
+            stage_timings=stage_timings,
+            stage_name="nearby_store_lookup",
+            timeout_s=NEARBY_STORES_TIMEOUT_S,
+            fn=load_stores,
+            fallback=[],
+        )
 
         g.request_metadata["store_count"] = len(stores)
         g.request_metadata["radius_m"] = radius_m
+        g.request_metadata["stage_timings_ms"] = dict(stage_timings)
+        g.request_metadata["degraded_stage_count"] = len(g.request_metadata.get("degraded_stages") or [])
+        app.logger.info(
+            "nearby stores: count=%s timings_ms=%s degraded=%s",
+            len(stores),
+            stage_timings,
+            g.request_metadata.get("degraded_stages") or [],
+        )
         return app.json.response({"stores": stores})
 
     @app.route("/api/recommendations/generic", methods=["POST"])
@@ -334,44 +449,74 @@ def create_app() -> Flask:
         if model_candidate_count < 1 or model_candidate_count > MAX_MODEL_CANDIDATE_COUNT:
             return json_error(f"model_candidate_count must be between 1 and {MAX_MODEL_CANDIDATE_COUNT}.")
 
-        with get_con() as con:
-            stores = normalize_store_snapshot(stores_raw, limit=store_limit) if stores_raw is not None else []
-            if not stores:
-                stores = nearby_stores(con, lat=lat, lon=lon, radius_m=radius_m, limit=store_limit)
-            price_context = resolve_price_context(lat, lon, stores)
-            try:
-                scorer_config = hybrid_pipeline_final.final_scorer_config(
-                    debug=debug_scorer,
-                    candidate_count=candidate_count,
-                    scorer_model_path=Path(scorer_model_path) if scorer_model_path else None,
-                )
-                candidate_generation_config = hybrid_pipeline_final.final_candidate_generation_config(
-                    debug=debug_candidate_generation,
-                    enable_model_candidates=enable_model_candidates,
-                    model_candidate_count=model_candidate_count,
-                    candidate_generator_model_path=Path(candidate_generator_model_path) if candidate_generator_model_path else None,
-                    candidate_generator_backend=candidate_generator_backend,
-                )
-                recommendation = recommend_generic_foods(
-                    con,
-                    protein_target_g=protein_target_g,
-                    calorie_target_kcal=calorie_target_kcal,
-                    preferences=preferences,
-                    nutrition_targets=nutrition_targets,
-                    pantry_items=pantry_items,
-                    days=days,
-                    shopping_mode=shopping_mode,
-                    price_context=price_context,
-                    stores=stores,
-                    scorer_config=scorer_config,
-                    candidate_generation_config=candidate_generation_config,
-                )
-            except PlanScorerArtifactError as e:
-                return json_error(str(e), status=500)
-            except ModelCandidateArtifactError as e:
-                return json_error(str(e), status=500)
-            except ValueError as e:
-                return json_error(str(e), status=422)
+        stage_timings: dict[str, float] = {}
+        stores = (
+            _run_stage(
+                stage_timings,
+                "store_snapshot_normalization",
+                lambda: normalize_store_snapshot(stores_raw, limit=store_limit),
+            )
+            if stores_raw is not None
+            else []
+        )
+        if not stores:
+            def load_recommendation_stores() -> list[dict[str, object]]:
+                with get_con() as store_con:
+                    return nearby_stores(store_con, lat=lat, lon=lon, radius_m=radius_m, limit=store_limit)
+
+            stores = _run_optional_stage(
+                app=app,
+                request_metadata=g.request_metadata,
+                stage_timings=stage_timings,
+                stage_name="nearby_store_lookup",
+                timeout_s=RECOMMENDATION_STORE_LOOKUP_TIMEOUT_S,
+                fn=load_recommendation_stores,
+                fallback=[],
+            )
+
+        price_context = _run_stage(
+            stage_timings,
+            "price_context_resolution",
+            lambda: resolve_price_context(lat, lon, stores),
+        )
+        try:
+            scorer_config = hybrid_pipeline_final.final_scorer_config(
+                debug=debug_scorer,
+                candidate_count=candidate_count,
+                scorer_model_path=Path(scorer_model_path) if scorer_model_path else None,
+            )
+            candidate_generation_config = hybrid_pipeline_final.final_candidate_generation_config(
+                debug=debug_candidate_generation,
+                enable_model_candidates=enable_model_candidates,
+                model_candidate_count=model_candidate_count,
+                candidate_generator_model_path=Path(candidate_generator_model_path) if candidate_generator_model_path else None,
+                candidate_generator_backend=candidate_generator_backend,
+            )
+
+            def build_recommendation() -> dict[str, object]:
+                with get_con() as con:
+                    return recommend_generic_foods(
+                        con,
+                        protein_target_g=protein_target_g,
+                        calorie_target_kcal=calorie_target_kcal,
+                        preferences=preferences,
+                        nutrition_targets=nutrition_targets,
+                        pantry_items=pantry_items,
+                        days=days,
+                        shopping_mode=shopping_mode,
+                        price_context=price_context,
+                        stores=stores,
+                        scorer_config=scorer_config,
+                        candidate_generation_config=candidate_generation_config,
+                    )
+
+            recommendation = _run_stage(stage_timings, "recommendation_generation", build_recommendation)
+        except PlanScorerArtifactError as e:
+            return json_error(str(e), status=500)
+        except ModelCandidateArtifactError as e:
+            return json_error(str(e), status=500)
+        except ValueError as e:
+            return json_error(str(e), status=422)
 
         g.request_metadata["store_count"] = len(stores)
         g.request_metadata["shopping_list_count"] = len(recommendation["shopping_list"])
@@ -415,6 +560,7 @@ def create_app() -> Flask:
             g.request_metadata["generated_model_candidate_count"] = model_candidate_total
         if fused_candidate_total is not None:
             g.request_metadata["fused_candidate_count"] = fused_candidate_total
+        g.request_metadata["stage_timings_ms"] = dict(stage_timings)
         app.logger.info(
             "generic recommendation: pipeline_mode=%s model_enabled=%s candidate_generator_backend=%s heuristic_candidates=%s model_candidates=%s fused_candidates=%s selected_source=%s selected_id=%s",
             execution_summary.get("pipeline_mode") or ("full_hybrid" if enable_model_candidates else "heuristic_only"),
@@ -426,23 +572,39 @@ def create_app() -> Flask:
             recommendation.get("selected_candidate_source") or "unknown",
             recommendation.get("selected_candidate_id") or "unknown",
         )
-        store_fit = recommend_store_fits(
-            stores,
-            recommendation["shopping_list"],
-            preferences=preferences,
-            days=days,
-            shopping_mode=shopping_mode,
+        store_fit = _run_optional_stage(
+            app=app,
+            request_metadata=g.request_metadata,
+            stage_timings=stage_timings,
+            stage_name="store_fit_ranking",
+            timeout_s=STORE_FIT_TIMEOUT_S,
+            fn=lambda: recommend_store_fits(
+                stores,
+                recommendation["shopping_list"],
+                preferences=preferences,
+                days=days,
+                shopping_mode=shopping_mode,
+            ),
+            fallback=_empty_store_fit_payload(),
         )
+        g.request_metadata["stage_timings_ms"] = dict(stage_timings)
+        g.request_metadata["degraded_stage_count"] = len(g.request_metadata.get("degraded_stages") or [])
         execution_summary.update(
             {
-                "store_fit_ranking_ran": True,
+                "store_fit_ranking_ran": not bool(g.request_metadata.get("store_fit_ranking_degraded")),
                 "stores_evaluated_count": len(stores),
                 "store_fit_ranked_store_count": len(store_fit["recommended_store_order"]),
                 "full_pipeline_completed": bool(execution_summary.get("scorer_reranking_used", recommendation.get("scorer_used"))),
+                "optional_stage_degraded": bool(g.request_metadata.get("degraded_stages")),
             }
         )
         recommendation["hybrid_planner_execution"] = execution_summary
         g.request_metadata["recommended_store_count"] = len(store_fit["recommended_store_order"])
+        app.logger.info(
+            "generic recommendation stages: timings_ms=%s degraded=%s",
+            stage_timings,
+            g.request_metadata.get("degraded_stages") or [],
+        )
         response_payload = {"stores": stores, **recommendation, **store_fit}
         return app.json.response(
             sanitize_recommendation_response_for_prod(response_payload) if IS_PROD else response_payload

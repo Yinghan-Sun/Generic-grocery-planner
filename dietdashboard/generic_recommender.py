@@ -34,6 +34,14 @@ GOAL_PROFILE_OPTIONS = {
     "budget_friendly_healthy",
     "generic_balanced",
 }
+GOAL_BASE_TARGETS = {
+    "generic_balanced": {"protein": 100.0, "energy_fibre_kcal": 2200.0, "carbohydrate": 250.0, "fat": 70.0, "fiber": 30.0},
+    "muscle_gain": {"protein": 180.0, "energy_fibre_kcal": 2800.0, "carbohydrate": 330.0, "fat": 85.0, "fiber": 35.0},
+    "fat_loss": {"protein": 145.0, "energy_fibre_kcal": 1700.0, "carbohydrate": 160.0, "fat": 55.0, "fiber": 32.0},
+    "maintenance": {"protein": 115.0, "energy_fibre_kcal": 2250.0, "carbohydrate": 240.0, "fat": 70.0, "fiber": 30.0},
+    "budget_friendly_healthy": {"protein": 110.0, "energy_fibre_kcal": 2100.0, "carbohydrate": 240.0, "fat": 65.0, "fiber": 32.0},
+    "high_protein_vegetarian": {"protein": 145.0, "energy_fibre_kcal": 2400.0, "carbohydrate": 260.0, "fat": 75.0, "fiber": 32.0},
+}
 MEAL_STYLE_TAGS = {
     "breakfast": {"breakfast"},
     "lunch_dinner": {"lunch", "dinner"},
@@ -440,84 +448,175 @@ def _goal_template_slack(goal_profile: str, role: str) -> float:
     }.get(role, 0.0)
 
 
-def _goal_quantity_cap(food: dict[str, object], role: str, goal_profile: str) -> float | None:
+def _goal_role_calorie_cap(
+    food: dict[str, object],
+    *,
+    role: str,
+    calorie_target_kcal: float,
+    basket_policy: dict[str, object] | None,
+    role_count: int,
+) -> float | None:
+    if calorie_target_kcal <= 0:
+        return None
+
+    configured_shares = basket_policy.get("target_role_calorie_shares") if isinstance(basket_policy, dict) else None
+    if not isinstance(configured_shares, dict):
+        return None
+
+    role_share = max(0.0, float(configured_shares.get(role, 0.0)))
+    if role_share <= 0.0:
+        return None
+
+    calorie_density = max(float(food.get("energy_fibre_kcal") or 0.0), 1.0)
+    per_item_target_calories = (calorie_target_kcal * role_share) / max(role_count, 1)
+    role_cap_multiplier = {
+        "protein_anchor": 1.25,
+        "carb_base": 1.35,
+        "produce": 1.05,
+        "calorie_booster": 1.05,
+    }.get(role, 1.1)
+    return 100.0 * per_item_target_calories * role_cap_multiplier / calorie_density
+
+
+def _goal_target_pressure(
+    goal_profile: str,
+    *,
+    protein_target_g: float = 0.0,
+    calorie_target_kcal: float = 0.0,
+    nutrition_targets: dict[str, float] | None = None,
+) -> float:
+    reference = GOAL_BASE_TARGETS.get(goal_profile, GOAL_BASE_TARGETS["generic_balanced"])
+    ratios = [
+        protein_target_g / max(float(reference["protein"]), 1.0) if protein_target_g > 0 else 0.0,
+        calorie_target_kcal / max(float(reference["energy_fibre_kcal"]), 1.0) if calorie_target_kcal > 0 else 0.0,
+    ]
+    normalized_targets = nutrition_targets or {}
+    for nutrient_id in ("carbohydrate", "fat", "fiber"):
+        target_value = float(normalized_targets.get(nutrient_id) or 0.0)
+        reference_value = float(reference.get(nutrient_id) or 0.0)
+        if target_value > 0 and reference_value > 0:
+            ratios.append(target_value / reference_value)
+    return max(1.0, min(max(ratios, default=1.0), 5.0))
+
+
+def _goal_quantity_cap(
+    food: dict[str, object],
+    role: str,
+    goal_profile: str,
+    *,
+    protein_target_g: float = 0.0,
+    calorie_target_kcal: float = 0.0,
+    nutrition_targets: dict[str, float] | None = None,
+    basket_policy: dict[str, object] | None = None,
+    role_count: int = 1,
+) -> float | None:
     food_id = str(food.get("generic_food_id") or "")
     family = str(food.get("food_family") or "")
     purchase_unit_size_g = float(food.get("purchase_unit_size_g") or 0.0)
 
+    cap_g: float | None = None
     if goal_profile == "budget_friendly_healthy":
         if role == "protein_anchor":
             if food_id in {"lentils", "beans", "black_beans", "chickpeas"}:
-                return 160.0
+                cap_g = 160.0
             if food_id == "eggs":
-                return 240.0
+                cap_g = 240.0
             if food_id == "tofu":
-                return 320.0
+                cap_g = 320.0
             if food_id == "peanut_butter":
-                return 60.0
+                cap_g = 60.0
         elif role == "carb_base":
             if food_id == "rice":
-                return 260.0
+                cap_g = 260.0
             if food_id == "pasta":
-                return 360.0
+                cap_g = 360.0
             if food_id == "oats":
-                return 240.0
+                cap_g = 240.0
             if food_id in {"potatoes", "sweet_potatoes"}:
-                return 480.0
+                cap_g = 480.0
             if food_id == "wholemeal_bread":
-                return max(320.0, min(purchase_unit_size_g, 420.0) if purchase_unit_size_g > 0 else 320.0)
+                cap_g = max(320.0, min(purchase_unit_size_g, 420.0) if purchase_unit_size_g > 0 else 320.0)
         elif role == "produce":
             if food_id in {"cabbage", "frozen_vegetables"}:
-                return 380.0
+                cap_g = 380.0
             if food_id in {"carrots", "bananas", "apples", "lettuce", "onions"}:
-                return 320.0
+                cap_g = 320.0
             if food_id in {"potatoes", "sweet_potatoes"}:
-                return 650.0
+                cap_g = 650.0
         elif role == "calorie_booster":
-            return 15.0 if family == "fat" else 30.0
+            cap_g = 15.0 if family == "fat" else 30.0
 
     if goal_profile == "fat_loss":
         if role == "protein_anchor":
             if food_id in {"tuna", "chicken_breast", "tofu", "greek_yogurt", "protein_yogurt", "cottage_cheese"}:
-                return 280.0
+                cap_g = 280.0
             if food_id == "eggs":
-                return 240.0
+                cap_g = 240.0
         elif role == "carb_base":
             if food_id in {"wholemeal_bread", "oats", "quinoa"}:
-                return 250.0
+                cap_g = 250.0
             if food_id in {"potatoes", "sweet_potatoes"}:
-                return 420.0
+                cap_g = 420.0
         elif role == "produce":
             if food_id in {"spinach", "lettuce", "cucumber", "tomatoes"}:
-                return 350.0
+                cap_g = 350.0
             if food_id in {"bell_peppers", "broccoli", "cauliflower"}:
-                return 420.0
+                cap_g = 420.0
             if food_id == "berries":
-                return 280.0
+                cap_g = 280.0
         elif role == "calorie_booster":
-            return 0.0
+            cap_g = 0.0
 
     if goal_profile == "muscle_gain":
         if role == "protein_anchor":
             if food_id == "eggs":
-                return 600.0
+                cap_g = 600.0
             if food_id in {"greek_yogurt", "protein_yogurt", "cottage_cheese", "milk"}:
-                return 420.0
+                cap_g = 420.0
             if food_id in {"turkey", "chicken_breast"}:
-                return 240.0
+                cap_g = 240.0
         elif role == "carb_base":
             if food_id == "oats":
-                return 350.0
+                cap_g = 350.0
             if food_id in {"rice", "pasta"}:
-                return 360.0
+                cap_g = 360.0
             if food_id in {"potatoes", "sweet_potatoes"}:
-                return 760.0
+                cap_g = 760.0
             if food_id in {"bagel", "wholemeal_bread"}:
-                return 360.0
+                cap_g = 360.0
         elif role == "calorie_booster":
-            return 45.0 if family == "fat" else 60.0
+            cap_g = 45.0 if family == "fat" else 60.0
 
-    return None
+    if cap_g is None:
+        return None
+
+    target_pressure = _goal_target_pressure(
+        goal_profile,
+        protein_target_g=protein_target_g,
+        calorie_target_kcal=calorie_target_kcal,
+        nutrition_targets=nutrition_targets,
+    )
+    if target_pressure > 1.0:
+        cap_growth = {
+            "protein_anchor": 1.0,
+            "carb_base": 1.05,
+            "produce": 0.55,
+            "calorie_booster": 0.35,
+        }.get(role, 0.75)
+        scaled_base_cap_g = cap_g * (1.0 + ((target_pressure - 1.0) * cap_growth))
+        cap_g = max(cap_g, scaled_base_cap_g)
+
+    role_calorie_cap_g = _goal_role_calorie_cap(
+        food,
+        role=role,
+        calorie_target_kcal=calorie_target_kcal,
+        basket_policy=basket_policy,
+        role_count=role_count,
+    )
+    if role_calorie_cap_g is not None:
+        cap_g = max(cap_g, role_calorie_cap_g)
+
+    return round(cap_g, 6)
 
 
 def _apply_goal_quantity_caps(
@@ -525,13 +624,30 @@ def _apply_goal_quantity_caps(
     available: dict[str, dict[str, object]],
     quantities: dict[str, float],
     goal_profile: str,
+    *,
+    protein_target_g: float = 0.0,
+    calorie_target_kcal: float = 0.0,
+    nutrition_targets: dict[str, float] | None = None,
+    basket_policy: dict[str, object] | None = None,
 ) -> None:
     if goal_profile == "generic_balanced":
         return
+    role_counts: dict[str, int] = {}
+    for _food_id, role in chosen:
+        role_counts[role] = role_counts.get(role, 0) + 1
     for food_id, role in chosen:
         if food_id not in quantities:
             continue
-        cap_g = _goal_quantity_cap(available[food_id], role, goal_profile)
+        cap_g = _goal_quantity_cap(
+            available[food_id],
+            role,
+            goal_profile,
+            protein_target_g=protein_target_g,
+            calorie_target_kcal=calorie_target_kcal,
+            nutrition_targets=nutrition_targets,
+            basket_policy=basket_policy,
+            role_count=role_counts.get(role, 1),
+        )
         if cap_g is None:
             continue
         if cap_g <= 0:
@@ -1132,7 +1248,7 @@ def _goal_role_score(food: dict[str, object], role: str, goal_profile: str) -> f
             if food_id in {"rice", "pasta", "potatoes"}:
                 score += 1.2
             if food_id == "oats":
-                score -= 1.0
+                score -= 1.8
             if cluster in {"meal_base", "starchy_produce"}:
                 score += 0.6
             if food_id == "quinoa":

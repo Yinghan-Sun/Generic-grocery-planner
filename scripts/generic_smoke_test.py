@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import time
 from unittest.mock import patch
 
 import dietdashboard.app as app_module
@@ -205,6 +206,67 @@ def main() -> int:
 
     assert_equal(radius_calls, [500.0, 500.0], "nearby-store radius reused for recommendation")
 
+    def sleepy_nearby_stores(_con, lat: float, lon: float, radius_m: float = 0.0, limit: int = 5):
+        del lat, lon, radius_m, limit
+        time.sleep(0.3)
+        return [
+            {
+                "store_id": "stub:slow-nearby",
+                "name": "Slow Nearby Store",
+                "address": "100 Demo St, Mountain View, CA 94040",
+                "distance_m": 250.0,
+                "lat": 37.401,
+                "lon": -122.09,
+                "category": "supermarket",
+            }
+        ]
+
+    with (
+        patch.object(app_module, "NEARBY_STORES_TIMEOUT_S", 0.05),
+        patch.object(app_module, "RECOMMENDATION_STORE_LOOKUP_TIMEOUT_S", 0.05),
+        patch.object(app_module, "nearby_stores", side_effect=sleepy_nearby_stores),
+    ):
+        timeout_app = app_module.create_app()
+        timeout_client = timeout_app.test_client()
+
+        nearby_start = time.perf_counter()
+        timed_nearby = timeout_client.get("/api/stores/nearby?lat=37.401&lon=-122.09&radius_m=8000&limit=5")
+        nearby_elapsed = time.perf_counter() - nearby_start
+        assert_equal(timed_nearby.status_code, 200, "timed nearby-store status")
+        timed_nearby_json = timed_nearby.get_json()
+        assert_equal(timed_nearby_json["stores"], [], "timed nearby-store fallback")
+        assert_true(nearby_elapsed < 0.2, "timed nearby-store bounded latency")
+
+        timed_recommendation_start = time.perf_counter()
+        timed_recommendation = timeout_client.post("/api/recommendations/generic", json=balanced_payload)
+        timed_recommendation_elapsed = time.perf_counter() - timed_recommendation_start
+        assert_equal(timed_recommendation.status_code, 200, "timed recommendation status")
+        timed_recommendation_json = timed_recommendation.get_json()
+        assert_equal(timed_recommendation_json["stores"], [], "timed recommendation store fallback")
+        assert_true(len(timed_recommendation_json["shopping_list"]) >= 1, "timed recommendation still returns shopping list")
+        assert_true(timed_recommendation_elapsed < 1.0, "timed recommendation bounded latency")
+
+    def sleepy_store_fit(stores, shopping_list, *, preferences=None, days=1, shopping_mode="balanced"):
+        del stores, shopping_list, preferences, days, shopping_mode
+        time.sleep(0.3)
+        return {"recommended_store_order": ["stub:slow"], "store_fit_notes": []}
+
+    with (
+        patch.object(app_module, "STORE_FIT_TIMEOUT_S", 0.05),
+        patch.object(app_module, "recommend_store_fits", side_effect=sleepy_store_fit),
+    ):
+        timeout_app = app_module.create_app()
+        timeout_client = timeout_app.test_client()
+        store_fit_start = time.perf_counter()
+        timed_store_fit = timeout_client.post("/api/recommendations/generic", json=balanced_payload)
+        store_fit_elapsed = time.perf_counter() - store_fit_start
+        assert_equal(timed_store_fit.status_code, 200, "timed store-fit recommendation status")
+        timed_store_fit_json = timed_store_fit.get_json()
+        assert_true(len(timed_store_fit_json["shopping_list"]) >= 1, "timed store-fit recommendation items")
+        assert_equal(timed_store_fit_json["recommended_store_order"], [], "timed store-fit fallback order")
+        assert_equal(timed_store_fit_json["store_fit_notes"], [], "timed store-fit fallback notes")
+        assert_true(store_fit_elapsed < 1.0, "timed store-fit bounded latency")
+
     print("generic_page=ok")
     print(f"nearby_store_count={len(stores)}")
     print(f"balanced_item_count={len(balanced_json['shopping_list'])}")
@@ -217,6 +279,7 @@ def main() -> int:
     print("prod_debug_suppression=ok")
     print("prod_hybrid_metadata_sanitization=ok")
     print("recommendation_radius_reuse=ok")
+    print("slow_dependency_fallbacks=ok")
     print("invalid_input_check=ok")
     return 0
 
