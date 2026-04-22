@@ -1,0 +1,34 @@
+# Full Transcript
+
+## Slide 1 - Title + Value Proposition
+Today I am presenting a grocery-planning dashboard that takes a nutrition goal and turns it into a practical shopping trip. Instead of asking a user to translate abstract advice like eat more protein or stay on budget into actual groceries, the tool gives them a starting basket, a rough price estimate, and nearby store suggestions. That makes the project easy to explain to a non-technical audience because its value is visible right away: it helps someone move from a goal to an action. As we go, I am going to focus less on code and more on the user decision this tool supports.
+
+## Slide 2 - Who This Is For
+The clearest audience for this tool is a busy, health-conscious shopper who is not a nutrition expert. I think the best example is a student or young professional who wants to shop in a way that supports muscle gain, fat loss, maintenance, or a healthier budget, but does not want to build a meal plan from scratch. This audience needs three things at once: simple choices, realistic prices, and recommendations that feel local and doable. So the dashboard is not trying to teach nutrition theory. It is trying to reduce friction and help a person make a better grocery decision in a few minutes.
+
+## Slide 3 - The Real-World Problem
+The real-world problem is that eating for a goal sounds simple until someone has to stand in a store and decide what to buy. Nutrition advice is usually abstract, grocery prices vary by place, and convenience matters just as much as protein or calories. A shopper might know they want to eat healthier, but they still have to answer practical questions like what basket gets me close to my goal, how much will it cost, and where should I go nearby. This project matters because it turns that messy decision into a clearer comparison instead of leaving the user to guess.
+
+## Slide 4 - What The Tool Does
+At a high level, the tool asks for a location, a daily target, a few food preferences, and any pantry items the user already has. Then it builds several possible grocery baskets and chooses one that best balances nutrition fit, practicality, and price-awareness. In plain English, the app is not hunting for one mathematically perfect meal plan. It is trying a few sensible baskets and selecting the one that seems most useful for a real shopper. The result is a shopping list, a nutrition summary, a typical basket cost, and store suggestions that help the user act on the recommendation.
+
+## Slide 5 - How A User Interacts With It
+This slide shows why the tool is accessible for a non-specialist audience. The user can start with a preset like muscle gain or budget-friendly healthy, keep the default city, and click a button to load nearby supermarkets. They can also fine-tune calories, protein, shopping window, dietary filters, and pantry items without needing any technical knowledge. That matters for grading because the dashboard is not just producing an answer. It is inviting exploration in a way that feels familiar, like filling out a guided shopping form rather than operating a model.
+
+## Slide 6 - What Changes When Decisions Change
+Here is the most important interaction story. I kept the same Mountain View location and the same 2,200 calorie, 130 gram protein target, and then changed one preference at a time. The base plan costs about eight dollars and uses familiar staples like chicken, bread, spinach, and carrots. When I turn on the budget preference, the basket drops closer to five and a half dollars and shifts toward lentils, eggs, rice, and cabbage. When I turn on low-prep, the tool leans more toward convenience foods like rotisserie chicken. So the model is making tradeoffs visible. Different choices really do change cost, basket composition, and even the suggested store fit.
+
+## Slide 7 - Key Recommendation Example
+This is a concrete example of the tool speaking in plain English. For the base scenario, the dashboard recommends two protein anchors, one carb base, two produce items, and a calorie booster. It estimates about 138 grams of protein against a 130 gram target, about 2,160 calories against a 2,200 calorie target, and a typical basket cost of about eight and a half dollars. The useful part is not the exact number. The useful part is the explanation: buy a small set of versatile staples that get you close to the goal, then use the nearby store suggestions to make the trip easier. That is decision support, not just prediction.
+
+## Slide 8 - Limitations + How To Improve
+The tool is useful, but it is important to state its limits clearly. First, it works with generic foods, not exact store inventory or exact product brands. Second, the prices are regional estimates rather than store quotes. Third, the long-window logic is approximate. In the live seven-day scenarios, fresh and bulk modes both drift away from the target because perishables are intentionally softened. The path forward is clear: add real inventory and pricing feeds, let users set a hard budget cap, support more dietary constraints, and use feedback from real shoppers to improve the confidence and realism of each recommendation.
+
+## Slide 9 - Stakeholders + Ethics
+Several groups are affected by this tool. Shoppers benefit from clearer planning, stores may benefit from more intentional trips, and nutrition educators could use it as a teaching aid. But there are also ethical concerns. Users with allergies, medical conditions, or very limited access to stores may be underserved if the tool is treated as more certain than it really is. That is why transparency matters. The dashboard should keep telling users when a result is approximate, when price data is regional, and when store recommendations are based on fit rather than live inventory. Used responsibly, the tool supports healthier choices; used carelessly, it could overstate confidence.
+
+## Slide 10 - Takeaways + Future Use
+The big takeaway is that this project makes nutrition goals more actionable. It gives a non-expert user a simple way to explore tradeoffs among health targets, convenience, and budget, and it does that with outputs they can immediately recognize: a shopping list, a cost estimate, and store suggestions. I would trust it as a practical starting point because it shows its reasoning in user-friendly terms and it does not pretend to be exact inventory or medical advice. The next step would be to test it with real student or young professional shoppers, collect feedback, and adapt the interface and rules around what those users say they actually need.
+
+## Slide 11 - Demo Backup
+This backup slide is here in case a live demo fails. It lets me walk through the same recommendation screen, point to the shopping list, the nutrition summary, the price notes, and the store suggestions, and still keep the presentation understandable.

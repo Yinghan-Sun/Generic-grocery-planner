@@ -165,7 +165,7 @@ export function LocationInput(parent, state, actions) {
       ${generalNotice(state)}
       <div>
         <h3>Goal Presets</h3>
-        <p class="generic-help">Start from a common goal, then fine-tune the location targets or preferences if needed.</p>
+        <p class="generic-help">Start from a common goal or dietary preset, then fine-tune the everyday planning details if needed.</p>
         <div class="generic-presets">${presetButtons}</div>
       </div>
 
@@ -284,17 +284,7 @@ export function LocationInput(parent, state, actions) {
               <option value="snack" ${state.meal_style === "snack" ? "selected" : ""}>Snack</option>
             </select>
           </label>
-          <div class="generic-checkboxes">
-            <label>
-              <input name="vegetarian" type="checkbox" ${state.vegetarian ? "checked" : ""} />
-              Vegetarian (includes eggs and dairy)
-            </label>
-            <label><input name="vegan" type="checkbox" ${state.vegan ? "checked" : ""} /> Vegan</label>
-            <label><input name="dairy_free" type="checkbox" ${state.dairy_free ? "checked" : ""} /> Dairy-free</label>
-            <label><input name="low_prep" type="checkbox" ${state.low_prep ? "checked" : ""} /> Low prep</label>
-            <label><input name="budget_friendly" type="checkbox" ${state.budget_friendly ? "checked" : ""} /> Budget friendly</label>
-          </div>
-          <p class="generic-help">Recommendations stay generic. They do not depend on exact store inventory or branded products.</p>
+          <p class="generic-help">Dietary goals like Vegan, Dairy-free, and Budget-Friendly Healthy now live in Goal Presets. Recommendations stay generic and do not depend on exact store inventory or branded products.</p>
         </div>
       </div>
 
@@ -307,48 +297,6 @@ export function LocationInput(parent, state, actions) {
           </div>
         </div>
       </div>
-
-      <details class="generic-advanced">
-        <summary>Advanced nutrition</summary>
-        <div class="generic-form-grid">
-          <label>
-            Calcium (mg)
-            <input
-              name="calcium"
-              type="number"
-              min="1"
-              step="1"
-              value="${escapeHtml(state.calcium)}"
-              aria-invalid="${fieldError(state, "calcium") ? "true" : "false"}"
-            />
-            <span class="generic-field-error">${escapeHtml(fieldError(state, "calcium"))}</span>
-          </label>
-          <label>
-            Iron (mg)
-            <input
-              name="iron"
-              type="number"
-              min="1"
-              step="0.1"
-              value="${escapeHtml(state.iron)}"
-              aria-invalid="${fieldError(state, "iron") ? "true" : "false"}"
-            />
-            <span class="generic-field-error">${escapeHtml(fieldError(state, "iron"))}</span>
-          </label>
-          <label>
-            Vitamin C (mg)
-            <input
-              name="vitamin_c"
-              type="number"
-              min="1"
-              step="1"
-              value="${escapeHtml(state.vitamin_c)}"
-              aria-invalid="${fieldError(state, "vitamin_c") ? "true" : "false"}"
-            />
-            <span class="generic-field-error">${escapeHtml(fieldError(state, "vitamin_c"))}</span>
-          </label>
-        </div>
-      </details>
 
       ${plannerControls}
 
@@ -419,14 +367,6 @@ export function LocationInput(parent, state, actions) {
       carbohydrate: form.carbohydrate.value,
       fat: form.fat.value,
       fiber: form.fiber.value,
-      calcium: form.calcium.value,
-      iron: form.iron.value,
-      vitamin_c: form.vitamin_c.value,
-      vegetarian: checkboxChecked(form, "vegetarian"),
-      dairy_free: checkboxChecked(form, "dairy_free"),
-      vegan: checkboxChecked(form, "vegan"),
-      low_prep: checkboxChecked(form, "low_prep"),
-      budget_friendly: checkboxChecked(form, "budget_friendly"),
       meal_style: form.meal_style.value,
       enable_model_candidates: checkboxChecked(form, "enable_model_candidates"),
       model_candidate_count: form.model_candidate_count.value,

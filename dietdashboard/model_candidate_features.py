@@ -173,7 +173,7 @@ def build_context_features(
         "target_produce_count": max(1, _safe_int(resolved_basket_policy.get("desired_produce_items", 1))),
         "target_calorie_booster_count": int(bool(resolved_basket_policy.get("booster_enabled", False))),
         "budget_friendly_preference": _bool_int(normalized_preferences.get("budget_friendly")),
-        "low_prep_preference": _bool_int(normalized_preferences.get("low_prep")),
+        "low_prep_preference": 0,
         "vegetarian_preference": _bool_int(normalized_preferences.get("vegetarian")),
         "vegan_preference": _bool_int(normalized_preferences.get("vegan")),
         "dairy_free_preference": _bool_int(normalized_preferences.get("dairy_free")),

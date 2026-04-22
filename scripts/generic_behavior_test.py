@@ -144,6 +144,28 @@ def load_price_meta() -> dict[str, dict[str, float | str | None]]:
     }
 
 
+def load_food_meta() -> dict[str, dict[str, object]]:
+    with duckdb.connect("data/data.db", read_only=True) as con:
+        rows = con.execute(
+            """
+            SELECT
+              generic_food_id,
+              prep_level,
+              budget_score,
+              microwave_friendly
+            FROM generic_foods
+            """
+        ).fetchall()
+    return {
+        str(generic_food_id): {
+            "prep_level": str(prep_level or ""),
+            "budget_score": float(budget_score or 0.0),
+            "microwave_friendly": bool(microwave_friendly),
+        }
+        for generic_food_id, prep_level, budget_score, microwave_friendly in rows
+    }
+
+
 def scenario_payloads() -> list[tuple[str, dict[str, Any], set[str], set[str]]]:
     return [
         (
@@ -189,17 +211,6 @@ def scenario_payloads() -> list[tuple[str, dict[str, Any], set[str], set[str]]]:
             },
             {"milk", "greek_yogurt", "cheese"},
             {"chicken_breast", "tuna", "eggs", "tofu", "oats", "bananas", "spinach", "broccoli"},
-        ),
-        (
-            "low_prep",
-            {
-                "location": {"lat": 37.3861, "lon": -122.0839},
-                "targets": {"protein": 120, "energy_fibre_kcal": 2100},
-                "preferences": {"low_prep": True},
-                "store_limit": 2,
-            },
-            set(),
-            {"tuna", "eggs", "greek_yogurt", "tofu", "wholemeal_bread", "peanut_butter", "bananas"},
         ),
         (
             "budget_friendly",
@@ -1057,6 +1068,142 @@ def run_diversity_scenario() -> list[str]:
     return ["diversity"]
 
 
+def run_preference_overlap_scenario() -> list[str]:
+    app = create_app()
+    client = app.test_client()
+    food_meta = load_food_meta()
+
+    def stub_nearby_stores(_con: duckdb.DuckDBPyConnection, *, limit: int, **_kwargs: object) -> list[dict[str, object]]:
+        return STUB_STORES[:limit]
+
+    payloads = {
+        "base": {
+            "location": {"lat": 37.3861, "lon": -122.0839},
+            "targets": {"protein": 130, "energy_fibre_kcal": 2200, "carbohydrate": 240, "fat": 70, "fiber": 30},
+            "preferences": {"meal_style": "lunch_dinner"},
+            "store_limit": 2,
+        },
+        "budget": {
+            "location": {"lat": 37.3861, "lon": -122.0839},
+            "targets": {"protein": 130, "energy_fibre_kcal": 2200, "carbohydrate": 240, "fat": 70, "fiber": 30},
+            "preferences": {"meal_style": "lunch_dinner", "budget_friendly": True},
+            "store_limit": 2,
+        },
+        "vegan": {
+            "location": {"lat": 37.3861, "lon": -122.0839},
+            "targets": {"protein": 125, "energy_fibre_kcal": 2200, "carbohydrate": 245, "fat": 68, "fiber": 36},
+            "preferences": {"meal_style": "any", "vegan": True},
+            "store_limit": 2,
+        },
+    }
+
+    with patched_attr(app_module, "nearby_stores", stub_nearby_stores):
+        responses = {
+            label: client.post("/api/recommendations/generic", json=payload).get_json()
+            for label, payload in payloads.items()
+        }
+
+    baskets = {
+        label: [str(item["generic_food_id"]) for item in body["shopping_list"]]
+        for label, body in responses.items()
+    }
+
+    def jaccard(left: list[str], right: list[str]) -> float:
+        left_ids = set(left)
+        right_ids = set(right)
+        union = left_ids | right_ids
+        if not union:
+            return 0.0
+        return len(left_ids & right_ids) / len(union)
+
+    budget_staples = {
+        "lentils",
+        "beans",
+        "black_beans",
+        "chickpeas",
+        "eggs",
+        "tofu",
+        "peanut_butter",
+        "oats",
+        "rice",
+        "pasta",
+        "potatoes",
+        "wholemeal_bread",
+        "bananas",
+        "apples",
+        "carrots",
+        "cabbage",
+        "lettuce",
+        "onions",
+        "frozen_vegetables",
+        "olive_oil",
+    }
+
+    def budget_staple_count(body: dict[str, Any]) -> int:
+        return sum(
+            1
+            for item in body["shopping_list"]
+            if str(item["generic_food_id"]) in budget_staples or float(food_meta[str(item["generic_food_id"])]["budget_score"]) >= 4.0
+        )
+
+    base_overlap_budget = jaccard(baskets["base"], baskets["budget"])
+    base_overlap_vegan = jaccard(baskets["base"], baskets["vegan"])
+    assert_true(base_overlap_budget <= 0.35, "preference overlap base-budget materially reduced")
+    assert_true(base_overlap_vegan <= 0.5, "preference overlap base-vegan materially reduced")
+    assert_true(len(set(baskets["base"]) ^ set(baskets["budget"])) >= 4, "preference overlap budget differs by at least two foods")
+    assert_true(len(set(baskets["base"]) ^ set(baskets["vegan"])) >= 4, "preference overlap vegan differs by at least two foods")
+
+    base_budget_staples = budget_staple_count(responses["base"])
+    budget_budget_staples = budget_staple_count(responses["budget"])
+    assert_true(budget_budget_staples >= base_budget_staples + 1, "preference overlap budget increases staple count")
+    assert_true(
+        float(responses["budget"]["estimated_basket_cost"]) <= float(responses["base"]["estimated_basket_cost"]) + 0.25,
+        "preference overlap budget keeps cost sensible",
+    )
+
+    for label, body in responses.items():
+        summary = body["nutrition_summary"]
+        protein_gap = abs(float(summary["protein_estimated_g"]) - float(summary["protein_target_g"]))
+        calorie_gap = abs(float(summary["calorie_estimated_kcal"]) - float(summary["calorie_target_kcal"]))
+        assert_true(protein_gap <= 25.0, f"{label} preference overlap protein gap acceptable")
+        assert_true(calorie_gap <= (380.0 if label == "budget" else 300.0), f"{label} preference overlap calorie gap acceptable")
+
+    vegan_ids = set(baskets["vegan"])
+    assert_true(
+        not bool(vegan_ids & {"eggs", "milk", "greek_yogurt", "cheese", "cottage_cheese", "protein_yogurt", "tuna", "chicken_breast"}),
+        "preference overlap vegan excludes animal foods",
+    )
+    vegan_unique_ids = vegan_ids - set(baskets["base"])
+    vegan_unique_items = [
+        item
+        for item in responses["vegan"]["shopping_list"]
+        if str(item["generic_food_id"]) in vegan_unique_ids
+    ]
+    assert_true(
+        any(
+            str(item["generic_food_id"]) in {"tofu", "lentils", "beans", "black_beans", "chickpeas", "oats"}
+            for item in vegan_unique_items
+        ),
+        "preference overlap vegan unique items reflect plant-based substitutions",
+    )
+
+    budget_unique_ids = set(baskets["budget"]) - set(baskets["base"])
+    budget_unique_items = [
+        item
+        for item in responses["budget"]["shopping_list"]
+        if str(item["generic_food_id"]) in budget_unique_ids
+    ]
+    assert_true(
+        any(
+            "lower-cost staple" in str(item["why_selected"]).lower()
+            or "budget-friendly" in str(item["reason_short"]).lower()
+            for item in budget_unique_items
+        ),
+        "preference overlap budget explanations reflect lower-cost substitutions",
+    )
+    return ["preference_overlap"]
+
+
 def run_goal_policy_scenario() -> list[str]:
     app = create_app()
     client = app.test_client()
@@ -1091,7 +1238,7 @@ def run_goal_policy_scenario() -> list[str]:
         },
         "high_protein_vegetarian": {
             "location": {"lat": 37.3861, "lon": -122.0839},
-            "targets": {"protein": 140, "energy_fibre_kcal": 2100, "carbohydrate": 220, "fat": 70, "fiber": 32, "iron": 18},
+            "targets": {"protein": 140, "energy_fibre_kcal": 2100, "carbohydrate": 220, "fat": 70, "fiber": 32},
             "preferences": {"vegetarian": True},
             "store_limit": 2,
         },
@@ -1944,6 +2091,7 @@ def main() -> int:
     recommendation_labels.extend(run_shopping_mode_scenario())
     recommendation_labels.extend(run_result_realism_scenario())
     recommendation_labels.extend(run_diversity_scenario())
+    recommendation_labels.extend(run_preference_overlap_scenario())
     recommendation_labels.extend(run_goal_policy_scenario())
     recommendation_labels.extend(run_goal_quantity_policy_scenario())
     recommendation_labels.extend(run_high_calorie_target_scaling_scenario())

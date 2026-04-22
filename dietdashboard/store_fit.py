@@ -72,7 +72,6 @@ def _basket_profile(
     budget_friendly = bool(preferences.get("budget_friendly"))
     vegetarian = bool(preferences.get("vegetarian"))
     vegan = bool(preferences.get("vegan"))
-    low_prep = bool(preferences.get("low_prep"))
 
     specialty_ids = {
         "tofu",
@@ -97,7 +96,7 @@ def _basket_profile(
             or (len(carb_items) >= 1 and len(booster_items) >= 1)
         ),
         "plant_forward": vegetarian or vegan or bool(item_ids & specialty_ids),
-        "quick_trip": meal_style in {"breakfast", "snack"} or low_prep,
+        "quick_trip": meal_style in {"breakfast", "snack"},
         "meal_style_lunch": meal_style == "lunch_dinner",
         "budget_friendly": budget_friendly,
     }

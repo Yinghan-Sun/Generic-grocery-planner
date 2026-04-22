@@ -404,7 +404,6 @@ def create_app() -> Flask:
                 "vegetarian": parse_bool(preferences_raw.get("vegetarian"), default=False),
                 "dairy_free": parse_bool(preferences_raw.get("dairy_free"), default=False),
                 "vegan": parse_bool(preferences_raw.get("vegan"), default=False),
-                "low_prep": parse_bool(preferences_raw.get("low_prep"), default=False),
                 "budget_friendly": parse_bool(preferences_raw.get("budget_friendly"), default=False),
                 "meal_style": parse_choice(
                     preferences_raw.get("meal_style"),

@@ -773,7 +773,7 @@ def _effective_preferences(preferences: dict[str, object]) -> dict[str, object]:
         "vegan": vegan,
         "vegetarian": vegetarian,
         "dairy_free": dairy_free,
-        "low_prep": bool(preferences.get("low_prep", False)),
+        "low_prep": False,
         "budget_friendly": bool(preferences.get("budget_friendly", False)),
         "meal_style": meal_style,
     }
@@ -1022,6 +1022,82 @@ def _carb_cluster(food: dict[str, object]) -> str:
     if prep_level == "none":
         return "bread_wrap"
     return "meal_base"
+
+
+def _low_prep_preference_signal(food: dict[str, object], role: str) -> float:
+    food_id = str(food.get("generic_food_id") or "")
+    prep_level = str(food.get("prep_level") or "medium")
+    prep_score = PREP_LEVEL_SCORES.get(prep_level, 0.0)
+    microwave_friendly = _metadata_bool(food, "microwave_friendly")
+    bonus = prep_score * {
+        "protein_anchor": 1.0,
+        "carb_base": 0.95,
+        "produce": 0.9,
+        "calorie_booster": 0.6,
+    }.get(role, 0.8)
+
+    if prep_level == "none":
+        bonus += {
+            "protein_anchor": 0.75,
+            "carb_base": 0.6,
+            "produce": 0.3,
+            "calorie_booster": 0.2,
+        }.get(role, 0.25)
+    elif prep_level == "low":
+        bonus += {
+            "protein_anchor": 0.35,
+            "carb_base": 0.25,
+            "produce": 0.2,
+            "calorie_booster": 0.08,
+        }.get(role, 0.15)
+    elif prep_level == "medium":
+        bonus -= {
+            "protein_anchor": 0.95,
+            "carb_base": 0.55,
+            "produce": 0.4,
+            "calorie_booster": 0.1,
+        }.get(role, 0.25)
+
+    if microwave_friendly:
+        bonus += {
+            "protein_anchor": 0.55,
+            "carb_base": 0.55,
+            "produce": 0.45,
+            "calorie_booster": 0.3,
+        }.get(role, 0.2)
+
+    if role == "protein_anchor":
+        if food_id in {"rotisserie_chicken", "eggs", "tofu", "tuna", "greek_yogurt", "protein_yogurt", "cottage_cheese", "veggie_burger", "hummus"}:
+            bonus += 0.35
+        if food_id in {"chicken_breast", "ground_beef", "turkey", "salmon", "shrimp"} and prep_level == "medium" and not microwave_friendly:
+            bonus -= 0.65
+    elif role == "carb_base":
+        if food_id in {"wholemeal_bread", "tortilla", "corn_tortilla", "pita", "bagel", "corn_flakes", "oats", "couscous"}:
+            bonus += 0.35
+    elif role == "produce":
+        cluster = _produce_cluster(food)
+        if food_id == "frozen_vegetables":
+            bonus += 0.45
+        elif cluster in {"portable_produce", "freezer_veg", "leafy_green"}:
+            bonus += 0.2
+
+    return round(bonus, 6)
+
+
+def _low_prep_ready(food: dict[str, object], role: str) -> bool:
+    prep_level = str(food.get("prep_level") or "medium")
+    if prep_level in {"none", "low"}:
+        return True
+    if role in {"protein_anchor", "carb_base", "produce"} and _metadata_bool(food, "microwave_friendly"):
+        return True
+    return False
+
+
+def _cook_heavy_food(food: dict[str, object], role: str) -> bool:
+    if role == "calorie_booster":
+        return False
+    prep_level = str(food.get("prep_level") or "medium")
+    return prep_level == "medium" and not _metadata_bool(food, "microwave_friendly")
 
 
 def _meal_suggestion_food_id(food: dict[str, object]) -> str:
@@ -1365,11 +1441,7 @@ def _role_score(
         if tags & {"lunch", "dinner", "breakfast"}:
             score += 0.3
         if preferences["low_prep"]:
-            score += prep_score * 0.8
-            if _metadata_bool(food, "microwave_friendly"):
-                score += 0.6
-            if _metadata_bool(food, "cold_only"):
-                score += 0.3
+            score += _low_prep_preference_signal(food, role)
         if preferences["budget_friendly"]:
             score += budget_score * 0.9
         score += price_signals["protein_score"] * 0.45
@@ -1397,9 +1469,7 @@ def _role_score(
         if _metadata_bool(food, "breakfast_friendly"):
             score += 0.3
         if preferences["low_prep"]:
-            score += prep_score * 0.7
-            if _metadata_bool(food, "microwave_friendly"):
-                score += 0.8
+            score += _low_prep_preference_signal(food, role)
         if preferences["budget_friendly"]:
             score += budget_score * 0.8
             score += fiber_score * 0.7
@@ -1430,9 +1500,7 @@ def _role_score(
         if tags & {"side", "snack"}:
             score += 0.5
         if preferences["low_prep"]:
-            score += prep_score * 0.8
-            if _metadata_bool(food, "microwave_friendly"):
-                score += 0.4
+            score += _low_prep_preference_signal(food, role)
         if preferences["budget_friendly"]:
             score += budget_score * 0.5
             if _produce_cluster(food) in {"portable_produce", "starchy_produce"}:
@@ -1461,11 +1529,7 @@ def _role_score(
         if tags & {"snack", "breakfast", "dinner"}:
             score += 0.3
         if preferences["low_prep"]:
-            score += prep_score * 0.6
-            if _metadata_bool(food, "microwave_friendly"):
-                score += 0.5
-            if _metadata_bool(food, "cold_only"):
-                score += 0.2
+            score += _low_prep_preference_signal(food, role)
         if preferences["budget_friendly"]:
             score += budget_score * 0.6
         score += price_signals["calories_score"] * 0.4
@@ -2157,7 +2221,7 @@ def _reason_short(role: str, food: dict[str, object], preferences: dict[str, obj
             return "Breakfast protein anchor"
         if meal_style == "snack" and str(food.get("prep_level") or "") in {"none", "low"}:
             return "Snack-ready protein"
-        if preferences["low_prep"] and (_metadata_bool(food, "cold_only") or str(food.get("prep_level")) in {"none", "low"}):
+        if preferences["low_prep"] and _low_prep_ready(food, role):
             return "Ready-to-use protein option"
         return "High-protein anchor"
     if role == "carb_base":
@@ -2217,6 +2281,8 @@ def _why_selected(role: str, food: dict[str, object], preferences: dict[str, obj
 
     if preferences["low_prep"] and str(food.get("prep_level") or "") in {"none", "low"}:
         parts.append("Fits a low-prep routine.")
+    elif preferences["low_prep"] and _low_prep_ready(food, role):
+        parts.append("Keeps prep light for a faster routine.")
     if preferences["budget_friendly"] and float(food.get("budget_score") or 0) >= 4:
         parts.append("Leans toward a lower-cost staple.")
     if nutrition_targets.get("fiber") and float(food.get("fiber_score") or 0) >= 1.5:

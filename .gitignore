@@ -85,4 +85,4 @@ data/usda/usda_food_area_prices_*_staged.csv
 **/user_data
 
 # DuckDB databases stay out of source control by default.
-**/*.db
+**/*.dbpresentation/

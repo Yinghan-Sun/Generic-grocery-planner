@@ -59,6 +59,27 @@ def main() -> int:
     assert_true("/static/generic_bundle.js" in generic_html, "/generic bundle reference")
     assert_true('"developerMode": false' in generic_html, "/generic developer mode disabled by default")
 
+    bundle = client.get("/static/generic_bundle.js")
+    assert_equal(bundle.status_code, 200, "generic bundle status")
+    bundle_text = bundle.get_data(as_text=True)
+    for preset_label in (
+        "Muscle Gain",
+        "Fat Loss",
+        "Maintenance",
+        "High-Protein Vegetarian",
+        "Budget-Friendly Healthy",
+        "Vegan",
+        "Dairy-free",
+    ):
+        assert_true(preset_label in bundle_text, f"bundle includes preset label {preset_label}")
+    for removed_label in (
+        "Vegetarian (includes eggs and dairy)",
+        "Low prep",
+        "Budget friendly",
+        "Advanced nutrition",
+    ):
+        assert_true(removed_label not in bundle_text, f"bundle removed label {removed_label}")
+
     developer_page = client.get("/generic?developer=1")
     assert_equal(developer_page.status_code, 200, "/generic developer page status")
     developer_html = developer_page.get_data(as_text=True)

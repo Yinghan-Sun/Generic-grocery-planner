@@ -205,7 +205,107 @@ def _selection_score_for_food(
         food_id=food_id,
         chosen=chosen,
     )
-    return base_score - diversity_penalty + goal_structure_bonus
+    preference_bonus = _preference_expression_bonus(
+        context,
+        role=role,
+        food_id=food_id,
+        chosen=chosen,
+    )
+    return base_score - diversity_penalty + goal_structure_bonus + preference_bonus
+
+
+def _low_prep_template_ids_for_pick(
+    context: PlannerContext,
+    *,
+    role: str,
+    chosen: Sequence[tuple[str, str]],
+) -> tuple[str, ...]:
+    if not bool(context.preferences.get("low_prep")):
+        return ()
+
+    chosen_role_ids = [food_id for food_id, chosen_role in chosen if chosen_role == role]
+    if role == "protein_anchor":
+        if chosen_role_ids:
+            return ("eggs", "tofu", "rotisserie_chicken", "tuna", "greek_yogurt", "protein_yogurt", "veggie_burger")
+        return ("rotisserie_chicken", "eggs", "tofu", "tuna", "greek_yogurt", "protein_yogurt", "veggie_burger", "hummus")
+    if role == "carb_base":
+        return ("wholemeal_bread", "couscous", "oats", "tortilla", "corn_tortilla", "pita", "rice")
+    if role == "produce":
+        if chosen_role_ids:
+            return ("frozen_vegetables", "carrots", "lettuce", "spinach", "cucumber", "tomatoes", "bananas", "apples")
+        return ("frozen_vegetables", "carrots", "lettuce", "spinach", "cucumber", "tomatoes")
+    if role == "calorie_booster":
+        return ("olive_oil", "peanut_butter")
+    return ()
+
+
+def _preferred_template_ids_for_pick(
+    context: PlannerContext,
+    *,
+    role: str,
+    chosen: Sequence[tuple[str, str]],
+) -> tuple[str, ...]:
+    ordered_ids: list[str] = []
+    for template_ids in (
+        _low_prep_template_ids_for_pick(context, role=role, chosen=chosen),
+        gr._goal_template_ids_for_pick(context.goal_profile, role, chosen, context.available),  # noqa: SLF001
+    ):
+        for food_id in template_ids:
+            if food_id in context.available and food_id not in ordered_ids:
+                ordered_ids.append(food_id)
+    return tuple(ordered_ids)
+
+
+def _preferred_template_slack(
+    context: PlannerContext,
+    *,
+    role: str,
+) -> float:
+    slack = gr._goal_template_slack(context.goal_profile, role)  # noqa: SLF001
+    if bool(context.preferences.get("low_prep")):
+        slack += {
+            "protein_anchor": 2.2,
+            "carb_base": 2.8,
+            "produce": 3.6,
+            "calorie_booster": 1.0,
+        }.get(role, 0.0)
+    return slack
+
+
+def _preference_expression_bonus(
+    context: PlannerContext,
+    *,
+    role: str,
+    food_id: str,
+    chosen: Sequence[tuple[str, str]],
+) -> float:
+    if food_id not in context.available:
+        return 0.0
+
+    food = context.available[food_id]
+    bonus = 0.0
+    if bool(context.preferences.get("low_prep")):
+        bonus += gr._low_prep_preference_signal(dict(food), role) * {  # noqa: SLF001
+            "protein_anchor": 0.18,
+            "carb_base": 0.16,
+            "produce": 0.14,
+            "calorie_booster": 0.08,
+        }.get(role, 0.1)
+        if food_id in _low_prep_template_ids_for_pick(context, role=role, chosen=chosen):
+            bonus += {
+                "protein_anchor": 0.55,
+                "carb_base": 0.45,
+                "produce": 0.4,
+                "calorie_booster": 0.2,
+            }.get(role, 0.25)
+        if gr._cook_heavy_food(dict(food), role):  # noqa: SLF001
+            bonus -= {
+                "protein_anchor": 0.65,
+                "carb_base": 0.45,
+                "produce": 0.3,
+                "calorie_booster": 0.1,
+            }.get(role, 0.2)
+    return round(bonus, 6)
 
 
 def _algorithm_flag(
@@ -257,11 +357,15 @@ def _rank_diverse_candidates(
     if not short_list:
         short_list = [candidates[0]]
 
-    preferred_ids = gr._goal_template_ids_for_pick(context.goal_profile, role, chosen, available)  # noqa: SLF001
+    preferred_ids = _preferred_template_ids_for_pick(
+        context,
+        role=role,
+        chosen=chosen,
+    )
     preferred_rank = {food_id: index for index, food_id in enumerate(preferred_ids)}
     use_goal_template = False
     if preferred_rank:
-        template_window = candidate_window + gr._goal_template_slack(context.goal_profile, role)  # noqa: SLF001
+        template_window = candidate_window + _preferred_template_slack(context, role=role)
         template_candidates = [
             food_id
             for food_id in candidates
@@ -913,7 +1017,13 @@ def _structured_candidate_terms(
         + _prep_score(context.available[food_id]) * 0.015 * float(profile["practicality_priority"])
         + _commonality_bonus(context.available[food_id]) * 0.65
     )
-    structured_bonus = nutrient_support + complementarity + reference_adjustment + goal_structure_bonus + novelty + practicality
+    preference_bonus = _preference_expression_bonus(
+        context,
+        role=role,
+        food_id=food_id,
+        chosen=chosen,
+    )
+    structured_bonus = nutrient_support + complementarity + reference_adjustment + goal_structure_bonus + novelty + practicality + preference_bonus
     return {
         "nutrient_support": round(nutrient_support, 6),
         "complementarity": round(complementarity, 6),
@@ -921,6 +1031,7 @@ def _structured_candidate_terms(
         "goal_structure_bonus": round(goal_structure_bonus, 6),
         "novelty": round(novelty, 6),
         "practicality": round(practicality, 6),
+        "preference_bonus": round(preference_bonus, 6),
         "structured_bonus": round(structured_bonus, 6),
     }
 
@@ -1709,7 +1820,11 @@ def _rank_model_candidates(
         "calorie_booster": 0.14,
     }[role]
     heuristic_window = gr._diversity_window(role, context.preferences) + 0.75  # noqa: SLF001
-    preferred_ids = gr._goal_template_ids_for_pick(context.goal_profile, role, chosen, context.available)  # noqa: SLF001
+    preferred_ids = _preferred_template_ids_for_pick(
+        context,
+        role=role,
+        chosen=chosen,
+    )
     preferred_rank = {food_id: index for index, food_id in enumerate(preferred_ids)}
 
     ranked_rows: list[tuple[float, int, int, str, str, float, dict[str, object]]] = []
@@ -2122,6 +2237,62 @@ def _generate_model_candidate_seeds(
     )
 
 
+def _candidate_preference_template_match_count(
+    context: PlannerContext,
+    chosen: Sequence[tuple[str, str]],
+) -> int:
+    count = 0
+    for index, (food_id, role) in enumerate(chosen):
+        role_prefix = [entry for entry_index, entry in enumerate(chosen) if entry_index < index and entry[1] == role]
+        preferred_ids = _preferred_template_ids_for_pick(
+            context,
+            role=role,
+            chosen=role_prefix,
+        )
+        if food_id in preferred_ids:
+            count += 1
+    return count
+
+
+def _candidate_low_prep_ready_item_count(
+    context: PlannerContext,
+    chosen: Sequence[tuple[str, str]],
+) -> int:
+    return sum(
+        1
+        for food_id, role in chosen
+        if food_id in context.available and gr._low_prep_ready(dict(context.available[food_id]), role)  # noqa: SLF001
+    )
+
+
+def _candidate_cook_heavy_item_count(
+    context: PlannerContext,
+    chosen: Sequence[tuple[str, str]],
+) -> int:
+    return sum(
+        1
+        for food_id, role in chosen
+        if food_id in context.available and gr._cook_heavy_food(dict(context.available[food_id]), role)  # noqa: SLF001
+    )
+
+
+def _candidate_budget_staple_item_count(
+    context: PlannerContext,
+    chosen: Sequence[tuple[str, str]],
+) -> int:
+    budget_staples = {
+        *gr.BUDGET_HEALTHY_PROTEIN_IDS,
+        *gr.BUDGET_HEALTHY_CARB_IDS,
+        *gr.BUDGET_HEALTHY_PRODUCE_IDS,
+        *gr.BUDGET_HEALTHY_BOOSTER_IDS,
+    }
+    return sum(
+        1
+        for food_id, _role in chosen
+        if food_id in budget_staples or float(context.available.get(food_id, {}).get("budget_score") or 0.0) >= 4.0
+    )
+
+
 def _candidate_preference_match_score(context: PlannerContext, chosen: list[tuple[str, str]]) -> float:
     if not chosen:
         return 0.0
@@ -2131,12 +2302,11 @@ def _candidate_preference_match_score(context: PlannerContext, chosen: list[tupl
     desired_tags = gr.MEAL_STYLE_TAGS.get(meal_style, set())  # noqa: SLF001
     for food_id, role in chosen:
         food = context.available[food_id]
-        prep_score = float(gr.PREP_LEVEL_SCORES.get(str(food.get("prep_level") or ""), 0.0))  # noqa: SLF001
         tags = gr._meal_tags(food)  # noqa: SLF001
         if context.preferences.get("budget_friendly"):
             total += float(food.get("budget_score") or 0.0)
         if context.preferences.get("low_prep"):
-            total += prep_score
+            total += float(gr._low_prep_preference_signal(dict(food), role))  # noqa: SLF001
         if desired_tags and tags & desired_tags:
             total += 1.5
         if role == "produce" and context.preferences.get("low_prep") and gr._metadata_bool(food, "microwave_friendly"):  # noqa: SLF001
@@ -2234,6 +2404,10 @@ def _candidate_bundle_from_response(
         "role_diversity_count": sum(1 for count in role_counts.values() if count > 0),
         "repetition_penalty": _candidate_repetition_penalty(context, chosen),
         "preference_match_score": _candidate_preference_match_score(context, chosen),
+        "preference_template_match_count": _candidate_preference_template_match_count(context, chosen),
+        "low_prep_ready_item_count": _candidate_low_prep_ready_item_count(context, chosen),
+        "cook_heavy_item_count": _candidate_cook_heavy_item_count(context, chosen),
+        "budget_staple_item_count": _candidate_budget_staple_item_count(context, chosen),
         "unrealistic_basket_penalty": _candidate_unrealistic_penalty(context, chosen, plan_quantities, response),
         "nearby_store_count": len(stores or []),
         "materialization_debug": dict(materialization_debug or {}),
@@ -4348,6 +4522,8 @@ def _score_and_rank_candidates(
 
     def ranking_adjustment(feature_row: Mapping[str, object]) -> float:
         goal_profile = str(feature_row.get("goal_profile") or "generic_balanced")
+        low_prep_preference = bool(feature_row.get("low_prep_preference"))
+        budget_friendly_preference = bool(feature_row.get("budget_friendly_preference"))
         adjustment = (
             0.24 * float(feature_row.get("goal_structure_alignment_score") or 0.0)
             - 0.08 * float(feature_row.get("role_share_gap_total") or 0.0)
@@ -4383,6 +4559,15 @@ def _score_and_rank_candidates(
             adjustment -= min(max(float(feature_row.get("fat_abs_gap_g") or 0.0) - 8.0, 0.0), 35.0) * 0.018
             adjustment -= min(max(float(feature_row.get("carbohydrate_abs_gap_g") or 0.0) - 25.0, 0.0), 80.0) * 0.006
             adjustment -= min(max(float(feature_row.get("protein_abs_gap_g") or 0.0) - 8.0, 0.0), 35.0) * 0.022
+        if budget_friendly_preference:
+            adjustment += 0.1 * float(feature_row.get("budget_staple_item_count") or 0.0)
+        if low_prep_preference:
+            adjustment += 0.32 * float(feature_row.get("low_prep_ready_item_count") or 0.0)
+            adjustment += 0.18 * float(feature_row.get("preference_template_match_count") or 0.0)
+            adjustment -= 0.5 * float(feature_row.get("cook_heavy_item_count") or 0.0)
+            adjustment += 0.12 * min(float(feature_row.get("preference_match_score") or 0.0), 4.0)
+            adjustment -= min(max(float(feature_row.get("protein_abs_gap_g") or 0.0) - 10.0, 0.0), 35.0) * 0.018
+            adjustment -= min(max(float(feature_row.get("calorie_abs_gap_kcal") or 0.0) - 140.0, 0.0), 280.0) * 0.0015
         return round(adjustment, 6)
 
     ranked = [

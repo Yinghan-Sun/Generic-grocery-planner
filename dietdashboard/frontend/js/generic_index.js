@@ -13,146 +13,123 @@ const ALLOWED_CANDIDATE_GENERATOR_BACKENDS = new Set([
   "hist_gradient_boosting"
 ]);
 
+const DEFAULT_FORM_VALUES = {
+  locationQuery: "Mountain View, CA",
+  lat: "",
+  lon: "",
+  radius_m: "8000",
+  store_limit: "5",
+  days: "1",
+  shopping_mode: "balanced",
+  protein: "130",
+  calories: "2200",
+  carbohydrate: "240",
+  fat: "70",
+  fiber: "30",
+  vegetarian: false,
+  dairy_free: false,
+  vegan: false,
+  budget_friendly: false,
+  meal_style: "any"
+};
+
+function presetValues(overrides) {
+  return {
+    ...DEFAULT_FORM_VALUES,
+    ...overrides
+  };
+}
+
 const GOAL_PRESETS = [
   {
     id: "muscle_gain",
     label: "Muscle Gain",
-    values: {
-      locationQuery: "Mountain View, CA",
-      lat: "",
-      lon: "",
-      radius_m: "8000",
-      store_limit: "5",
-      days: "1",
-      shopping_mode: "balanced",
+    values: presetValues({
       protein: "170",
       calories: "2800",
       carbohydrate: "330",
       fat: "85",
-      fiber: "35",
-      calcium: "",
-      iron: "",
-      vitamin_c: "",
-      vegetarian: false,
-      dairy_free: false,
-      vegan: false,
-      low_prep: false,
-      budget_friendly: false,
-      meal_style: "any"
-    },
+      fiber: "35"
+    }),
     notice: 'Loaded the muscle gain preset for "Mountain View, CA".'
   },
   {
     id: "fat_loss",
     label: "Fat Loss",
-    values: {
-      locationQuery: "Mountain View, CA",
-      lat: "",
-      lon: "",
-      radius_m: "8000",
-      store_limit: "5",
-      days: "1",
-      shopping_mode: "balanced",
+    values: presetValues({
       protein: "150",
       calories: "1800",
       carbohydrate: "160",
       fat: "55",
-      fiber: "30",
-      calcium: "",
-      iron: "",
-      vitamin_c: "",
-      vegetarian: false,
-      dairy_free: false,
-      vegan: false,
-      low_prep: false,
-      budget_friendly: false,
-      meal_style: "any"
-    },
+      fiber: "30"
+    }),
     notice: 'Loaded the fat loss preset for "Mountain View, CA".'
   },
   {
     id: "maintenance",
     label: "Maintenance",
-    values: {
-      locationQuery: "Mountain View, CA",
-      lat: "",
-      lon: "",
-      radius_m: "8000",
-      store_limit: "5",
-      days: "1",
-      shopping_mode: "balanced",
+    values: presetValues({
       protein: "130",
       calories: "2200",
       carbohydrate: "240",
       fat: "70",
-      fiber: "30",
-      calcium: "",
-      iron: "",
-      vitamin_c: "",
-      vegetarian: false,
-      dairy_free: false,
-      vegan: false,
-      low_prep: false,
-      budget_friendly: false,
-      meal_style: "any"
-    },
+      fiber: "30"
+    }),
     notice: 'Loaded the maintenance preset for "Mountain View, CA".'
   },
   {
     id: "high_protein_vegetarian",
     label: "High-Protein Vegetarian",
-    values: {
-      locationQuery: "Mountain View, CA",
-      lat: "",
-      lon: "",
-      radius_m: "8000",
-      store_limit: "5",
-      days: "1",
-      shopping_mode: "balanced",
+    values: presetValues({
       protein: "140",
       calories: "2100",
       carbohydrate: "220",
       fat: "70",
       fiber: "32",
-      calcium: "",
-      iron: "18",
-      vitamin_c: "",
       vegetarian: true,
-      dairy_free: false,
-      vegan: false,
-      low_prep: false,
-      budget_friendly: false,
-      meal_style: "any"
-    },
+    }),
     notice: 'Loaded the high-protein vegetarian preset for "Mountain View, CA".'
   },
   {
     id: "budget_friendly_healthy",
     label: "Budget-Friendly Healthy",
-    values: {
-      locationQuery: "Mountain View, CA",
-      lat: "",
-      lon: "",
-      radius_m: "8000",
-      store_limit: "5",
-      days: "1",
-      shopping_mode: "balanced",
+    values: presetValues({
       protein: "120",
       calories: "2100",
       carbohydrate: "230",
       fat: "65",
       fiber: "35",
-      calcium: "",
-      iron: "",
-      vitamin_c: "",
-      vegetarian: false,
-      dairy_free: false,
-      vegan: false,
-      low_prep: false,
       budget_friendly: true,
-      meal_style: "any"
-    },
+    }),
     notice: 'Loaded the budget-friendly healthy preset for "Mountain View, CA".'
+  },
+  {
+    id: "vegan",
+    label: "Vegan",
+    values: presetValues({
+      protein: "125",
+      calories: "2200",
+      carbohydrate: "245",
+      fat: "68",
+      fiber: "36",
+      vegan: true,
+      vegetarian: true,
+      dairy_free: true
+    }),
+    notice: 'Loaded the vegan preset for "Mountain View, CA".'
+  },
+  {
+    id: "dairy_free",
+    label: "Dairy-free",
+    values: presetValues({
+      protein: "135",
+      calories: "2150",
+      carbohydrate: "225",
+      fat: "68",
+      fiber: "28",
+      dairy_free: true
+    }),
+    notice: 'Loaded the dairy-free preset for "Mountain View, CA".'
   }
 ];
 
@@ -190,27 +167,7 @@ function defaultPlannerState() {
 }
 
 const state = {
-  locationQuery: "Mountain View, CA",
-  lat: "",
-  lon: "",
-  radius_m: "8000",
-  store_limit: "5",
-  days: "1",
-  shopping_mode: "balanced",
-  protein: "130",
-  calories: "2200",
-  carbohydrate: "240",
-  fat: "70",
-  fiber: "30",
-  calcium: "",
-  iron: "",
-  vitamin_c: "",
-  vegetarian: false,
-  dairy_free: false,
-  vegan: false,
-  low_prep: false,
-  budget_friendly: false,
-  meal_style: "any",
+  ...DEFAULT_FORM_VALUES,
   ...defaultPlannerState(),
   pantry_items: [],
   stores: [],
@@ -373,7 +330,6 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
       vegetarian: currentState.vegetarian,
       dairy_free: currentState.dairy_free,
       vegan: currentState.vegan,
-      low_prep: currentState.low_prep,
       budget_friendly: currentState.budget_friendly,
       meal_style: currentState.meal_style || "any"
     },
@@ -401,10 +357,7 @@ export function buildRecommendationPayload(currentState, search = currentLocatio
   for (const [fieldName, value] of Object.entries({
     carbohydrate: parseNumber(currentState.carbohydrate),
     fat: parseNumber(currentState.fat),
-    fiber: parseNumber(currentState.fiber),
-    calcium: parseNumber(currentState.calcium),
-    iron: parseNumber(currentState.iron),
-    vitamin_c: parseNumber(currentState.vitamin_c)
+    fiber: parseNumber(currentState.fiber)
   })) {
     if (value !== null) {
       payload.targets[fieldName] = value;
@@ -434,10 +387,7 @@ export function validateFormState(currentState, mode = "recommend") {
   const optionalTargets = [
     ["carbohydrate", "carbohydrate"],
     ["fat", "fat"],
-    ["fiber", "fiber"],
-    ["calcium", "calcium"],
-    ["iron", "iron"],
-    ["vitamin_c", "vitamin C"]
+    ["fiber", "fiber"]
   ];
   const hasCoords = hasValidCoordinates(currentState);
 

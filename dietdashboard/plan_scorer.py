@@ -77,6 +77,10 @@ NUMERIC_FEATURES = (
     "repetition_penalty",
     "unrealistic_basket_penalty",
     "preference_match_score",
+    "preference_template_match_count",
+    "low_prep_ready_item_count",
+    "cook_heavy_item_count",
+    "budget_staple_item_count",
     "heuristic_selection_score",
     "overlap_with_best_heuristic_jaccard",
     "changed_food_count_vs_best_heuristic",
@@ -178,6 +182,7 @@ def _nutrition_value(summary: Mapping[str, object], key: str) -> float:
 def _goal_tradeoff_profile(feature_row: Mapping[str, object]) -> dict[str, float]:
     goal_profile = str(feature_row.get("goal_profile") or "generic_balanced")
     budget_friendly = bool(_safe_bool(feature_row.get("budget_friendly_preference")))
+    low_prep = bool(_safe_bool(feature_row.get("low_prep_preference")))
     profile = {
         "protein_gap_scale": 1.0,
         "calorie_gap_scale": 1.0,
@@ -267,6 +272,9 @@ def _goal_tradeoff_profile(feature_row: Mapping[str, object]) -> dict[str, float
         profile["price_penalty_scale"] *= 1.08
         profile["alternative_cost_tolerance"] = min(profile["alternative_cost_tolerance"], 0.85)
         profile["soft_cost_delta"] = min(profile["soft_cost_delta"], 0.45)
+    if low_prep:
+        profile["preference_reward_scale"] *= 1.35
+        profile["alternative_cost_tolerance"] = max(profile["alternative_cost_tolerance"], 1.4)
     return profile
 
 
@@ -408,6 +416,10 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
         "repetition_penalty": _safe_float(metadata.get("repetition_penalty")),
         "unrealistic_basket_penalty": _safe_float(metadata.get("unrealistic_basket_penalty")),
         "preference_match_score": _safe_float(metadata.get("preference_match_score")),
+        "preference_template_match_count": _safe_float(metadata.get("preference_template_match_count")),
+        "low_prep_ready_item_count": _safe_float(metadata.get("low_prep_ready_item_count")),
+        "cook_heavy_item_count": _safe_float(metadata.get("cook_heavy_item_count")),
+        "budget_staple_item_count": _safe_float(metadata.get("budget_staple_item_count")),
         "heuristic_selection_score": _safe_float(metadata.get("heuristic_selection_score")),
         "overlap_with_best_heuristic_jaccard": 1.0,
         "changed_food_count_vs_best_heuristic": 0.0,
@@ -430,7 +442,7 @@ def extract_candidate_features(candidate: Mapping[str, object]) -> dict[str, obj
         "adjusted_by_split": _safe_bool(recommendation.get("adjusted_by_split")),
         "has_price_estimate": _safe_bool("estimated_basket_cost" in recommendation),
         "budget_friendly_preference": _safe_bool(preferences.get("budget_friendly")),
-        "low_prep_preference": _safe_bool(preferences.get("low_prep")),
+        "low_prep_preference": False,
         "vegetarian_preference": _safe_bool(preferences.get("vegetarian")),
         "vegan_preference": _safe_bool(preferences.get("vegan")),
         "dairy_free_preference": _safe_bool(preferences.get("dairy_free")),
@@ -493,6 +505,7 @@ def heuristic_candidate_label(feature_row: Mapping[str, object]) -> float:
     score += 0.3 * _safe_float(feature_row.get("unique_ingredient_count"))
     score += 0.25 * _safe_float(feature_row.get("food_family_diversity_count")) * profile["diversity_reward_scale"]
     score += 0.18 * _safe_float(feature_row.get("preference_match_score")) * profile["preference_reward_scale"]
+    score += 0.12 * _safe_float(feature_row.get("preference_template_match_count")) * profile["preference_reward_scale"]
     score += 0.02 * _safe_float(feature_row.get("heuristic_selection_score"))
     score += _goal_structure_label_adjustment(feature_row)
     score -= 0.38 * _safe_float(feature_row.get("repetition_penalty")) * profile["repetition_penalty_scale"]
@@ -505,7 +518,11 @@ def heuristic_candidate_label(feature_row: Mapping[str, object]) -> float:
         score -= 0.03 * _safe_float(feature_row.get("price_per_1000_kcal")) * profile["price_penalty_scale"]
         score -= 0.025 * _safe_float(feature_row.get("price_per_100g_protein")) * profile["price_penalty_scale"]
     if _safe_bool(feature_row.get("low_prep_preference")):
+        score += 0.2 * _safe_float(feature_row.get("low_prep_ready_item_count"))
+        score -= 0.3 * _safe_float(feature_row.get("cook_heavy_item_count"))
         score -= 0.12 * _safe_float(feature_row.get("unrealistic_basket_penalty"))
+    if _safe_bool(feature_row.get("budget_friendly_preference")):
+        score += 0.08 * _safe_float(feature_row.get("budget_staple_item_count"))
     return round(score, 6)
 
 
